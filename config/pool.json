@@ -1,0 +1,51 @@
+{
+    "daemon": {
+        "host": "localhost",
+        "port": 10102
+    },
+
+    "wallet": {
+        "host": "localhost",
+        "port": 10103
+    },
+
+    "scratchpad" : {
+       "path" : "./scratchpad.bin",
+       "storeInterval" : 14400000
+    },
+
+    "server" : {
+        "port" : 6000,
+        "difficulty" : 1250000
+    },
+
+    "share" : {
+        "targetTime" : 60000,
+        "targetTimeSpan" : 30000,
+        "timeout" : 600000
+    },
+
+    "mongodb": {
+        "host": "localhost",
+        "port": 27017,
+        "dbName" : "bbr-pool"
+    },
+
+    "block": {
+        "unlockDepth": 10
+    },
+
+    "payment": {
+        "units": 1000000000000,
+        "mixin": 3,
+        "fee": 2000000000,
+        "threshold": 1000000000000,
+        "denomination": 100000000000,
+        "interval" : 600000
+    },
+
+    "address" : "",
+    "refreshBlockInterval" : 1000,
+    "fee" : 2 
+
+}

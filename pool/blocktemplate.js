@@ -72,30 +72,31 @@ function PushBlockTemlate(template) {
     console.log(`New block template loaded with height: ${currentBlockTemplate.height}, diff: ${currentBlockTemplate.difficulty}`);
     scratchpad.getFullScratchpad();
     newBlockTemplate.emit('NewTemplate');
-    UnlockBlock();
+    UnlockBlocks();
 }
 
-async function UnlockBlock() {
+async function UnlockBlocks() {
     let unlockHeight = currentBlockTemplate.height - config.pool.block.unlockDepth;
 
-    let blockCandidate = await db.getBlock(unlockHeight);
-    if (!blockCandidate) {
+    let blockCandidates = await db.getCandidates(unlockHeight);
+    if (blockCandidates.length === 0) {
         return;
     }
 
-    let response = await rpc.getBlockHeaderByHeight(unlockHeight);
-    if (response.error) {
-        console.error('Error receiving block header');
-        return;
+    for (let blockCandidate of blockCandidates) {
+        let response = await rpc.getBlockHeaderByHeight(blockCandidate.height);
+        if (response.error) {
+            console.error('Error receiving block header');
+            return;
+        }
+        let blockHeader = response.result.block_header;
+
+        let logBalance = blockHeader.reward / config.pool.payment.units;
+        orphan = blockHeader.hash === blockCandidate.hash ? 0 : 1;
+        console.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
+
+        await db.unlockBlock(orphan, blockCandidate.height, blockHeader.reward, blockCandidate);
     }
-    let blockHeader = response.result.block_header;
-
-    let logBalance = blockHeader.reward / config.pool.payment.units;
-    orphan = blockHeader.hash === blockCandidate.hash ? 0 : 1;
-    console.log(`Unlocking block ${unlockHeight} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
-
-    await db.unlockBlock(orphan, unlockHeight, blockHeader.reward, blockCandidate.shares);
-
 }
 
 module.exports = BlockTemplate;

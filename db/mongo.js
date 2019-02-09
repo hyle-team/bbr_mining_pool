@@ -49,8 +49,7 @@ async function storeBlockCandidate(height, templateDiff, hash, dateNow) {
         $group: { _id: null, total: { $sum: "$score" } }
     }]).toArray((err, result) => {
         if (!err) {
-            db.collection('blocks').insertOne({
-                'status': 'candidate',
+            db.collection('candidates').insertOne({
                 'height': height,
                 'difficulty': templateDiff,
                 'hash': hash,
@@ -65,7 +64,7 @@ async function storeBlockCandidate(height, templateDiff, hash, dateNow) {
         { upsert: true });
 };
 
-async function unlockBlock(orphan, height, reward, totalShares) {
+async function unlockBlock(orphan, height, reward, blockCandidate) {
     let col = db.collection('shares');
     let shares = await col.find({ 'height': height }).toArray();
     if (shares.length > 0) {
@@ -83,10 +82,10 @@ async function unlockBlock(orphan, height, reward, totalShares) {
             let feePercent = config.pool.fee / 100;
             reward = Math.round(reward - (reward * feePercent));
             shares.forEach(share => {
-                let percent = share.score / totalShares;
+                let percent = share.score / blockCandidate.shares;
                 let workerReward = Math.round(reward * percent);
-                bulkRewards.find({'account': share.account})
-                .upsert().updateOne({ $inc: { 'balance': workerReward } });
+                bulkRewards.find({ 'account': share.account })
+                    .upsert().updateOne({ $inc: { 'balance': workerReward } });
             });
             await bulkRewards.execute();
         }
@@ -94,9 +93,9 @@ async function unlockBlock(orphan, height, reward, totalShares) {
         await bulkShares.execute();
     }
 
-    let status = (orphan) ? 'orphan' : 'matured';
-    await db.collection('blocks').updateOne({ 'height': height },
-        { $set: { 'status': status } });
+    blockCandidate.status = (orphan) ? 'orphan' : 'matured';
+    await db.collection('candidates').deleteOne({ 'height': height });
+    await db.collection('blocks').insertOne(blockCandidate);
 }
 
 async function getBlock(height) {
@@ -104,37 +103,48 @@ async function getBlock(height) {
     return await col.findOne({ 'height': height });
 }
 
+async function getCandidates(height) {
+    let col = db.collection('candidates');
+    return await col.find({ 'height': { $lte: height } }).toArray();
+}
+
 async function getBalances() {
     const col = db.collection('balances');
-    const balances = await col.find({}).toArray();
-    return balances;
+    return await col.find({}).toArray();
 }
 
 async function proccessPayments(balances) {
-    if(balances.length === 0) {
+    if (balances.length === 0) {
         return;
     }
-
-    let col = db.collection('balances');
-    let bulkBalances = col.initializeOrderedBulkOp();
+    const dateNowSeconds = Date.now() / 1000 | 0;
+    let balanceCol = db.collection('balances');
+    let bulkBalances = balanceCol.initializeOrderedBulkOp();
+    let transCol = db.collection('transactions');
+    let bulkTrans = transCol.initializeOrderedBulkOp();
 
     balances.forEach(balance => {
         bulkBalances.find({
             'account': balance.account
         })
-            .updateOne({ $inc: { 'balance': -parseInt(balance.balance) }});
+            .updateOne({ $inc: { 'balance': -parseInt(balance.balance) } });
+        
+        delete balance._id;
+        balance.date = dateNowSeconds;
+        bulkTrans.insert(balance);
     });
 
     await bulkBalances.execute();
+    await bulkTrans.execute();
 }
 
 module.exports = {
-    db: db,
     connect: connect,
     storeMinerShare: storeMinerShare,
     storeBlockCandidate: storeBlockCandidate,
     unlockBlock: unlockBlock,
     getBlock: getBlock,
+    getCandidates: getCandidates,
     getBalances: getBalances,
     proccessPayments: proccessPayments
 };

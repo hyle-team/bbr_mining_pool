@@ -162,16 +162,16 @@ setInterval(() => {
 
     for (let id in connectedMiners) {
         let miner = connectedMiners[id];
-        if (now - miner.timeStamp > timeout) {
-            console.log(`Miner timed out and disconnected ${miner.account}`);
+        let timeGap = now - miner.timeStamp;
+        if (timeGap > timeout) {
+            console.log(`Miner was idle for ${miner.account / 1000} and now removed ${miner.account}`);
             BlockTemplate.notifier().removeListener('NewTemplate', miner.listener);
             miner.validJobs = [];
             delete connectedMiners[id];
          }
     }
-    console.log('Active miners', Object.keys(connectedMiners).length, 'listeneres', BlockTemplate.notifier().listenerCount('NewTemplate'));
+    console.log(`Pool has ${Object.keys(connectedMiners).length} active miners`);
 
-}, 10000);
-//config.pool.share.timeout);
+}, config.pool.share.timeout);
 
 module.exports = Miner;

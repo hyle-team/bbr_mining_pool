@@ -23,6 +23,7 @@ class BlockTemplate {
         this.previousBlockHash = Buffer.alloc(32);
         this.buffer.copy(this.previousBlockHash, 0, 7, 39);
         this.extraNonce = 0;
+        this.isFound = false;
     }
 
     static notifier() {
@@ -49,6 +50,9 @@ class BlockTemplate {
         } else if (!currentBlockTemplate.hashEquals(response.result)) {
             if (validBlockTemplates.push(currentBlockTemplate) > blockTemplateCount) {
                 validBlockTemplates.shift();
+            }
+            if (!currentBlockTemplate.isFound) {
+                db.storeBlockCandidate(currentBlockTemplate.height, currentBlockTemplate.difficulty, '', Date.now());
             }
             PushBlockTemlate(response.result);
         }
@@ -95,7 +99,7 @@ async function UnlockBlocks() {
         orphan = blockHeader.hash === blockCandidate.hash ? 0 : 1;
         console.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
 
-        await db.unlockBlock(orphan, blockCandidate.height, blockHeader.reward, blockCandidate);
+        await db.unlockBlock(orphan, currentBlockTemplate.height, blockHeader.reward, blockCandidate);
     }
 }
 

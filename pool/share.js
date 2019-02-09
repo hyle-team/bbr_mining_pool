@@ -74,6 +74,7 @@ async function validateShare(miner, params, reply) {
             console.log('BLOCK SUBMITED');
             const cryptoNight = multiHashing['cryptonight'];
             let blockFastHash = cryptoNight(Buffer.concat([Buffer.from([convertedBlob.length]), convertedBlob]), true).toString('hex');
+            current.isFound = true;
             storeMinerShare(miner, job, blockFastHash, current);
             //process alias queue
         }

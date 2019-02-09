@@ -54,7 +54,7 @@ async function storeBlockCandidate(height, templateDiff, hash, dateNow) {
                 'difficulty': templateDiff,
                 'hash': hash,
                 'date': dateNowSeconds,
-                'shares': result[0].total
+                'shares': (result.length > 0) ? result[0].total : 0
             });
         }
     });
@@ -64,15 +64,15 @@ async function storeBlockCandidate(height, templateDiff, hash, dateNow) {
         { upsert: true });
 };
 
-async function unlockBlock(orphan, height, reward, blockCandidate) {
+async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
     let col = db.collection('shares');
-    let shares = await col.find({ 'height': height }).toArray();
+    let shares = await col.find({ 'height': blockCandidate.height }).toArray();
     if (shares.length > 0) {
         let bulkShares = col.initializeOrderedBulkOp();
         if (orphan) {
             shares.forEach(share => {
                 bulkShares.find({
-                    'height': share.height + config.pool.block.unlockDepth,
+                    'height': currentHeight,
                     'account': share.account
                 })
                     .upsert().updateOne({ $inc: { 'score': parseInt(share.score) } });
@@ -89,12 +89,19 @@ async function unlockBlock(orphan, height, reward, blockCandidate) {
             });
             await bulkRewards.execute();
         }
-        bulkShares.find({ 'height': height }).remove();
+        bulkShares.find({ 'height': blockCandidate.height }).remove();
         await bulkShares.execute();
     }
 
-    blockCandidate.status = (orphan) ? 'orphan' : 'matured';
-    await db.collection('candidates').deleteOne({ 'height': height });
+    if (blockCandidate.hash === '') {
+        blockCandidate.status = 'not found';
+    } else if (orphan) {
+        blockCandidate.status = 'orphan';
+    } else {
+        blockCandidate.status = 'matured';
+    }
+
+    await db.collection('candidates').deleteOne({ 'height': blockCandidate.height });
     await db.collection('blocks').insertOne(blockCandidate);
 }
 

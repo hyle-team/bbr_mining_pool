@@ -1,7 +1,7 @@
 {
     "daemon": {
         "host": "localhost",
-        "port": 10102
+        "port": 50102
     },
 
     "wallet": {
@@ -15,6 +15,7 @@
     },
 
     "server" : {
+        "api" : 3000,
         "port" : 6000,
         "difficulty" : 1250000
     },
@@ -32,7 +33,7 @@
     },
 
     "block": {
-        "unlockDepth": 10
+        "unlockDepth": 3
     },
 
     "payment": {
@@ -41,10 +42,10 @@
         "fee": 2000000000,
         "threshold": 1000000000000,
         "denomination": 100000000000,
-        "interval" : 600000
+        "interval" : 60000
     },
 
-    "address" : "",
+    "address" : "1CeedLextJgDfXxESueHUF9a6QzXKRtAwDi2gu5QmiFWTjTeccEdCKqg2L2qjZBHhGQLjRC3LEXr1Gd7ekuVvZ5h8L9JgW5",
     "refreshBlockInterval" : 1000,
     "fee" : 2 
 

@@ -105,9 +105,9 @@ async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
     await db.collection('blocks').insertOne(blockCandidate);
 }
 
-async function getBlock(height) {
+async function getBlocks(height) {
     let col = db.collection('blocks');
-    return await col.findOne({ 'height': height });
+    return await col.find({ 'height': { $lte: height } }).toArray();
 }
 
 async function getCandidates(height) {
@@ -145,13 +145,25 @@ async function proccessPayments(balances) {
     await bulkTrans.execute();
 }
 
+async function getTransactions(wallet) {
+    let col = db.collection('transactions');
+    return await col.find({ 'account': wallet }).toArray();
+}
+
+async function getBalance(wallet) {
+    let col = db.collection('balances');
+    return await col.findOne({ 'account': wallet });
+}
+
 module.exports = {
     connect: connect,
     storeMinerShare: storeMinerShare,
     storeBlockCandidate: storeBlockCandidate,
     unlockBlock: unlockBlock,
-    getBlock: getBlock,
+    getBlocks: getBlocks,
     getCandidates: getCandidates,
     getBalances: getBalances,
-    proccessPayments: proccessPayments
+    proccessPayments: proccessPayments,
+    getTransactions: getTransactions,
+    getBalance: getBalance
 };

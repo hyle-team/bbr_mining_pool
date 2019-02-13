@@ -69,7 +69,7 @@ async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
     let shares = await col.find({ 'height': blockCandidate.height }).toArray();
     if (shares.length > 0) {
         let bulkShares = col.initializeOrderedBulkOp();
-        if (orphan) {
+        if (orphan || blockCandidate.hash === '') {
             shares.forEach(share => {
                 bulkShares.find({
                     'height': currentHeight,

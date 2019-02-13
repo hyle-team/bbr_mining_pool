@@ -1,7 +1,7 @@
 {
     "daemon": {
         "host": "localhost",
-        "port": 50102
+        "port": 10102
     },
 
     "wallet": {
@@ -45,7 +45,7 @@
         "interval" : 60000
     },
 
-    "address" : "1CeedLextJgDfXxESueHUF9a6QzXKRtAwDi2gu5QmiFWTjTeccEdCKqg2L2qjZBHhGQLjRC3LEXr1Gd7ekuVvZ5h8L9JgW5",
+    "address" : "",
     "refreshBlockInterval" : 1000,
     "fee" : 2 
 

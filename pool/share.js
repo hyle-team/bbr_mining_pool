@@ -2,6 +2,7 @@ const multiHashing = require('multi-hashing');
 const cnUtil = require('cryptonote-util');
 const rpc = require('../rpc');
 const config = require('../config');
+const logger = require('../log');
 const BlockTemplate = require('./blocktemplate');
 const scratchpad = require('./scratchpad');
 const bignum = require('bignum');
@@ -53,7 +54,7 @@ async function validateShare(miner, params, reply) {
     let hash = multiHashing.boolberry(convertedBlob, scratchpad.current.buffer, job.height);
 
     if (hash.toString('hex') !== params.result) {
-        console.log('Bad hash from miner ' + miner.account + '@' + miner.address +
+        logger.log('Bad hash from miner ' + miner.account + '@' + miner.address +
             '\n scratchpad.height=' + scratchpad.current.height + ', job.height=' + job.height +
             '\n calculated hash: ' + hash.toString('hex') + ', transfered hash: ' + params.result);
         reply('Bad hash');
@@ -64,14 +65,14 @@ async function validateShare(miner, params, reply) {
     let hashNum = bignum.fromBuffer(Buffer.from(hashArray));
     let hashDiff = diffOne.div(hashNum);
 
-    console.log(`Share with diff ${hashDiff} when block diff is ${current.difficulty} from ${miner.account}`);
+    logger.log(`Share with diff ${hashDiff} when block diff is ${current.difficulty} from ${miner.account}`);
     if (hashDiff.ge(current.difficulty)) {
         let response = await rpc.submitBlock([shareBuffer.toString('hex')]);
         if (response.error) {
-            console.error('Error submitting block:', response.error);
+            logger.error('Error submitting block:', response.error);
             storeMinerShare(miner, job);
         } else {
-            console.log('BLOCK SUBMITED');
+            logger.log('BLOCK SUBMITED');
             const cryptoNight = multiHashing['cryptonight'];
             let blockFastHash = cryptoNight(Buffer.concat([Buffer.from([convertedBlob.length]), convertedBlob]), true).toString('hex');
             current.isFound = true;
@@ -79,7 +80,7 @@ async function validateShare(miner, params, reply) {
             //process alias queue
         }
     } else if (hashDiff.lt(job.difficulty) && (hashDiff / job.difficulty) < 0.995) {
-        console.log('Block rejected due low diff, found by', miner.account);
+        logger.log('Block rejected due low diff, found by', miner.account);
         sendReply('Low difficulty share');
         return false;
     } else {
@@ -136,9 +137,9 @@ function retargetDifficulty(miner, jobId) {
             var newJob = miner.getJob().job;
             miner.pushMessage('job', newJob);
             jobId = newJob.job_id;
-            console.log(`${time - job.timeStamp} msecs from last share, new miner diff set to ${miner.difficulty} for ${miner.account}`);
+            logger.log(`${time - job.timeStamp} msecs from last share, new miner diff set to ${miner.difficulty} for ${miner.account}`);
         } else {
-            console.log(`${time - job.timeStamp} msecs from last share, continue with current diff for ${miner.account}`);
+            logger.log(`${time - job.timeStamp} msecs from last share, continue with current diff for ${miner.account}`);
             job.timeStamp = time;
             miner.timeStamp = time;
         }

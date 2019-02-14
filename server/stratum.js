@@ -1,19 +1,20 @@
 const net = require('net');
 const config = require('../config');
+const logger = require('../log');
 const Miner = require('../miner');
 
 function startPoolServer() {
         var handleMessage = function (socket, jsonData, pushMessage) {
             if (!jsonData.id) {
-                console.log('Miner RPC request missing RPC id');
+                logger.log('Miner RPC request missing RPC id');
                 return;
             }
             else if (!jsonData.method) {
-                console.log('Miner RPC request missing RPC method');
+                logger.log('Miner RPC request missing RPC method');
                 return;
             }
             else if (!jsonData.params) {
-                console.log('Miner RPC request missing RPC params');
+                logger.log('Miner RPC request missing RPC params');
                 return;
             }
 
@@ -54,7 +55,7 @@ function startPoolServer() {
                 dataBuffer += d;
                 if (Buffer.byteLength(dataBuffer, 'utf8') > 10240) { //10KB
                     dataBuffer = null;
-                    console.log('Socket flooding detected and prevented from', socket.remoteAddress);
+                    logger.log('Socket flooding detected and prevented from', socket.remoteAddress);
                     socket.destroy();
                     return;
                 }
@@ -79,28 +80,28 @@ function startPoolServer() {
                                     break;
                                 }
                             }
-                            console.error('Malformed message from', socket.remoteAddress, ':', error);
+                            logger.error('Malformed message from', socket.remoteAddress, ':', error);
                             socket.destroy();
                             break;
                         }
-                        console.log('Server received', jsonData.method, 'message');
+                        logger.log('Server received', jsonData.method, 'message');
                         handleMessage(socket, jsonData, pushMessage);
                     }
                     dataBuffer = incomplete;
                 }
             }).on('error', (error) => {
                 if (error.code !== 'ECONNRESET')
-                    console.error('Socket error from', socket.remoteAddress, ':', error);
+                logger.error('Socket error from', socket.remoteAddress, ':', error);
             }).on('close', () => {
                 pushMessage = function () { };
             });
 
         }).listen(config.pool.server.port, (error, result) => {
             if (error) {
-                console.error('Could not start server: ' +  error);
+                logger.error('Could not start server: ' +  error);
                 return;
             }
-            console.log('Pool server started at port ' + config.pool.server.port);
+            logger.log('Pool server started at port ' + config.pool.server.port);
         });
 }
 

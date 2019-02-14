@@ -1,5 +1,6 @@
 const login = require('./login');
 const config = require('../config');
+const logger = require('../log');
 const scratchpad = require('../pool/scratchpad');
 const share = require('../pool/share');
 const BlockTemplate = require('../pool/blocktemplate');
@@ -45,7 +46,7 @@ class Miner {
 
                     var miner = new Miner(id, params.login, params.pass, address, difficulty, message);
                     connectedMiners[id] = miner;
-                    console.log('Miner logged in:', miner.account);
+                    logger.log('Miner logged in:', miner.account);
                     if (params.hi
                         && params.hi.height
                         && params.hi.block_id
@@ -164,13 +165,13 @@ setInterval(() => {
         let miner = connectedMiners[id];
         let timeGap = now - miner.timeStamp;
         if (timeGap > timeout) {
-            console.log(`Miner was idle for ${miner.account / 1000} and now removed ${miner.account}`);
+            logger.log(`Miner was idle for ${miner.account / 1000} and now removed ${miner.account}`);
             BlockTemplate.notifier().removeListener('NewTemplate', miner.listener);
             miner.validJobs = [];
             delete connectedMiners[id];
          }
     }
-    console.log(`Pool has ${Object.keys(connectedMiners).length} active miners`);
+    logger.log(`Pool has ${Object.keys(connectedMiners).length} active miners`);
 
 }, config.pool.share.timeout);
 

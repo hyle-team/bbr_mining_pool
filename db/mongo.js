@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const config = require('../config');
+const logger = require('../log');
 
 const url = `mongodb://${config.pool.mongodb.host}:${config.pool.mongodb.port}`;
 const dbName = config.pool.mongodb.dbName;
@@ -14,7 +15,7 @@ async function connect() {
             return true;
         })
         .catch((err) => {
-            console.error('Couldn\'t connect to MongoDB');
+            logger.error('Couldn\'t connect to MongoDB');
             client.close();
             return false;
         });

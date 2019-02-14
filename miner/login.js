@@ -1,5 +1,6 @@
 const cnUtil = require('cryptonote-util');
 const config = require('../config');
+const logger = require('../log');
 const rpc = require('../rpc');
 const BlockTemplate = require('../pool/blocktemplate');
 
@@ -29,9 +30,9 @@ async function login(params, reply) {
     if (login.indexOf('@') === 0) {
         login = login.substr(1);
         let response = await rpc.getAliasDetails(login);
-        console.log(response);
+        logger.log(response);
         if (response.error) {
-            console.error('Invalid alias');
+            logger.error('Invalid alias');
             reply('Invalid alias');
             return false;
         }
@@ -39,7 +40,7 @@ async function login(params, reply) {
         login = response.result.alias_details.address;
     }
     if (addressBase58Prefix !== cnUtil.address_decode(Buffer.from(login))) {
-        console.error('Invalid address');
+        logger.error('Invalid address');
         reply('Invalid address');
         return false;
     }

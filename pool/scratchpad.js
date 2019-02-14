@@ -1,5 +1,6 @@
 const rpc = require('../rpc');
 const config = require('../config');
+const logger = require('../log');
 
 var scratchpad = { buffer: Buffer.alloc(0), block_id: '', height: 0 };
 
@@ -7,7 +8,7 @@ function storeScratchpadRoutine() {
     rpc.storeScratchpad(config.pool.scratchpad.path)
         .then((response) => {
             if (response.error) {
-                console.error('Unable to store scratchpad');
+                logger.error('Unable to store scratchpad');
             }
             setTimeout(storeScratchpadRoutine, config.pool.scratchpad.storeInterval);
         });
@@ -17,7 +18,7 @@ async function getFullScratchpad() {
     let response = await rpc.getFullScratchpad();
 
     if (response.error) {
-        console.error('Empty scratchpad');
+        logger.error('Empty scratchpad');
     } else {
         let buff = response;
         let bin_buffer = Buffer.from(buff.slice(0, 4));
@@ -38,7 +39,7 @@ async function getAddendum(miner, currentTemplate) {
     }
     let response = await rpc.getAddendum(miner.hi);
     if (response.error) {
-        console.error('Error fetching addendum');
+        logger.error('Error fetching addendum');
         return;
     }
 

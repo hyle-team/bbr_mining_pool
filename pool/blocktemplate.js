@@ -1,5 +1,6 @@
 const events = require('events');
 const rpc = require('../rpc');
+const logger = require('../log');
 const db = require('../db');
 const config = require('../config');
 const scratchpad = require('./scratchpad');
@@ -41,7 +42,7 @@ class BlockTemplate {
     static async refresh() {
         let response = await rpc.getBlockTemplate('');
         if (response.error) {
-            console.error('Unable to get block template');
+            logger.error('Unable to get block template');
             return
         }
 
@@ -73,7 +74,7 @@ class BlockTemplate {
 
 function PushBlockTemlate(template) {
     currentBlockTemplate = new BlockTemplate(template);
-    console.log(`New block template loaded with height: ${currentBlockTemplate.height}, diff: ${currentBlockTemplate.difficulty}`);
+    logger.log(`New block template loaded with height: ${currentBlockTemplate.height}, diff: ${currentBlockTemplate.difficulty}`);
     scratchpad.getFullScratchpad();
     newBlockTemplate.emit('NewTemplate');
     UnlockBlocks();
@@ -90,14 +91,14 @@ async function UnlockBlocks() {
     for (let blockCandidate of blockCandidates) {
         let response = await rpc.getBlockHeaderByHeight(blockCandidate.height);
         if (response.error) {
-            console.error('Error receiving block header');
+            logger.error('Error receiving block header');
             return;
         }
         let blockHeader = response.result.block_header;
 
         let logBalance = blockHeader.reward / config.pool.payment.units;
         orphan = blockHeader.hash === blockCandidate.hash ? 0 : 1;
-        console.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
+        logger.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
 
         await db.unlockBlock(orphan, currentBlockTemplate.height, blockHeader.reward, blockCandidate);
     }

@@ -1,0 +1,31 @@
+const config = require('../config');
+const size = config.pool.logger.size;
+var stack = [];
+
+function log() {
+    let message = new Date().toGMTString();
+    for (var i = 0; i < arguments.length; i++) {
+        message += ' ' + arguments[i];
+    }
+    console.log(message);
+
+    if (stack.unshift(message) > size) {
+        stack.pop();
+    }
+};
+
+function error() {
+    log(arguments);
+};
+
+function read() {
+    let output = JSON.stringify(stack).replace(/","/g, '\n', );
+    output = output.slice(2, output.length - 2);
+    return output;
+}
+
+module.exports = {
+    log: log,
+    error, error,
+    read: read
+}

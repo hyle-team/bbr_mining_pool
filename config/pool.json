@@ -35,6 +35,10 @@
     "block": {
         "unlockDepth": 3
     },
+    
+    "logger": {
+        "size": 1000
+    },
 
     "payment": {
         "units": 1000000000000,

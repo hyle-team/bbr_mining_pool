@@ -12,6 +12,7 @@ async function connect() {
     let res = await client.connect()
         .then(async () => {
             db = client.db(dbName);
+            getCurrentHashrate();
             return true;
         })
         .catch((err) => {
@@ -29,7 +30,10 @@ async function storeMinerShare(height, account, score, jobDiff, dateNow) {
         'height': height,
         'account': account
     }, {
-            $inc: { 'score': parseInt(score) }
+            $inc: {
+                'score': parseInt(score),
+                'shares': parseInt(jobDiff)
+            }
         },
         { upsert: true });
 
@@ -41,36 +45,33 @@ async function storeMinerShare(height, account, score, jobDiff, dateNow) {
         { upsert: true });
 };
 
-async function storeBlockCandidate(height, templateDiff, hash, dateNow) {
+async function storeBlockCandidate(height, block, hash, dateNow) {
     const dateNowSeconds = dateNow / 1000 | 0;
 
-    db.collection('shares').aggregate([{
-        $match: { 'height': height }
-    }, {
-        $group: { _id: null, total: { $sum: "$score" } }
-    }]).toArray((err, result) => {
-        if (!err) {
-            db.collection('candidates').insertOne({
-                'height': height,
-                'difficulty': templateDiff,
-                'hash': hash,
-                'date': dateNowSeconds,
-                'shares': (result.length > 0) ? result[0].total : 0
-            });
-        }
+    let totalShares = await getTotalShares(height);
+    db.collection('candidates').insertOne({
+        'height': height,
+        'difficulty': block.difficulty,
+        'hash': hash,
+        'date': dateNowSeconds,
+        'reward': block.reward,
+        'shares': totalShares
     });
 
-    db.collection('stats').updateOne({},
-        { $set: { 'lastBlockFound': dateNow } },
-        { upsert: true });
+    if (hash) {
+        db.collection('stats').updateOne({},
+            { $set: { 'lastBlockFound': dateNowSeconds } },
+            { upsert: true });
+    }
 };
 
 async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
     let col = db.collection('shares');
     let shares = await col.find({ 'height': blockCandidate.height }).toArray();
+    blockCandidate.reward = reward;
     if (shares.length > 0) {
         let bulkShares = col.initializeOrderedBulkOp();
-        if (orphan || blockCandidate.hash === '') {
+        if (orphan || !blockCandidate.hash) {
             shares.forEach(share => {
                 bulkShares.find({
                     'height': currentHeight,
@@ -95,7 +96,8 @@ async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
     }
 
     if (blockCandidate.hash === '') {
-        blockCandidate.status = 'not found';
+        await db.collection('candidates').deleteOne({ 'height': blockCandidate.height });
+        return;
     } else if (orphan) {
         blockCandidate.status = 'orphan';
     } else {
@@ -108,17 +110,23 @@ async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
 
 async function getBlocks(height) {
     let col = db.collection('blocks');
-    return await col.find({ 'height': { $lte: height } }).toArray();
+    return await col.find({ 'height': { $lte: height } },
+        { projection: { _id: 0 } })
+        .sort({ 'height': -1 })
+        .toArray();
 }
 
 async function getCandidates(height) {
     let col = db.collection('candidates');
-    return await col.find({ 'height': { $lte: height } }).toArray();
+    return await col.find({ 'height': { $lte: height } },
+        { projection: { _id: 0 } })
+        .sort({ 'height': -1 })
+        .toArray();
 }
 
 async function getBalances() {
     const col = db.collection('balances');
-    return await col.find({}).toArray();
+    return await col.find({}, { projection: { _id: 0 } }).toArray();
 }
 
 async function proccessPayments(balances) {
@@ -136,7 +144,7 @@ async function proccessPayments(balances) {
             'account': balance.account
         })
             .updateOne({ $inc: { 'balance': -parseInt(balance.balance) } });
-        
+
         delete balance._id;
         balance.date = dateNowSeconds;
         bulkTrans.insert(balance);
@@ -156,6 +164,52 @@ async function getBalance(wallet) {
     return await col.findOne({ 'account': wallet });
 }
 
+async function getCurrentHashrate() {
+    let result = await db.collection('candidates').aggregate([{
+        $group: {
+            _id: null,
+            shares: { $push: { 'date': '$date', 'shares': '$shares' } }
+        }
+    }]).toArray();
+    if (result) {
+        const shares = result[0].shares;
+        var times = [];
+        for (let i = 1; i < shares.length; i++) {
+            let time = shares[i].date - shares[i - 1].date;
+            time = (time <= 0) ? 1 : time;
+            times.push({
+                time: time,
+                shares: shares[i].shares
+            });
+        }
+
+        let sum = 0;
+        for (let i = 0; i < times.length; i++) {
+            sum += times[i].shares / times[i].time;
+        }
+        var avg = sum / times.length;
+        return avg;
+    }
+
+}
+
+async function getLastBlockTime() {
+    let col = db.collection('stats');
+    let stat = await col.findOne({});
+    return stat.lastBlockFound;
+}
+
+async function getTotalShares(height) {
+    let result = await db.collection('shares').aggregate([{
+        $match: { 'height': height }
+    }, {
+        $group: { _id: null, total: { $sum: "$shares" } }
+    }]).toArray();
+    if (result) {
+        return (result.length > 0) ? result[0].total : 0;
+    }
+}
+
 module.exports = {
     connect: connect,
     storeMinerShare: storeMinerShare,
@@ -166,5 +220,8 @@ module.exports = {
     getBalances: getBalances,
     proccessPayments: proccessPayments,
     getTransactions: getTransactions,
-    getBalance: getBalance
+    getBalance: getBalance,
+    getCurrentHashrate: getCurrentHashrate,
+    getLastBlockTime: getLastBlockTime,
+    getTotalShares: getTotalShares
 };

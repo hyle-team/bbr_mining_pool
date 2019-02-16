@@ -72,11 +72,16 @@ async function validateShare(miner, params, reply) {
             logger.error('Error submitting block:', response.error);
             storeMinerShare(miner, job);
         } else {
-            logger.log('BLOCK SUBMITED');
+            logger.log('BLOCK SUBMITED', JSON.stringify(response.result));
             const cryptoNight = multiHashing['cryptonight'];
             let blockFastHash = cryptoNight(Buffer.concat([Buffer.from([convertedBlob.length]), convertedBlob]), true).toString('hex');
             current.isFound = true;
-            storeMinerShare(miner, job, blockFastHash, current);
+            var blockHeader = await BlockTemplate.getBlockHeader(blockTemplate.height);
+            if (!blockHeader) {
+                storeMinerShare(miner, job, blockFastHash, current);
+            } else {
+                storeMinerShare(miner, job, blockFastHash, blockHeader);
+            }
             //process alias queue
         }
     } else if (hashDiff.lt(job.difficulty) && (hashDiff / job.difficulty) < 0.995) {
@@ -89,14 +94,13 @@ async function validateShare(miner, params, reply) {
     return true;
 }
 
-async function storeMinerShare(miner, job, hash = null, template = null) {
+async function storeMinerShare(miner, job, hash = null, block = null) {
     const dateNow = Date.now();
     job.score = job.difficulty; //slush support to be added later
     await db.storeMinerShare(job.height, miner.account, job.score, job.difficulty, dateNow);
-    if (hash && template) {
-        await db.storeBlockCandidate(job.height, template.difficulty, hash, dateNow);
+    if (hash && block) {
+        await db.storeBlockCandidate(job.height, block, hash, dateNow);
     }
-
 };
 
 function getTargetHex(miner) {

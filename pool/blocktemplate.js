@@ -25,19 +25,19 @@ class BlockTemplate {
         this.buffer.copy(this.previousBlockHash, 0, 7, 39);
         this.extraNonce = 0;
         this.isFound = false;
-    }
+    };
 
     static notifier() {
         return newBlockTemplate;
-    }
+    };
 
     static current() {
         return currentBlockTemplate;
-    }
+    };
 
     static validBlocks() {
         return validBlockTemplates;
-    }
+    };
 
     static async refresh() {
         let response = await rpc.getBlockTemplate('');
@@ -53,23 +53,37 @@ class BlockTemplate {
                 validBlockTemplates.shift();
             }
             if (!currentBlockTemplate.isFound) {
-                db.storeBlockCandidate(currentBlockTemplate.height, currentBlockTemplate.difficulty, '', Date.now());
+                db.storeBlockCandidate(currentBlockTemplate.height, currentBlockTemplate, null, Date.now());
             }
             PushBlockTemlate(response.result);
         }
+    };
+
+    static async getBlockHeader (height = null) {
+        var response;
+        if (height) {
+            response = await rpc.getBlockHeaderByHeight(height);
+        } else {
+            response = await rpc.getLastBlockHeader();
+        }
+        if (response.error) {
+            logger.error('Error receiving block header');
+            return null;
+        }
+        return response.result.block_header;
     }
 
     nextBlob() {
         this.buffer.writeUInt32BE(++this.extraNonce, this.reserveOffset);
         return cnUtil.convert_blob_bb(this.buffer).toString('hex');
-    }
+    };
 
     hashEquals(template) {
         let buffer = Buffer.from(template.blocktemplate_blob, 'hex');
         let previousBlockHash = Buffer.alloc(32);
         buffer.copy(previousBlockHash, 0, 7, 39);
         return (previousBlockHash.toString('hex') == this.previousBlockHash.toString('hex'));
-    }
+    };
 }
 
 function PushBlockTemlate(template) {
@@ -89,18 +103,14 @@ async function UnlockBlocks() {
     }
 
     for (let blockCandidate of blockCandidates) {
-        let response = await rpc.getBlockHeaderByHeight(blockCandidate.height);
-        if (response.error) {
-            logger.error('Error receiving block header');
-            return;
+        let blockHeader = await BlockTemplate.getBlockHeader(blockCandidate.height);
+        if (blockHeader) {
+            let logBalance = blockHeader.reward / config.pool.payment.units;
+            orphan = blockHeader.hash === blockCandidate.hash ? 0 : 1;
+            logger.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
+    
+            await db.unlockBlock(orphan, currentBlockTemplate.height, blockHeader.reward, blockCandidate);    
         }
-        let blockHeader = response.result.block_header;
-
-        let logBalance = blockHeader.reward / config.pool.payment.units;
-        orphan = blockHeader.hash === blockCandidate.hash ? 0 : 1;
-        logger.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
-
-        await db.unlockBlock(orphan, currentBlockTemplate.height, blockHeader.reward, blockCandidate);
     }
 }
 

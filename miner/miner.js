@@ -36,6 +36,10 @@ class Miner {
         BlockTemplate.notifier().on('NewTemplate', this.listener);
     }
 
+    static minersCount () {
+        return Object.keys(connectedMiners).length;
+    }
+
     static async executeMethod(method, params, address, reply, message) {
         switch (method) {
             case 'login':
@@ -165,7 +169,7 @@ setInterval(() => {
         let miner = connectedMiners[id];
         let timeGap = now - miner.timeStamp;
         if (timeGap > timeout) {
-            logger.log(`Miner was idle for ${miner.account / 1000} and now removed ${miner.account}`);
+            logger.log(`Miner was idle for ${timeGap / 1000} and now removed ${miner.account}`);
             BlockTemplate.notifier().removeListener('NewTemplate', miner.listener);
             miner.validJobs = [];
             delete connectedMiners[id];

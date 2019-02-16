@@ -19,7 +19,8 @@ function error() {
 };
 
 function read() {
-    let output = JSON.stringify(stack).replace(/","/g, '\n', );
+    let output = JSON.stringify(stack)
+    .replace(/","/g, '\n');
     output = output.slice(2, output.length - 2);
     return output;
 }

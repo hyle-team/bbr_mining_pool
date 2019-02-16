@@ -77,6 +77,15 @@ async function getBlockHeaderByHeight(height) {
     return response;
 }
 
+async function getLastBlockHeader() {
+    let dataBinary = new DataBinary('getlastblockheader', '');
+    let response = await request.jsonRequest(config.pool.daemon.host, config.pool.daemon.port, JSON.stringify(dataBinary))
+        .catch((error) => {
+            return ({ error: error });
+        });
+    return response;
+}
+
 async function getAddendum(hi) {
     let dataBinary = new DataBinary('getjob', { id: '', hi: hi });
     let response = await request.jsonRequest(config.pool.daemon.host, config.pool.daemon.port, JSON.stringify(dataBinary))
@@ -102,6 +111,7 @@ module.exports = {
     getBalance: getBalance,
     transfer: transfer,
     getBlockHeaderByHeight: getBlockHeaderByHeight,
+    getLastBlockHeader: getLastBlockHeader,
     getAddendum: getAddendum,
     getFullScratchpad: getFullScratchpad
 };

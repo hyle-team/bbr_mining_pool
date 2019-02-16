@@ -196,7 +196,8 @@ async function getCurrentHashrate() {
 async function getLastBlockTime() {
     let col = db.collection('stats');
     let stat = await col.findOne({});
-    return stat.lastBlockFound;
+    if (stat)
+        return stat.lastBlockFound;
 }
 
 async function getTotalShares(height) {

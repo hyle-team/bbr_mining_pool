@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const bignum = require('bignum');
 const logger = require('../log');
 const db = require('../db');
 const config = require('../config');
@@ -41,7 +42,7 @@ app.get('/dashboard', async (req, res) => {
   let network = {};
   let units = config.pool.payment.units;
   if (blockHeader) {
-    network.hashRate = blockHeader.difficulty / 120 | 0;
+    network.hashRate = bignum(blockHeader.difficulty).div(120) | 0;
     network.blockFound = dateNowSeconds - blockHeader.timestamp | 0;
     network.difficulty = blockHeader.difficulty;
     network.blockHeight = blockHeader.height;
@@ -57,8 +58,10 @@ app.get('/dashboard', async (req, res) => {
   pool.hashRate = hashRate | 0;
   pool.blockFound = dateNowSeconds - blockFound;
   pool.miners = Miner.minersCount();
-  pool.fee = 100 * config.pool.payment.fee / units;
-  pool.effort = 100 * currentShares / BlockTemplate.current().difficulty | 0;
+  pool.fee = config.pool.fee;
+  let shares = bignum(currentShares);
+  let difficulty = bignum(BlockTemplate.current().difficulty);
+  pool.effort = 100 * shares / difficulty | 0;
 
   netOutput = JSON.stringify(network).replace(/,/g, ',\n');
   poolOutput = JSON.stringify(pool).replace(/,/g, ',\n');

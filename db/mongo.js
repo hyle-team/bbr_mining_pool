@@ -95,9 +95,10 @@ async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
         await bulkShares.execute();
     }
 
-    if (blockCandidate.hash === '') {
-        await db.collection('candidates').deleteOne({ 'height': blockCandidate.height });
-        return;
+    if (!blockCandidate.hash) {
+        blockCandidate.status = 'not found';
+        //await db.collection('candidates').deleteOne({ 'height': blockCandidate.height });
+        //return;
     } else if (orphan) {
         blockCandidate.status = 'orphan';
     } else {

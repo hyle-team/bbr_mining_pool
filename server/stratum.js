@@ -19,7 +19,10 @@ function startPoolServer() {
             }
 
             var sendReply = function (error, result) {
-                if (!socket.writable) return;
+                if (!socket.writable) {
+                    logger.log('Socket is not writable');
+                    return;
+                }
                 var sendData = JSON.stringify({
                     id: jsonData.id,
                     jsonrpc: "2.0",

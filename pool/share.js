@@ -15,17 +15,20 @@ async function validateShare(miner, params, reply) {
     var job = miner.validJobs.find(function (job) { return job.id === params.job_id; });
     if (!job) {
         reply('Invalid job id');
+        logger.log('Invalid job id');
         return false;
     }
 
     params.nonce = params.nonce.substr(0, 8).toLowerCase();
     if (!noncePattern.test(params.nonce)) {
         reply('Invalid nonce');
+        logger.log('Invalid nonce');
         return false;
     }
 
     if (job.submissions.includes(params.nonce)) {
         reply('Duplicate share');
+        logger.log('Duplicate share');
         return false;
     }
     job.submissions.push(params.nonce);
@@ -36,6 +39,7 @@ async function validateShare(miner, params, reply) {
 
     if (!blockTemplate) {
         reply('Block expired');
+        logger.log('Block expired');
         return false;
     }
 

@@ -93,6 +93,7 @@ class Miner {
                         }
                     }
                 } else {
+                    logger.log('Miner unauthenticated');
                     reply('Unauthenticated');
                 }
                 break;

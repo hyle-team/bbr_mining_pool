@@ -15,7 +15,11 @@ function log() {
 };
 
 function error() {
-    log(arguments);
+    log.apply(null, arguments);
+};
+
+function debug() {
+    log.apply(null, arguments);
 };
 
 function read() {
@@ -27,6 +31,7 @@ function read() {
 
 module.exports = {
     log: log,
-    error, error,
+    error: error,
+    debug: debug,
     read: read
 }

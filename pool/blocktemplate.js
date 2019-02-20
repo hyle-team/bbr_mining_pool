@@ -13,6 +13,10 @@ var currentBlockTemplate;
 var validBlockTemplates = [];
 var newBlockTemplate = new events.EventEmitter();
 
+var currentShares = {};
+var startTime;
+var endTime;
+
 class BlockTemplate {
     constructor(template) {
         this.blob = template.blocktemplate_blob;
@@ -24,7 +28,6 @@ class BlockTemplate {
         this.previousBlockHash = Buffer.alloc(32);
         this.buffer.copy(this.previousBlockHash, 0, 7, 39);
         this.extraNonce = 0;
-        this.isFound = false;
     };
 
     static notifier() {
@@ -39,11 +42,37 @@ class BlockTemplate {
         return validBlockTemplates;
     };
 
+    static getTotalShares() {
+        let sum = 0;
+        Object.keys(currentShares).forEach(minerId => {
+            sum += currentShares[minerId].score;
+        });
+        return sum;
+    }
+
+    static async storeCandidate(miner, job, hash, height) {
+        BlockTemplate.addMinerShare(miner, job);
+        endTime = new Date();
+        let blockHeader = await BlockTemplate.getBlockHeader(height);
+        if (blockHeader) {
+            let totalShares = BlockTemplate.getTotalShares();
+            db.storeCandidate(blockHeader, totalShares, hash, startTime, endTime);
+            db.storeRoundShares(height, currentShares, startTime, endTime);
+            clearRound();
+        }
+    };
+
+    static addMinerShare(miner, job) {
+        job.score = job.difficulty;
+        //later PPLNS
+        UpdateShares(miner.account, job.score, job.difficulty, new Date());
+    }
+
     static async refresh() {
         let response = await rpc.getBlockTemplate('');
         if (response.error) {
             logger.error('Unable to get block template');
-            return
+            return;
         }
 
         if (!currentBlockTemplate) {
@@ -52,14 +81,11 @@ class BlockTemplate {
             if (validBlockTemplates.push(currentBlockTemplate) > blockTemplateCount) {
                 validBlockTemplates.shift();
             }
-            if (!currentBlockTemplate.isFound) {
-                db.storeBlockCandidate(currentBlockTemplate.height, currentBlockTemplate, null, Date.now());
-            }
             PushBlockTemlate(response.result);
         }
     };
 
-    static async getBlockHeader (height = null) {
+    static async getBlockHeader(height = null) {
         var response;
         if (height) {
             response = await rpc.getBlockHeaderByHeight(height);
@@ -89,6 +115,7 @@ class BlockTemplate {
 function PushBlockTemlate(template) {
     currentBlockTemplate = new BlockTemplate(template);
     logger.log(`New block template loaded with height: ${currentBlockTemplate.height}, diff: ${currentBlockTemplate.difficulty}`);
+    startTime = new Date();
     scratchpad.getFullScratchpad();
     newBlockTemplate.emit('NewTemplate');
     UnlockBlocks();
@@ -106,10 +133,52 @@ async function UnlockBlocks() {
         let blockHeader = await BlockTemplate.getBlockHeader(blockCandidate.height);
         if (blockHeader) {
             let logBalance = blockHeader.reward / config.pool.payment.units;
-            orphan = blockHeader.hash === blockCandidate.hash ? 0 : 1;
-            logger.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR and ${(blockHeader.hash === blockCandidate.hash)} validity`)
-    
-            await db.unlockBlock(orphan, currentBlockTemplate.height, blockHeader.reward, blockCandidate);    
+            orphan = blockHeader.hash != blockCandidate.hash;
+            logger.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR (orphan: ${orphan})`);
+            let shares = await db.getShares(blockCandidate.height);
+            if (orphan) {
+                shares.forEach(share => {
+                    UpdateShares(share.miner, share.score, share.shares, new Date());
+                });
+            } else {
+                let feePercent = config.pool.fee / 100;
+                let reward = Math.round(blockHeader.reward - (blockHeader.reward * feePercent));
+                var rewardList = [];
+                shares.forEach(share => {
+                    let percent = share.score / blockCandidate.shares;
+                    let workerReward = Math.round(reward * percent);
+                    rewardList.push({
+                        updateOne: {
+                            filter: { 'miner': share.miner },
+                            update: { $inc: { 'balance': workerReward } },
+                            upsert: true
+                        }
+                    });
+                });
+                db.storeBlockRewards (rewardList);
+            }
+            db.unlockBlock(blockCandidate.height, orphan);
+        }
+    }
+}
+
+function clearRound() {
+    endTime = startTime = null;
+    Object.keys(currentShares).forEach(minerId => {
+        delete currentShares[minerId];
+    });
+}
+
+function UpdateShares(miner, score, shares, timeStamp) {
+    if (currentShares.hasOwnProperty(miner)) {
+        currentShares[miner].score += score;
+        currentShares[miner].shares += shares;
+        currentShares[miner].timeStamp = timeStamp;
+    } else {
+        currentShares[miner] = {
+            score: score,
+            shares: shares,
+            timeStamp: timeStamp
         }
     }
 }

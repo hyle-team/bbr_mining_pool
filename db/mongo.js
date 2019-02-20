@@ -12,7 +12,6 @@ async function connect() {
     let res = await client.connect()
         .then(async () => {
             db = client.db(dbName);
-            getCurrentHashrate();
             return true;
         })
         .catch((err) => {
@@ -23,97 +22,56 @@ async function connect() {
     return res;
 };
 
-async function storeMinerShare(height, account, score, jobDiff, dateNow) {
-    const dateNowSeconds = dateNow / 1000 | 0;
+async function storeCandidate(block, totalShares, hash, startTime, endTime) {
 
-    await db.collection('shares').updateOne({
-        'height': height,
-        'account': account
-    }, {
-            $inc: {
-                'score': parseInt(score),
-                'shares': parseInt(jobDiff)
-            }
-        },
-        { upsert: true });
-
-    await db.collection('workers').updateOne({ 'account': account },
-        {
-            $inc: { 'hashes': parseInt(jobDiff) },
-            $set: { 'lastShare': dateNowSeconds }
-        },
-        { upsert: true });
-};
-
-async function storeBlockCandidate(height, block, hash, dateNow) {
-    const dateNowSeconds = dateNow / 1000 | 0;
-
-    let totalShares = await getTotalShares(height);
     db.collection('candidates').insertOne({
-        'height': height,
+        'height': block.height,
         'difficulty': block.difficulty,
         'hash': hash,
-        'date': dateNowSeconds,
         'reward': block.reward,
-        'shares': totalShares
+        'shares': totalShares,
+        'startTime': startTime,
+        'endTime': endTime
     });
 
-    if (hash) {
-        db.collection('stats').updateOne({},
-            { $set: { 'lastBlockFound': dateNowSeconds } },
-            { upsert: true });
+    db.collection('stats').updateOne({},
+        { $set: { 'lastBlockFound': endTime } },
+        { upsert: true });
+};
+
+async function storeRoundShares(height, currentShares, startTime, endTime) {
+    let bulkRoundStats = [];
+    Object.keys(currentShares).forEach(miner => {
+        bulkRoundStats.push({
+            'height': height,
+            'miner': miner,
+            'worker': currentShares[miner].worker,
+            'score': currentShares[miner].score,
+            'shares': currentShares[miner].shares,
+            'startTime': startTime,
+            'endTime': endTime,
+        });
+    });
+
+    if (bulkRoundStats.length > 0) {
+        db.collection('shares').insertMany(bulkRoundStats);
     }
 };
 
-async function unlockBlock(orphan, currentHeight, reward, blockCandidate) {
-    let col = db.collection('shares');
-    let shares = await col.find({ 'height': blockCandidate.height }).toArray();
-    blockCandidate.reward = reward;
-    if (shares.length > 0) {
-        let bulkShares = col.initializeOrderedBulkOp();
-        if (orphan || !blockCandidate.hash) {
-            shares.forEach(share => {
-                bulkShares.find({
-                    'height': currentHeight,
-                    'account': share.account
-                })
-                    .upsert().updateOne({ $inc: { 'score': parseInt(share.score) } });
-            });
-        } else {
-            let bulkRewards = db.collection('balances').initializeOrderedBulkOp();
-            let feePercent = config.pool.fee / 100;
-            reward = Math.round(reward - (reward * feePercent));
-            shares.forEach(share => {
-                let percent = share.score / blockCandidate.shares;
-                let workerReward = Math.round(reward * percent);
-                bulkRewards.find({ 'account': share.account })
-                    .upsert().updateOne({ $inc: { 'balance': workerReward } });
-            });
-            await bulkRewards.execute();
-        }
-        bulkShares.find({ 'height': blockCandidate.height }).remove();
-        await bulkShares.execute();
-    }
+async function storeBlockRewards (rewards) {
+    db.collection('balances').bulkWrite(rewards)
+};
 
-    if (!blockCandidate.hash) {
-        blockCandidate.status = 'not found';
-        //await db.collection('candidates').deleteOne({ 'height': blockCandidate.height });
-        //return;
-    } else if (orphan) {
-        blockCandidate.status = 'orphan';
-    } else {
-        blockCandidate.status = 'matured';
-    }
-
-    await db.collection('candidates').deleteOne({ 'height': blockCandidate.height });
-    await db.collection('blocks').insertOne(blockCandidate);
+async function unlockBlock(height, orphan) {
+    let block = await db.collection('candidates').findOneAndDelete({'height': height});
+    block.value.status = (orphan) ? 'orphan' : 'matured';
+    db.collection('blocks').insertOne(block.value);
 }
 
 async function getBlocks(height) {
     let col = db.collection('blocks');
     return await col.find({ 'height': { $lte: height } },
         { projection: { _id: 0 } })
-        .sort({ 'height': -1 })
         .toArray();
 }
 
@@ -121,7 +79,12 @@ async function getCandidates(height) {
     let col = db.collection('candidates');
     return await col.find({ 'height': { $lte: height } },
         { projection: { _id: 0 } })
-        .sort({ 'height': -1 })
+        .toArray();
+}
+
+async function getShares(height) {
+    let col = db.collection('shares');
+    return await col.find({'height': height}, {projection: {_id: 0}})
         .toArray();
 }
 
@@ -134,7 +97,6 @@ async function proccessPayments(balances) {
     if (balances.length === 0) {
         return;
     }
-    const dateNowSeconds = Date.now() / 1000 | 0;
     let balanceCol = db.collection('balances');
     let bulkBalances = balanceCol.initializeOrderedBulkOp();
     let transCol = db.collection('transactions');
@@ -147,7 +109,7 @@ async function proccessPayments(balances) {
             .updateOne({ $inc: { 'balance': -parseInt(balance.balance) } });
 
         delete balance._id;
-        balance.date = dateNowSeconds;
+        balance.date = new Date();
         bulkTrans.insert(balance);
     });
 
@@ -169,29 +131,16 @@ async function getCurrentHashrate() {
     let result = await db.collection('candidates').aggregate([{
         $group: {
             _id: null,
-            shares: { $push: { 'date': '$date', 'shares': '$shares' } }
+            time: { $push: { 'date': '$date' } },
+            sum: { $sum: '$shares' }
         }
     }]).toArray();
     if (result) {
-        const shares = result[0].shares;
-        var times = [];
-        for (let i = 1; i < shares.length; i++) {
-            let time = shares[i].date - shares[i - 1].date;
-            time = (time <= 0) ? 1 : time;
-            times.push({
-                time: time,
-                shares: shares[i].shares
-            });
-        }
-
-        let sum = 0;
-        for (let i = 0; i < times.length; i++) {
-            sum += times[i].shares / times[i].time;
-        }
-        var avg = sum / times.length;
+        const shares = result[0].time;
+        let time = (shares[shares.length - 1].date - shares[0].date) / 1000;
+        let avg = Math.abs(result[0].sum / time);
         return avg;
     }
-
 }
 
 async function getLastBlockTime() {
@@ -201,29 +150,19 @@ async function getLastBlockTime() {
         return stat.lastBlockFound;
 }
 
-async function getTotalShares(height) {
-    let result = await db.collection('shares').aggregate([{
-        $match: { 'height': height }
-    }, {
-        $group: { _id: null, total: { $sum: "$shares" } }
-    }]).toArray();
-    if (result) {
-        return (result.length > 0) ? result[0].total : 0;
-    }
-}
-
 module.exports = {
     connect: connect,
-    storeMinerShare: storeMinerShare,
-    storeBlockCandidate: storeBlockCandidate,
+    storeCandidate: storeCandidate,
+    storeRoundShares: storeRoundShares,
+    storeBlockRewards: storeBlockRewards,
     unlockBlock: unlockBlock,
     getBlocks: getBlocks,
     getCandidates: getCandidates,
     getBalances: getBalances,
+    getShares: getShares,
     proccessPayments: proccessPayments,
     getTransactions: getTransactions,
     getBalance: getBalance,
     getCurrentHashrate: getCurrentHashrate,
     getLastBlockTime: getLastBlockTime,
-    getTotalShares: getTotalShares
 };

@@ -24,12 +24,12 @@ async function routine () {
             let payout = balance - remainder;
             if (payout > 0) {
                 workers[i].balance = payout;
-                const destination = [{ address: workers[i].account, 
+                const destination = [{ address: workers[i].miner, 
                     amount: workers[i].balance}];
                 let response = await rpc.transfer(destination);
                 if (!response.error) {
                     let logBalance = workers[i].balance / units;
-                    logger.log('Transfered', logBalance, 'BBR to', workers[i].account);
+                    logger.log('Transfered', logBalance, 'BBR to', workers[i].miner);
                     workers[i].tx = response.result.tx_hash;
                     i++;
                 } else {

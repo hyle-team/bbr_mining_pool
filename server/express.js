@@ -50,12 +50,12 @@ app.get('/dashboard', async (req, res) => {
   };
 
   let pool = {};
-  let currentShares = await db.getTotalShares(BlockTemplate.current().height);
+  let currentShares = BlockTemplate.getTotalShares();
   let hashRate = await db.getCurrentHashrate();
   let blockFound = await db.getLastBlockTime();
   
   pool.hashRate = Math.round(hashRate);
-  pool.blockFound = dateNowSeconds - blockFound;
+  pool.blockFound = dateNowSeconds - blockFound / 1000 | 0;
   pool.miners = Miner.minersCount();
   pool.fee = config.pool.fee;
   pool.effort = Math.round(100 * currentShares / BlockTemplate.current().difficulty);

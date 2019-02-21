@@ -47,6 +47,11 @@ class BlockTemplate {
         return lastBlock;
     };
 
+    static currentHashRate() {
+        let time = (endTime && startTime) ? (endTime - startTime) / 1000 : 1;
+        return Math.round(BlockTemplate.getTotalShares() / time);
+    };
+
     static getTotalShares() {
         let sum = 0;
         Object.keys(currentShares).forEach(minerId => {

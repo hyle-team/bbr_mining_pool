@@ -57,6 +57,10 @@ app.get('/dashboard', async (req, res) => {
       let hashRate = data[1];
       let blocks = data[2];
 
+      if (!hashRate) {
+        hashRate = BlockTemplate.currentHashRate();
+      }
+
       let network = {};
       if (header) {
         network.hashRate = Math.round(header.difficulty / 120);
@@ -85,15 +89,12 @@ app.get('/dashboard', async (req, res) => {
           time: block.endTime
         });
       };
-      
+
       let output = {};
       output.network = network;
       output.pool = pool;
       output.charts = chartsData;
       res.end(JSON.stringify(output));
-    })
-    .catch(err => {
-      res.end('Cannot query dashboard data: ' + err);
     });
 
 

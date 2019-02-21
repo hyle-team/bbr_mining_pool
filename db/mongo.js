@@ -141,10 +141,10 @@ async function getCurrentHashrate() {
             sum: { $sum: '$shares' }
         }
     }]).toArray();
-    if (shares) {
+    if (shares.length > 0) {
         let time = (shares[0].endTime - shares[0].startTime) / 1000;
         return Math.round(shares[0].sum / time);
-    }
+    } 
 }
 
 async function getLastBlockTime() {

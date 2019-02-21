@@ -48,7 +48,7 @@ class BlockTemplate {
     };
 
     static currentHashRate() {
-        let time = (endTime && startTime) ? (endTime - startTime) / 1000 : 1;
+        let time = (new Date() - startTime) / 1000;
         return Math.round(BlockTemplate.getTotalShares() / time);
     };
 

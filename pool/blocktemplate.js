@@ -16,6 +16,7 @@ var newBlockTemplate = new events.EventEmitter();
 var currentShares = {};
 var startTime;
 var endTime;
+var lastBlock;
 
 class BlockTemplate {
     constructor(template) {
@@ -42,6 +43,10 @@ class BlockTemplate {
         return validBlockTemplates;
     };
 
+    static lastBlockTime() {
+        return lastBlock;
+    };
+
     static getTotalShares() {
         let sum = 0;
         Object.keys(currentShares).forEach(minerId => {
@@ -52,7 +57,7 @@ class BlockTemplate {
 
     static async storeCandidate(miner, job, hash, height) {
         BlockTemplate.addMinerShare(miner, job);
-        endTime = new Date();
+        lastBlock = endTime = new Date();
         let blockHeader = await BlockTemplate.getBlockHeader(height);
         if (blockHeader) {
             let totalShares = BlockTemplate.getTotalShares();

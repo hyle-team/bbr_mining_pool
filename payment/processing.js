@@ -12,38 +12,39 @@ async function routine () {
     }
     logger.log('Wallet balance:', response.result.balance / units, 'unlocked:', response.result.unlocked_balance / units)
 
-    var workers = await db.getBalances();
+    var balances = await db.getBalances();
     const threshold = config.pool.payment.threshold;
     const denomination = config.pool.payment.denomination;
 
     let i = 0;
-    while (i < workers.length) {
-        let balance = workers[i].balance;
+    while (i < balances.length) {
+        let balance = balances[i].balance;
         if (balance >= threshold) {
             let remainder = balance % denomination;
             let payout = balance - remainder;
             if (payout > 0) {
-                workers[i].balance = payout;
-                const destination = [{ address: workers[i].miner, 
-                    amount: workers[i].balance}];
+                balances[i].balance = payout;
+                const destination = [{ address: balances[i].miner, 
+                    amount: balances[i].balance
+                }];
                 let response = await rpc.transfer(destination);
                 if (!response.error) {
-                    let logBalance = workers[i].balance / units;
-                    logger.log('Transfered', logBalance, 'BBR to', workers[i].miner);
-                    workers[i].tx = response.result.tx_hash;
+                    let logBalance = balances[i].balance / units;
+                    logger.log('Transfered', logBalance, 'BBR to', balances[i].miner);
+                    balances[i].tx = response.result.tx_hash;
                     i++;
                 } else {
                     logger.error(response.error.message);
-                    workers.splice(i, 1);
+                    balances.splice(i, 1);
                 };
             } else {
-                workers.splice(i, 1);
+                balances.splice(i, 1);
             };
         } else {
-            workers.splice(i, 1);
+            balances.splice(i, 1);
         };
     };
-    await db.proccessPayments(workers);
+    await db.proccessPayments(balances);
     setTimeout(routine, config.pool.payment.interval);
 
 };

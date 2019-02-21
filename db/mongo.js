@@ -58,20 +58,22 @@ async function storeRoundShares(height, currentShares, startTime, endTime) {
     }
 };
 
-async function storeBlockRewards (rewards) {
-    db.collection('balances').bulkWrite(rewards)
+async function storeBlockRewards(rewards) {
+    db.collection('balances').bulkWrite(rewards);
 };
 
 async function unlockBlock(height, orphan) {
-    let block = await db.collection('candidates').findOneAndDelete({'height': height});
-    block.value.status = (orphan) ? 'orphan' : 'matured';
+    let block = await db.collection('candidates').findOneAndDelete({ 'height': height });
+    block.value.status = (orphan) ? 'orphan' : 'confirmed';
     db.collection('blocks').insertOne(block.value);
 }
 
-async function getBlocks(height) {
+async function getBlocks(height, limit = 0) {
     let col = db.collection('blocks');
     return await col.find({ 'height': { $lte: height } },
         { projection: { _id: 0 } })
+        .sort([['height', -1]])
+        .limit(limit)
         .toArray();
 }
 
@@ -79,12 +81,13 @@ async function getCandidates(height) {
     let col = db.collection('candidates');
     return await col.find({ 'height': { $lte: height } },
         { projection: { _id: 0 } })
+        .sort([['height', -1]])
         .toArray();
 }
 
 async function getShares(height) {
     let col = db.collection('shares');
-    return await col.find({'height': height}, {projection: {_id: 0}})
+    return await col.find({ 'height': height }, { projection: { _id: 0 } })
         .toArray();
 }
 
@@ -94,52 +97,53 @@ async function getBalances() {
 }
 
 async function proccessPayments(balances) {
-    if (balances.length === 0) {
-        return;
+    if (balances.length > 0) {
+        let balanceCol = db.collection('balances');
+        let transCol = db.collection('transactions');
+        let bulkBalances = balanceCol.initializeOrderedBulkOp();
+        let bulkTrans = transCol.initializeOrderedBulkOp();
+
+        balances.forEach(balance => {
+            bulkBalances.find({
+                'miner': balance.miner
+            }).updateOne({
+                $inc: { 'balance': -parseInt(balance.balance) }
+            });
+
+            delete balance._id;
+            balance.time = new Date();
+            bulkTrans.insert(balance);
+        });
+
+        bulkBalances.execute();
+        bulkTrans.execute();
     }
-    let balanceCol = db.collection('balances');
-    let bulkBalances = balanceCol.initializeOrderedBulkOp();
-    let transCol = db.collection('transactions');
-    let bulkTrans = transCol.initializeOrderedBulkOp();
-
-    balances.forEach(balance => {
-        bulkBalances.find({
-            'account': balance.account
-        })
-            .updateOne({ $inc: { 'balance': -parseInt(balance.balance) } });
-
-        delete balance._id;
-        balance.date = new Date();
-        bulkTrans.insert(balance);
-    });
-
-    await bulkBalances.execute();
-    await bulkTrans.execute();
 }
 
 async function getTransactions(wallet) {
     let col = db.collection('transactions');
-    return await col.find({ 'account': wallet }).toArray();
+    return await col.find({ 'miner': wallet },
+        { projection: { _id: 0 } }).toArray();
 }
 
 async function getBalance(wallet) {
     let col = db.collection('balances');
-    return await col.findOne({ 'account': wallet });
+    return await col.find({ 'miner': wallet },
+        { projection: { _id: 0 } }).toArray();
 }
 
 async function getCurrentHashrate() {
-    let result = await db.collection('candidates').aggregate([{
+    let shares = await db.collection('candidates').aggregate([{
         $group: {
             _id: null,
-            time: { $push: { 'date': '$date' } },
+            startTime: { $min: '$startTime' },
+            endTime: {$max: '$endTime'},
             sum: { $sum: '$shares' }
         }
     }]).toArray();
-    if (result) {
-        const shares = result[0].time;
-        let time = (shares[shares.length - 1].date - shares[0].date) / 1000;
-        let avg = Math.abs(result[0].sum / time);
-        return avg;
+    if (shares) {
+        let time = (shares[0].endTime - shares[0].startTime) / 1000;
+        return Math.round(shares[0].sum / time);
     }
 }
 

@@ -20,9 +20,17 @@ app.get('/log', async (req, res) => {
 
 app.get('/blocks', async (req, res) => {
   let height = BlockTemplate.current().height;
-  let candidates = await db.getCandidates(height);
-  let blocks = await db.getBlocks(height);
-  res.end(`${JSON.stringify(candidates)}\n\n${JSON.stringify(blocks)}`);
+  let promises = []
+  promises.push(db.getCandidates(height));
+  promises.push(db.getBlocks(height, 100));
+  Promise.all(promises)
+    .then(data => {
+      res.end(JSON.stringify(data));
+    })
+    .catch(err => {
+      res.end('Cannot query block data: ' + err);
+    });
+
 });
 
 app.get('/tx/:wallet/', async (req, res) => {
@@ -36,31 +44,57 @@ app.get('/balance/:wallet/', async (req, res) => {
 });
 
 app.get('/dashboard', async (req, res) => {
-  const dateNowSeconds = Date.now() / 1000 | 0;
-  let blockHeader = await BlockTemplate.getBlockHeader();
-  let network = {};
-  let units = config.pool.payment.units;
-  if (blockHeader) {
-    network.hashRate = Math.round(1793706080215 / 120);
-    network.blockFound = Math.round(dateNowSeconds - blockHeader.timestamp);
-    network.difficulty = blockHeader.difficulty;
-    network.blockHeight = blockHeader.height;
-    network.lastReward = blockHeader.reward / units;
-    network.lastHash = blockHeader.hash;
-  };
+  let promises = [];
+  let current = BlockTemplate.current();
+  promises.push(BlockTemplate.getBlockHeader());
+  promises.push(db.getCurrentHashrate());
+  promises.push(db.getBlocks(current.height, 100));
+  Promise.all(promises)
+    .then(data => {
+      const units = config.pool.payment.units;
+      const dateNowSeconds = Date.now() / 1000 | 0;
+      let header = data[0];
+      let hashRate = data[1];
+      let blocks = data[2];
 
-  let pool = {};
-  let currentShares = BlockTemplate.getTotalShares();
-  let hashRate = await db.getCurrentHashrate();
-  let blockFound = await db.getLastBlockTime();
-  
-  pool.hashRate = Math.round(hashRate);
-  pool.blockFound = dateNowSeconds - blockFound / 1000 | 0;
-  pool.miners = Miner.minersCount();
-  pool.fee = config.pool.fee;
-  pool.effort = Math.round(100 * currentShares / BlockTemplate.current().difficulty);
+      let network = {};
+      if (header) {
+        network.hashRate = Math.round(header.difficulty / 120);
+        network.blockFound = Math.round(dateNowSeconds - header.timestamp);
+        network.difficulty = header.difficulty;
+        network.blockHeight = header.height;
+        network.lastReward = header.reward / units;
+        network.lastHash = header.hash;
+      };
+    
+      let pool = {};
+      let currentShares = BlockTemplate.getTotalShares();
+      pool.hashRate = hashRate;
+      pool.blockFound = dateNowSeconds - BlockTemplate.lastBlockTime() / 1000 | 0;
+      pool.miners = Miner.minersCount();
+      pool.fee = config.pool.fee;
+      pool.effort = Math.round(100 * currentShares / current.difficulty);
+    
+      let chartsData = [];
+      for (let block of blocks) {
+        let timeSpan = (block.endTime - block.startTime) / 1000;
+        chartsData.push({
+          difficulty: block.difficulty,
+          hashRate: Math.round(block.shares / timeSpan),
+          effort: 100 * block.shares / block.difficulty,
+          time: block.endTime
+        });
+      };
+      
+      let output = {};
+      output.network = network;
+      output.pool = pool;
+      output.charts = chartsData;
+      res.end(JSON.stringify(output));
+    })
+    .catch(err => {
+      res.end('Cannot query dashboard data: ' + err);
+    });
 
-  netOutput = JSON.stringify(network).replace(/,/g, ',\n');
-  poolOutput = JSON.stringify(pool).replace(/,/g, ',\n');
-  res.end(`${netOutput}\n\n${poolOutput}`);
+
 });

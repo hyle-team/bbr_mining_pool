@@ -94,8 +94,10 @@ function startPoolServer() {
                     dataBuffer = incomplete;
                 }
             }).on('error', (error) => {
-                if (error.code !== 'ECONNRESET')
-                logger.error('Socket error from', address, ':', error);
+                if (error.code !== 'ECONNRESET') {
+                    let address = socket.remoteAddress.split(':').pop();
+                    logger.error('Socket error from', address, ':', error);
+                }
             }).on('close', () => {
                 pushMessage = function () { };
             });

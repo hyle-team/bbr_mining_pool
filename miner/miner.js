@@ -22,14 +22,12 @@ class Miner {
     constructor(id, login, pass, address, difficulty, pushMessage) {
         this.id = id;
         this.login = login;
-        this.pass = pass.match(/^[a-f0-9]{64}$/i);
+        this.pass = (pass.match(/^[a-z0-9]+$/i) !== null) ? pass : '';
         this.address = address;
         this.pushMessage = pushMessage;
         this.difficulty = difficulty;
         this.timeStamp = Date.now();
         this.validJobs = [];
-        //       this.account = (this.pass.match(/^[a-f0-9]{64}$/i) != null) ?
-        //           [this.login, this.pass].join(':') : this.login;
         this.account = this.login;
         this.hi = { block_id: '', height: 0 };
         this.addendum = [];

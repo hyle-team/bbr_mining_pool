@@ -157,8 +157,6 @@ function updateStats(miner, valid) {
     var minerShares = stats.perIP[miner.address];
     (valid) ? minerShares.valid++ : minerShares.invalid++;
 
-    logger.log('STATS', JSON.stringify(minerShares));
-
     if (minerShares.valid + minerShares.invalid >= config.pool.ban.checkpoint) {
         if (minerShares.invalid / minerShares.valid >= banPercent) {
             logger.log('Miner banned', miner.address, ':', miner.account);

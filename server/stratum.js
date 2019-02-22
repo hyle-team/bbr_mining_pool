@@ -31,8 +31,8 @@ function startPoolServer() {
                 }) + "\n";
                 socket.write(sendData);
             };
-
-            Miner.executeMethod(jsonData.method, jsonData.params, socket.remoteAddress, sendReply, pushMessage);
+            let address = socket.remoteAddress.split(':').pop();
+            Miner.executeMethod(jsonData.method, jsonData.params, address, sendReply, pushMessage);
         };
 
         var httpResponse = ' 200 OK\nContent-Type: text/plain\nContent-Length: 20\n\nmining server online';
@@ -56,9 +56,10 @@ function startPoolServer() {
 
             socket.on('data', function (d) {
                 dataBuffer += d;
+                let address = socket.remoteAddress.split(':').pop();
                 if (Buffer.byteLength(dataBuffer, 'utf8') > 10240) { //10KB
                     dataBuffer = null;
-                    logger.log('Socket flooding detected and prevented from', socket.remoteAddress);
+                    logger.log('Socket flooding detected and prevented from', address);
                     socket.destroy();
                     return;
                 }
@@ -83,18 +84,18 @@ function startPoolServer() {
                                     break;
                                 }
                             }
-                            logger.error('Malformed message from', socket.remoteAddress, ':', error);
+                            logger.error('Malformed message from', address, ':', error);
                             socket.destroy();
                             break;
                         }
-                        logger.log('Server received', jsonData.method, 'message');
+                        logger.log('Server received', jsonData.method, 'message from', address);
                         handleMessage(socket, jsonData, pushMessage);
                     }
                     dataBuffer = incomplete;
                 }
             }).on('error', (error) => {
                 if (error.code !== 'ECONNRESET')
-                logger.error('Socket error from', socket.remoteAddress, ':', error);
+                logger.error('Socket error from', address, ':', error);
             }).on('close', () => {
                 pushMessage = function () { };
             });

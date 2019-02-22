@@ -5,12 +5,13 @@ const scratchpad = require('../pool/scratchpad');
 const share = require('../pool/share');
 const BlockTemplate = require('../pool/blocktemplate');
 
-
-const bignum = require('bignum');
-const diffOne = bignum('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
+//const bignum = require('bignum');
+//const diffOne = bignum('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
 const validJobsCount = 5;
 
 var connectedMiners = {};
+var bannedMiners = {};
+var statsPerIP = {};
 var doRetarget = true;
 
 Buffer.prototype.toByteArray = function () {
@@ -18,17 +19,18 @@ Buffer.prototype.toByteArray = function () {
 }
 
 class Miner {
-    constructor(id, login, password, address, difficulty, pushMessage) {
+    constructor(id, login, pass, address, difficulty, pushMessage) {
         this.id = id;
         this.login = login;
-        this.password = password;
+        this.pass = pass.match(/^[a-f0-9]{64}$/i);
         this.address = address;
         this.pushMessage = pushMessage;
         this.difficulty = difficulty;
         this.timeStamp = Date.now();
         this.validJobs = [];
-        this.account = (this.password.match(/^[a-f0-9]{64}$/i) != null) ?
-            [this.login, this.password].join(':') : this.login;
+        //       this.account = (this.pass.match(/^[a-f0-9]{64}$/i) != null) ?
+        //           [this.login, this.pass].join(':') : this.login;
+        this.account = this.login;
         this.hi = { block_id: '', height: 0 };
         this.addendum = [];
 
@@ -36,11 +38,17 @@ class Miner {
         BlockTemplate.notifier().on('NewTemplate', this.listener);
     }
 
-    static minersCount () {
+    static minersCount() {
         return Object.keys(connectedMiners).length;
     }
 
     static async executeMethod(method, params, address, reply, message) {
+        if (checkBan(address)) {
+            logger.log('Banned IP', address);
+            reply('your IP is banned');
+            return;
+        }
+
         switch (method) {
             case 'login':
                 let loggedIn = await login(params, reply);
@@ -50,7 +58,7 @@ class Miner {
 
                     var miner = new Miner(id, params.login, params.pass, address, difficulty, message);
                     connectedMiners[id] = miner;
-                    logger.log('Miner logged in:', miner.account);
+                    logger.log('Miner logged in', miner.address, ':', miner.account);
                     if (params.hi
                         && params.hi.height
                         && params.hi.block_id
@@ -142,7 +150,7 @@ class Miner {
         return reply;
     }
 
-    async newTemplate () {
+    async newTemplate() {
         await scratchpad.getAddendum(this, BlockTemplate.current());
         var job = this.getJob().job;
         this.pushMessage('job', job);
@@ -152,7 +160,17 @@ class Miner {
                 share.retarget(this, job.job_id);
             }, config.pool.share.targetTime + config.pool.share.targetTimeSpan + 1000);
         }
-    };
+    }
+
+    getBanStats() {
+        return { bannedMiners: bannedMiners, perIP: statsPerIP };
+    }
+
+    remove() {
+        BlockTemplate.notifier().removeListener('NewTemplate', this.listener);
+        this.validJobs = [];
+        delete connectedMiners[this.id];
+    }
 }
 
 function uid() {
@@ -160,6 +178,21 @@ function uid() {
     var max = 999999999999999;
     var id = Math.floor(Math.random() * (max - min + 1)) + min;
     return id.toString();
+}
+
+function checkBan(address) {
+    if (config.pool.ban.percent <= 0 || !bannedMiners[address])
+        return false;
+
+    var banTime = Date.now() - bannedMiners[address];
+    if (config.pool.ban.time - banTime > 0) {
+        return true;
+    } else {
+        delete bannedMiners[address];
+        delete statsPerIP[address];
+        logger.log('Ban has expired for', address);
+        return false;
+    }
 }
 
 setInterval(() => {
@@ -171,10 +204,8 @@ setInterval(() => {
         let timeGap = now - miner.timeStamp;
         if (timeGap > timeout) {
             logger.log(`Miner was idle for ${timeGap / 1000} and now removed ${miner.account}`);
-            BlockTemplate.notifier().removeListener('NewTemplate', miner.listener);
-            miner.validJobs = [];
-            delete connectedMiners[id];
-         }
+            miner.remove();
+        }
     }
     logger.log(`Pool has ${Object.keys(connectedMiners).length} active miners`);
 

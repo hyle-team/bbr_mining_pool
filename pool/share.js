@@ -6,7 +6,6 @@ const logger = require('../log');
 const BlockTemplate = require('./blocktemplate');
 const scratchpad = require('./scratchpad');
 const bignum = require('bignum');
-const db = require('../db');
 
 const diffOne = bignum('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
 const noncePattern = new RegExp("^[0-9a-f]{8}$");
@@ -21,12 +20,14 @@ async function validateShare(miner, params, reply) {
 
     params.nonce = params.nonce.substr(0, 8).toLowerCase();
     if (!noncePattern.test(params.nonce)) {
+        updateStats(miner, false);
         reply('Invalid nonce');
         logger.log('Invalid nonce');
         return false;
     }
 
     if (job.submissions.includes(params.nonce)) {
+        updateStats(miner, false);
         reply('Duplicate share');
         logger.log('Duplicate share');
         return false;
@@ -64,6 +65,8 @@ async function validateShare(miner, params, reply) {
         reply('Bad hash');
         return false;
     }
+
+    updateStats(miner, true);
 
     let hashArray = hash.toByteArray().reverse();
     let hashNum = bignum.fromBuffer(Buffer.from(hashArray));
@@ -140,6 +143,30 @@ function retargetDifficulty(miner, jobId) {
         setTimeout(() => {
             retargetDifficulty(miner, jobId);
         }, config.pool.share.targetTime + config.pool.share.targetTimeSpan + 1000);
+    }
+}
+
+function updateStats(miner, valid) {
+    let banPercent = config.pool.ban.percent / 100;
+    if (banPercent <= 0) return;
+
+    let stats = miner.getBanStats();
+    if (!stats.perIP[miner.address]) {
+        stats.perIP[miner.address] = { valid: 0, invalid: 0 };
+    }
+    var minerShares = stats.perIP[miner.address];
+    (valid) ? minerShares.valid++ : minerShares.invalid++;
+
+    logger.log('STATS', JSON.stringify(minerShares));
+
+    if (minerShares.valid + minerShares.invalid >= config.pool.ban.checkpoint) {
+        if (minerShares.invalid / minerShares.valid >= banPercent) {
+            logger.log('Miner banned', miner.address, ':', miner.account);
+            stats.bannedMiners[miner.address] = Date.now();
+            miner.remove();
+        } else {
+            minerShares.invalid = minerShares.valid = 0;
+        }
     }
 }
 

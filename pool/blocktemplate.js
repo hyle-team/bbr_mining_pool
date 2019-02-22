@@ -73,9 +73,9 @@ class BlockTemplate {
     };
 
     static addMinerShare(miner, job) {
-        job.score = job.difficulty;
-        //later PPLNS
-        UpdateShares(miner.account, miner.pass, job.score, job.difficulty, new Date());
+        let now = new Date();
+        job.score = job.difficulty * Math.pow(Math.E, ((startTime - now) / config.pool.share.weight));
+        UpdateShares(miner.account, miner.pass, job.score, job.difficulty, now);
     }
 
     static async refresh() {
@@ -180,14 +180,13 @@ function clearRound() {
 }
 
 function UpdateShares(miner, worker, score, shares, timeStamp) {
-    if (currentShares.hasOwnProperty(miner)) {
-        currentShares[miner].worker = worker,
-        currentShares[miner].score += score;
-        currentShares[miner].shares += shares;
-        currentShares[miner].timeStamp = timeStamp;
+    let entry = miner + ':' + worker;
+    if (currentShares.hasOwnProperty(entry)) {
+        currentShares[entry].score += score;
+        currentShares[entry].shares += shares;
+        currentShares[entry].timeStamp = timeStamp;
     } else {
-        currentShares[miner] = {
-            worker: worker,
+        currentShares[entry] = {
             score: score,
             shares: shares,
             timeStamp: timeStamp

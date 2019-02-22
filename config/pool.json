@@ -1,7 +1,7 @@
 {
     "daemon": {
         "host": "localhost",
-        "port": 50102
+        "port": 10102
     },
 
     "wallet": {
@@ -23,7 +23,8 @@
     "share" : {
         "targetTime" : 60000,
         "targetTimeSpan" : 30000,
-        "timeout" : 600000
+        "timeout" : 600000,
+        "weight" : 240000
     },
 
     "mongodb": {
@@ -40,16 +41,22 @@
         "size": 1000
     },
 
+    "ban": {
+        "time": 600000,
+        "percent": 5,
+        "checkpoint": 50
+    },
+
     "payment": {
         "units": 1000000000000,
-        "mixin": 0,
+        "mixin": 3,
         "fee": 2000000000,
         "threshold": 1000000000000,
         "denomination": 100000000000,
         "interval" : 60000
     },
 
-    "address" : "1CeedLextJgDfXxESueHUF9a6QzXKRtAwDi2gu5QmiFWTjTeccEdCKqg2L2qjZBHhGQLjRC3LEXr1Gd7ekuVvZ5h8L9JgW5",
+    "address" : "",
     "refreshBlockInterval" : 1000,
     "fee" : 2 
 

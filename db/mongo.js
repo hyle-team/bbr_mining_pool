@@ -42,10 +42,11 @@ async function storeCandidate(block, totalShares, hash, startTime, endTime) {
 async function storeRoundShares(height, currentShares, startTime, endTime) {
     let bulkRoundStats = [];
     Object.keys(currentShares).forEach(miner => {
+        let entry = miner.split(':');
         bulkRoundStats.push({
             'height': height,
-            'miner': miner,
-            'worker': currentShares[miner].worker,
+            'miner': entry[0],
+            'worker': entry[1],
             'score': currentShares[miner].score,
             'shares': currentShares[miner].shares,
             'startTime': startTime,

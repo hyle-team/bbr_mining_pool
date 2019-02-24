@@ -4,6 +4,7 @@ const logger = require('../log');
 const db = require('../db');
 const config = require('../config');
 const scratchpad = require('./scratchpad');
+const alias = require('./alias');
 const crypto = require('crypto');
 const cnUtil = require('cryptonote-util');
 const instanceId = crypto.randomBytes(4);
@@ -79,7 +80,8 @@ class BlockTemplate {
     }
 
     static async refresh() {
-        let response = await rpc.getBlockTemplate('');
+        let nextAlias = await alias.getCurrent();
+        let response = await rpc.getBlockTemplate(nextAlias);
         if (response.error) {
             logger.error('Unable to get block template');
             return;

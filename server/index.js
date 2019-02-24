@@ -1,4 +1,5 @@
 const poolServer = require('./stratum');
-require('./express');
+const webServer = require('./express');
 
 exports.start = poolServer;
+exports.router = webServer;

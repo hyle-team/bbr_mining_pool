@@ -5,6 +5,7 @@ const config = require('../config');
 const logger = require('../log');
 const BlockTemplate = require('./blocktemplate');
 const scratchpad = require('./scratchpad');
+const alias = require('./alias');
 const bignum = require('bignum');
 
 const diffOne = bignum('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
@@ -83,7 +84,7 @@ async function validateShare(miner, params, reply) {
             const cryptoNight = multiHashing['cryptonight'];
             let blockFastHash = cryptoNight(Buffer.concat([Buffer.from([convertedBlob.length]), convertedBlob]), true).toString('hex');
             BlockTemplate.storeCandidate(miner, job, blockFastHash, current.height);
-            //process alias queue
+            await alias.updateQueue();
         }
     } else if (hashDiff.lt(job.difficulty) && (hashDiff / job.difficulty) < 0.995) {
         logger.log('Block rejected due low diff, found by', miner.account);

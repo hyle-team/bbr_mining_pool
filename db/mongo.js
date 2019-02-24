@@ -12,6 +12,7 @@ async function connect() {
     let res = await client.connect()
         .then(async () => {
             db = client.db(dbName);
+            logger.log('Connected to MongoDB');
             return true;
         })
         .catch((err) => {
@@ -65,8 +66,10 @@ async function storeBlockRewards(rewards) {
 
 async function unlockBlock(height, orphan) {
     let block = await db.collection('candidates').findOneAndDelete({ 'height': height });
-    block.value.status = (orphan) ? 'orphan' : 'confirmed';
-    db.collection('blocks').insertOne(block.value);
+    if (block.value) {
+        block.value.status = (orphan) ? 'orphan' : 'confirmed';
+        db.collection('blocks').insertOne(block.value);
+    }
 }
 
 async function getBlocks(height, limit = 0) {
@@ -90,11 +93,6 @@ async function getShares(height) {
     let col = db.collection('shares');
     return await col.find({ 'height': height }, { projection: { _id: 0 } })
         .toArray();
-}
-
-async function getBalances() {
-    const col = db.collection('balances');
-    return await col.find({}, { projection: { _id: 0 } }).toArray();
 }
 
 async function proccessPayments(balances) {
@@ -121,15 +119,17 @@ async function proccessPayments(balances) {
     }
 }
 
-async function getTransactions(wallet) {
+async function getTransactions(wallet = null) {
     let col = db.collection('transactions');
-    return await col.find({ 'miner': wallet },
+    let filter = (wallet) ? { 'miner': wallet } : {};
+    return await col.find(filter,
         { projection: { _id: 0 } }).toArray();
 }
 
-async function getBalance(wallet) {
+async function getBalance(wallet = null) {
     let col = db.collection('balances');
-    return await col.find({ 'miner': wallet },
+    let filter = (wallet) ? { 'miner': wallet } : {};
+    return await col.find(filter,
         { projection: { _id: 0 } }).toArray();
 }
 
@@ -138,14 +138,36 @@ async function getCurrentHashrate() {
         $group: {
             _id: null,
             startTime: { $min: '$startTime' },
-            endTime: {$max: '$endTime'},
+            endTime: { $max: '$endTime' },
             sum: { $sum: '$shares' }
         }
     }]).toArray();
     if (shares.length > 0) {
         let time = (shares[0].endTime - shares[0].startTime) / 1000;
         return Math.round(shares[0].sum / time);
-    } 
+    }
+}
+
+async function getTotalShares(wallet = null) {
+    let filter = (wallet) ? { miner: wallet } : {};
+    let shares = await db.collection('shares').aggregate([
+        { $match: filter }, {
+            $group: {
+                _id: null,
+                startTime: { $min: '$startTime' },
+                endTime: { $max: '$endTime' },
+                sum: { $sum: '$shares' }
+            }
+        }]).toArray();
+    var output = {};
+    if (shares.length > 0) {
+        let time = (shares[0].endTime - shares[0].startTime) / 1000;
+        output.total = shares[0].sum;
+        output.average = Math.round(shares[0].sum / time);
+    } else {
+        output.total = output.average = 0;
+    }
+    return output;
 }
 
 async function getLastBlockTime() {
@@ -153,6 +175,34 @@ async function getLastBlockTime() {
     let stat = await col.findOne({});
     if (stat)
         return stat.lastBlockFound;
+}
+
+async function getAliasRequests(limit = 1) {
+    let col = db.collection('requests');
+    return await col.find({},
+        { projection: { _id: 0 } })
+        .sort([['score', -1], ['time', -1]])
+        .limit(limit)
+        .toArray();
+}
+
+async function addAliasRequest(wallet, alias, score) {
+    db.collection('requests').updateOne({ 'address': wallet },
+        {
+            $set: {
+                'alias': alias,
+                'score': score,
+                'time': new Date()
+            }
+        },
+        { upsert: true });
+}
+
+async function updateAliasQueue(alias) {
+    let res = await db.collection('requests').findOneAndDelete({ 'alias': alias });
+    if (res.value) {
+        db.collection('aliases').insertOne(res.value);
+    }
 }
 
 module.exports = {
@@ -163,11 +213,14 @@ module.exports = {
     unlockBlock: unlockBlock,
     getBlocks: getBlocks,
     getCandidates: getCandidates,
-    getBalances: getBalances,
     getShares: getShares,
     proccessPayments: proccessPayments,
     getTransactions: getTransactions,
     getBalance: getBalance,
     getCurrentHashrate: getCurrentHashrate,
+    getTotalShares: getTotalShares,
     getLastBlockTime: getLastBlockTime,
+    getAliasRequests: getAliasRequests,
+    addAliasRequest: addAliasRequest,
+    updateAliasQueue: updateAliasQueue
 };

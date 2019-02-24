@@ -1,3 +1,4 @@
+const cluster = require('cluster');
 const login = require('./login');
 const config = require('../config');
 const logger = require('../log');
@@ -193,20 +194,22 @@ function checkBan(address) {
     }
 }
 
-setInterval(() => {
-    var now = Date.now();
-    let timeout = config.pool.share.timeout;
+if (cluster.isWorker) {
+    setInterval(() => {
+        var now = Date.now();
+        let timeout = config.pool.share.timeout;
 
-    for (let id in connectedMiners) {
-        let miner = connectedMiners[id];
-        let timeGap = now - miner.timeStamp;
-        if (timeGap > timeout) {
-            logger.log(`Miner was idle for ${timeGap / 1000} and now removed ${miner.account}`);
-            miner.remove();
+        for (let id in connectedMiners) {
+            let miner = connectedMiners[id];
+            let timeGap = now - miner.timeStamp;
+            if (timeGap > timeout) {
+                logger.log(`Miner was idle for ${timeGap / 1000} and now removed ${miner.account}`);
+                miner.remove();
+            }
         }
-    }
-    logger.log(`Pool has ${Object.keys(connectedMiners).length} active miners`);
+        logger.log(`Pool has ${Object.keys(connectedMiners).length} active miners`);
 
-}, config.pool.share.timeout);
+    }, config.pool.share.timeout);
+}
 
 module.exports = Miner;

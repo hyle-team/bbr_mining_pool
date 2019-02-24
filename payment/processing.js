@@ -12,7 +12,7 @@ async function routine () {
     }
     logger.log('Wallet balance:', response.result.balance / units, 'unlocked:', response.result.unlocked_balance / units)
 
-    var balances = await db.getBalances();
+    var balances = await db.getBalance();
     const threshold = config.pool.payment.threshold;
     const denomination = config.pool.payment.denomination;
 

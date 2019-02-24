@@ -3,7 +3,7 @@ const size = config.pool.logger.size;
 var stack = [];
 
 function log() {
-    let message = new Date().toGMTString();
+    let message = `[${process.pid}][${new Date().toLocaleString()}]`;
     for (var i = 0; i < arguments.length; i++) {
         message += ' ' + arguments[i];
     }

@@ -47,7 +47,7 @@ class BlockTemplate {
     static lastBlockTime() {
         return lastBlock;
     };
-
+    
     static currentHashRate() {
         let time = (new Date() - startTime) / 1000;
         return Math.round(BlockTemplate.getTotalShares() / time);
@@ -83,8 +83,12 @@ class BlockTemplate {
         let nextAlias = await alias.getCurrent();
         let response = await rpc.getBlockTemplate(nextAlias);
         if (response.error) {
-            logger.error('Unable to get block template');
-            return;
+            logger.error('Unable to get block template', JSON.stringify(response.error));
+            response = await rpc.getBlockTemplate('');
+            if (response.error) {
+                logger.error('Unable to get on second attempt', JSON.stringify(response.error));
+                return;
+            }
         }
 
         if (!currentBlockTemplate) {

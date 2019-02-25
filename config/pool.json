@@ -10,11 +10,12 @@
     },
 
     "scratchpad" : {
-       "path" : "./scratchpad.bin",
+       "path" : "/boolberry/scratchpad.bin",
        "storeInterval" : 14400000
     },
 
     "server" : {
+        "remote" : false,
         "api" : 3000,
         "port" : 6000,
         "difficulty" : 1250000
@@ -53,11 +54,11 @@
         "fee": 2000000000,
         "threshold": 1000000000000,
         "denomination": 100000000000,
-        "interval" : 60000
+        "interval" : 3600000
     },
 
     "address" : "",
     "refreshBlockInterval" : 1000,
-    "fee" : 2 
+    "fee" : 0.1 
 
 }

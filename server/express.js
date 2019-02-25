@@ -15,8 +15,21 @@ function startServer() {
 
   app.use(bodyParser.json());
 
+  app.use((req, res, next) => {
+    if(config.pool.server.remote || req.ip == '127.0.0.1' || req.ip == '::ffff:127.0.0.1' || req.ip == '::1') {
+      next();
+    } else {
+      res.end('Remote connection refused');
+    }
+  });
+
   app.get('/log', async (req, res) => {
     res.end(logger.read());
+  });
+
+  app.get('/scratchpad', function(req, res){
+    var file = config.pool.scratchpad.path;
+    res.download(file);
   });
 
   app.get('/blocks', async (req, res) => {
@@ -117,6 +130,57 @@ function startServer() {
         output.network = network;
         output.pool = pool;
         output.charts = chartsData;
+        res.end(JSON.stringify(output));
+      });
+  });
+
+  app.get('/miner/:wallet', async (req, res) => {
+    let promises = [];
+    let height = BlockTemplate.current().height;
+    let unlockHeight = height - config.pool.block.unlockDepth;
+    let miner = req.params.wallet;
+    promises.push(db.getCandidates(height));
+    promises.push(db.getBalance(miner));
+    promises.push(db.getPaymentsStats(miner));
+    promises.push(db.getTotalShares(miner));
+    promises.push(db.getShareDetails(miner, unlockHeight));
+    Promise.all(promises)
+      .then(data => {
+        const units = config.pool.payment.units;
+
+        let sumReward = 0;
+        let sumShares = 0;
+        for (let i = 0; i < data[0].length; i++) {
+          sumReward += data[0][i].reward;
+          sumShares += data[0][i].shares;
+        }
+
+        let unconfirmed = sumReward * data[4].total / sumShares / units;
+        let confirmed = (data[1].length > 0) ? data[1][0].balance / units : 0;
+        let total = 0;
+        let h24 = 0;
+        let shares = data[3].total;
+        let hashRate = data[4].average;
+        
+        let payments = {};
+        if (data[2].length > 0) {
+          total = data[2][0].total / units;
+          h24 = data[2][0].h24 / units;
+          payments.transactions = data[2][0].transactions;
+        }
+
+        let overview = {};
+        overview.unconfirmed = unconfirmed;
+        overview.confirmed = confirmed;
+        overview.total = total;
+        overview.h24 = h24;
+        overview.shares = shares;
+        overview.threshold = config.pool.payment.threshold / units;
+        overview.hashRate = hashRate;
+        
+        let output = {};
+        output.overview = overview;
+        output.payments = payments;
         res.end(JSON.stringify(output));
       });
   });

@@ -1,7 +1,10 @@
+const cnUtil = require('cryptonote-util');
 const logger = require('../log');
 const db = require('../db');
 const rpc = require('../rpc');
 const config = require('../config');
+
+const addressBase58Prefix = cnUtil.address_decode(Buffer.from(config.pool.address));
 
 var getNext = true;
 var current = {
@@ -36,10 +39,12 @@ async function isAvailable(alias) {
 }
 
 async function request(address, alias) {
-    if (await isAvailable(alias)) {
-        let shares = await db.getTotalShares(address);
-        db.addAliasRequest(address, alias, shares.total);
-        return true;
+    if (addressBase58Prefix == cnUtil.address_decode(Buffer.from(address))) {
+        if (await isAvailable(alias)) {
+            let shares = await db.getTotalShares(address);
+            db.addAliasRequest(address, alias, shares.total);
+            return true;
+        }
     }
 }
 

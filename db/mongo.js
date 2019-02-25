@@ -126,6 +126,20 @@ async function getTransactions(wallet = null) {
         { projection: { _id: 0 } }).toArray();
 }
 
+async function getPaymentsStats(wallet = null) {
+    let filter = (wallet) ? { 'miner': wallet } : {};
+    let yesterday = new Date(Date.now() - 86400 * 1000);
+    return await db.collection('transactions').aggregate([
+        { $match: filter }, {
+            $group: {
+                _id: null,
+                total: { $sum: '$balance' },
+                h24: { $sum: { $cond: [{ $gte: ['$time', yesterday] }, '$balance', 0] } },
+                transactions: { $push: { balance: '$balance', tx: '$tx', time: '$time' } }
+            }
+        }]).toArray();
+}
+
 async function getBalance(wallet = null) {
     let col = db.collection('balances');
     let filter = (wallet) ? { 'miner': wallet } : {};
@@ -168,6 +182,32 @@ async function getTotalShares(wallet = null) {
         output.total = output.average = 0;
     }
     return output;
+}
+
+async function getShareDetails(wallet = null, height = null, worker = null) {
+    let filter = {};
+    if (wallet) filter.miner = wallet;
+    if (worker) filter.worker = worker;
+    if (height) filter.height = { $gt: height };
+    let shares = await db.collection('shares').aggregate([
+        { $match: filter }, {
+            $group: {
+                _id: null,
+                startTime: { $min: '$startTime' },
+                endTime: { $max: '$endTime' },
+                shares: { $sum: '$shares' },
+                score: { $sum: '$score' }
+            }
+        }]).toArray();
+    var output = {};
+    if (shares.length > 0) {
+        let time = (shares[0].endTime - shares[0].startTime) / 1000;
+        output.total = shares[0].shares;
+        output.average = Math.round(shares[0].shares / time);
+    } else {
+        output.total = output.average = 0;
+    }
+    return output;  
 }
 
 async function getLastBlockTime() {
@@ -216,9 +256,11 @@ module.exports = {
     getShares: getShares,
     proccessPayments: proccessPayments,
     getTransactions: getTransactions,
+    getPaymentsStats: getPaymentsStats,
     getBalance: getBalance,
     getCurrentHashrate: getCurrentHashrate,
     getTotalShares: getTotalShares,
+    getShareDetails: getShareDetails,
     getLastBlockTime: getLastBlockTime,
     getAliasRequests: getAliasRequests,
     addAliasRequest: addAliasRequest,

@@ -6,9 +6,10 @@ const scratchpad = require('../pool/scratchpad');
 const share = require('../pool/share');
 const BlockTemplate = require('../pool/blocktemplate');
 
-//const bignum = require('bignum');
-//const diffOne = bignum('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
 const validJobsCount = 5;
+const statReplyDataCount = 100;
+
+var statReplyData = [];
 
 var connectedMiners = {};
 var bannedMiners = {};
@@ -48,6 +49,11 @@ class Miner {
             return;
         }
 
+        var statReply = {
+            method: method,
+            time: Date.now()
+        };
+
         switch (method) {
             case 'login':
                 let loggedIn = await login(params, reply);
@@ -67,6 +73,7 @@ class Miner {
                     }
                     await scratchpad.getAddendum(miner, BlockTemplate.current());
                     reply(null, miner.getJob());
+                    storeStatReply(statReply);
                 }
                 break;
             case 'getjob':
@@ -80,6 +87,7 @@ class Miner {
                     }
                     await scratchpad.getAddendum(miner, BlockTemplate.current());
                     reply(null, miner.getJob());
+                    storeStatReply(statReply);
                 } else {
                     reply('Unauthenticated');
                 }
@@ -98,6 +106,7 @@ class Miner {
                         if (doRetarget) {
                             share.retarget(miner, params.job_id);
                         }
+                        storeStatReply(statReply);
                     }
                 } else {
                     logger.log('Miner unauthenticated');
@@ -194,6 +203,13 @@ function checkBan(address) {
     }
 }
 
+function storeStatReply(statReply) {
+    statReply.time = Date.now() - statReply.time;
+    if (statReplyData.push(statReply) > statReplyDataCount) {
+        statReplyData.shift();
+    }
+}
+
 if (cluster.isWorker) {
     setInterval(() => {
         var now = Date.now();
@@ -210,6 +226,30 @@ if (cluster.isWorker) {
         logger.log(`Pool has ${Object.keys(connectedMiners).length} active miners`);
 
     }, config.pool.share.timeout);
+
+    setInterval(() => {
+        let timeSubmit = timeLogin = timeGetjob = 0;
+        let countSubmit = countLogin = countGetjob = 0;
+        for (let i = 0; i < statReplyData.length; i++) {
+            switch (statReplyData[i].method) {
+                case 'login':
+                    timeLogin += statReplyData[i].time;
+                    countLogin++;
+                    break;
+                case 'submit':
+                    timeSubmit += statReplyData[i].time;
+                    countSubmit++;
+                    break;
+                case 'getjob':
+                    timeGetjob += statReplyData[i].time;
+                    countGetjob++;
+                    break;
+            }
+        }
+
+        logger.log('POOL REPLY STATS: login', timeLogin/countLogin, 'msecs, submit', timeSubmit/countSubmit, 'msecs, getjob', timeGetjob/countGetjob, 'msecs');
+
+    }, 60000);
 }
 
 module.exports = Miner;

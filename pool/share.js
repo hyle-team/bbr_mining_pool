@@ -88,7 +88,7 @@ async function validateShare(miner, params, reply) {
         }
     } else if (hashDiff.lt(job.difficulty) && (hashDiff / job.difficulty) < 0.995) {
         logger.log('Block rejected due low diff, found by', miner.account);
-        sendReply('Low difficulty share');
+        reply('Low difficulty share');
         return false;
     } else {
         BlockTemplate.addMinerShare(miner, job);

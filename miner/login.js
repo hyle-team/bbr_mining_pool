@@ -11,16 +11,19 @@ const addressBase58Prefix = cnUtil.address_decode(Buffer.from(config.pool.addres
 async function login(params, reply) {
     if (!BlockTemplate.current()) {
         reply('no blocktemplate');
+        reply('no blocktemplate');
         return false;
     }
 
     if (params.hi && (BlockTemplate.current().height - params.hi.height) > 9360) {
+        logger.debug('invalid miner height, redownload scratchpad');
         reply('invalid miner height, redownload scratchpad');
         return false;
     }
 
     let login = params.login;
     if (!login) {
+        logger.debug('missing login');
         reply('missing login');
         return false;
     }
@@ -33,6 +36,7 @@ async function login(params, reply) {
         if (result) {
             login = result.alias_details.address;
         } else {
+            logger.debug('Invalid alias');
             reply('Invalid alias');
             return false;
         }

@@ -60,7 +60,6 @@ class Miner {
                 if (loggedIn) {
                     let difficulty = config.pool.server.difficulty;
                     let id = uid();
-
                     var miner = new Miner(id, params.login, params.pass, address, difficulty, message);
                     connectedMiners[id] = miner;
                     logger.log('Miner logged in', miner.address, ':', miner.account);

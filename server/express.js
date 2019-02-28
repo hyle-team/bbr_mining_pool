@@ -147,20 +147,21 @@ function startServer() {
     Promise.all(promises)
       .then(data => {
         const units = config.pool.payment.units;
-
         let sumReward = 0;
-        let sumShares = 0;
+        let sumShares = BlockTemplate.getTotalShares();
+        let minerShares = data[4].total + BlockTemplate.getTotalShares(miner);
+
         for (let i = 0; i < data[0].length; i++) {
           sumReward += data[0][i].reward;
           sumShares += data[0][i].shares;
         }
 
-        let unconfirmed = sumReward * data[4].total / sumShares / units;
+        let unconfirmed = sumReward * minerShares / sumShares / units;
         let confirmed = (data[1].length > 0) ? data[1][0].balance / units : 0;
         let total = 0;
         let h24 = 0;
         let shares = data[3].total;
-        let hashRate = data[4].average;
+        let hashRate = data[4].average + BlockTemplate.currentHashRate(miner);
         
         let payments = {};
         if (data[2].length > 0) {

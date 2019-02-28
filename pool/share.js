@@ -61,8 +61,8 @@ async function validateShare(miner, params, reply) {
 
     if (hash.toString('hex') !== params.result) {
         logger.log('Bad hash from miner ' + miner.account + '@' + miner.address +
-            '\n scratchpad.height=' + scratchpad.current.height + ', job.height=' + job.height +
-            '\n calculated hash: ' + hash.toString('hex') + ', transfered hash: ' + params.result);
+            ' scratchpad.height=' + scratchpad.current.height + ', job.height=' + job.height +
+            ' calculated hash: ' + hash.toString('hex') + ', transfered hash: ' + params.result);
         reply('Bad hash');
         return false;
     }

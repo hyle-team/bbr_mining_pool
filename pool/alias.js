@@ -14,12 +14,6 @@ var current = {
     comment: 'alias created by hyle team'
 };
 
-debug();
-async function debug() {
-    let res = await isAvailable('sowle');
-    logger.debug('CHECK ALIAS', res);
-}
-
 async function getDetails(alias) {
     let response = await rpc.getAliasDetails(alias);
     if (!response.result || response.result.status !== "OK") {

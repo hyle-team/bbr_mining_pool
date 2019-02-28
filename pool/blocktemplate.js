@@ -47,16 +47,18 @@ class BlockTemplate {
     static lastBlockTime() {
         return lastBlock;
     };
-    
-    static currentHashRate() {
+
+    static currentHashRate(miner = null) {
         let time = (new Date() - startTime) / 1000;
-        return Math.round(BlockTemplate.getTotalShares() / time);
+        return Math.round(BlockTemplate.getTotalShares(miner) / time);
     };
 
-    static getTotalShares() {
+    static getTotalShares(miner = null) {
         let sum = 0;
         Object.keys(currentShares).forEach(minerId => {
-            sum += currentShares[minerId].score;
+            if ((miner && minerId.includes(miner)) || (!miner)) {
+                sum += currentShares[minerId].score;
+            }
         });
         return sum;
     }

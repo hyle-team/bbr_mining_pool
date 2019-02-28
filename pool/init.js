@@ -9,6 +9,7 @@ const payment = require('../payment');
 
 (async function init() {
     if (cluster.isMaster) {
+        scratchpad.storeScratchpadRoutine();
         if (await db.connect()) {
             payment.routine();
         }
@@ -19,7 +20,6 @@ const payment = require('../payment');
             cluster.fork();
         });
     } else {
-        scratchpad.storeScratchpadRoutine();
         if (await db.connect()) {
             await refreshBlockRoutine();
             server.start();

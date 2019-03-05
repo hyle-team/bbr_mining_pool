@@ -61,7 +61,7 @@ class BlockTemplate {
             let time = (new Date() - startTime) / 1000;
             let sums = BlockTemplate.getTotalShares(miner, true);
             for (let i = 0; i < sums.length; i++) {
-                sums[i].sum = Math.round(sums[i].sum / time);
+                sums[i].score = Math.round(sums[i].score / time);
             }
             return sums;
         } else {

@@ -16,7 +16,7 @@ function startServer() {
   app.use(bodyParser.json());
 
   app.use((req, res, next) => {
-    if(config.pool.server.remote || req.ip == '127.0.0.1' || req.ip == '::ffff:127.0.0.1' || req.ip == '::1') {
+    if (config.pool.server.remote || req.ip == '127.0.0.1' || req.ip == '::ffff:127.0.0.1' || req.ip == '::1') {
       next();
     } else {
       res.end('Remote connection refused');
@@ -27,7 +27,7 @@ function startServer() {
     res.end(logger.read());
   });
 
-  app.get('/scratchpad', function(req, res){
+  app.get('/scratchpad', function (req, res) {
     var file = config.pool.scratchpad.path;
     res.download(file);
   });
@@ -163,7 +163,7 @@ function startServer() {
         let h24 = 0;
         let shares = data[3].total + minerCurrentShares;
         let hashRate = data[4].average + BlockTemplate.currentHashRate(miner);
-        
+
         let payments = {};
         if (data[2].length > 0) {
           total = data[2][0].total / units;
@@ -179,10 +179,14 @@ function startServer() {
         overview.shares = shares;
         overview.threshold = config.pool.payment.threshold / units;
         overview.hashRate = hashRate;
-        
+
+        let workers = {};
+        workers.hasrate = BlockTemplate.currentHashRate(miner, true);
+
         let output = {};
         output.overview = overview;
         output.payments = payments;
+        output.workers = workers;
         res.end(JSON.stringify(output));
       });
   });

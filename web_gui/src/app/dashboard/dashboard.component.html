@@ -1,0 +1,186 @@
+<div class="content-row">
+  <div class="content-col">
+    <div class="card network-card" *ngIf="network">
+      <div class="card-header">
+        Network
+      </div>
+      <div class="card-content">
+        <div class="card-content-row">
+          <label>Hash Rate</label>
+          <span>{{network['hashRate']}} GH/sec</span>
+        </div>
+        <div class="card-content-row">
+          <label>Block Found</label>
+          <span>{{network['blockFound']}} min ago</span>
+        </div>
+        <div class="card-content-row">
+          <label>Difficulty</label>
+          <span>{{network['difficulty']}}</span>
+        </div>
+        <div class="card-content-row">
+          <label>Block Height</label>
+          <span>{{network['blockHeight']}}</span>
+        </div>
+        <div class="card-content-row">
+          <label>Last Reward</label>
+          <span>{{network['lastReward']}} BBR</span>
+        </div>
+        <div class="card-content-row">
+          <label>Last Hash</label>
+          <a [href]="'#'">{{network['lastHash']}}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content-col">
+    <div class="card pool-card" *ngIf="pool">
+      <div class="card-header">
+        Pool
+      </div>
+      <div class="card-content">
+        <div class="card-content-row">
+          <label>Hash Rate</label>
+          <span>{{pool['hashRate']}} MH/sec</span>
+        </div>
+        <div class="card-content-row">
+          <label>Block found</label>
+          <span>{{pool['blockFound']}} min ago</span>
+        </div>
+        <div class="card-content-row">
+          <label>Connected Miners</label>
+          <span>{{pool['miners']}}</span>
+        </div>
+        <div class="card-content-row">
+          <label>Donations</label>
+          <span>{{pool['effort']}}%</span>
+        </div>
+        <div class="card-content-row">
+          <label>Total Pool Fee</label>
+          <span>{{pool['fee']}}%</span>
+        </div>
+        <div class="card-content-row">
+          <label>Block Found Every</label>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content-col">
+    <div class="card config-card">
+      <div class="card-header">
+        Config
+      </div>
+      <div class="card-content">
+        <div class="card-content-row">
+          <label>USA, East coast, start diff 12500</label>
+          <span>URL</span>
+        </div>
+        <div class="card-content-row">
+          <label>USA, East coast, start diff 12500</label>
+          <span>URL</span>
+        </div>
+        <div class="card-content-row">
+          <label>USA, East coast, start diff 12500</label>
+          <span>URL</span>
+        </div>
+        <div class="card-content-row">
+          <label>USA, East coast, start diff 12500</label>
+          <span>URL</span>
+        </div>
+        <div class="card-content-row">
+          <label>USA, East coast, start diff 12500</label>
+          <span>URL</span>
+        </div>
+        <div class="card-content-row">
+          <label>USA, East coast, start diff 12500</label>
+          <span>URL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content-row">
+  <div class="content-col">
+    <div class="card">
+      <div class="card-header">
+        <ul class="tabs">
+          <li class="tab" [class.active]="activeChartTab === 'hashrate'">
+            <button type="button" (click)="activeChartTab = 'hashrate'">Hashrate</button>
+          </li>
+          <li class="tab" [class.active]="activeChartTab === 'difficulty'">
+            <button type="button" (click)="activeChartTab = 'difficulty'">Difficulty</button>
+          </li>
+          <li class="tab" [class.active]="activeChartTab === 'effort'">
+            <button type="button" (click)="activeChartTab = 'effort'">Effort</button>
+          </li>
+        </ul>
+      </div>
+      <div class="card-content">
+        <div [chart]="hashRateChart" *ngIf="activeChartTab === 'hashrate'"></div>
+        <div [chart]="difficultyChart" *ngIf="activeChartTab === 'difficulty'"></div>
+        <div [chart]="effortChart" *ngIf="activeChartTab === 'effort'"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content-row">
+  <div class="content-col">
+    <div class="card">
+      <div class="card-header">
+        <ul class="tabs">
+          <li class="tab" [class.active]="activeTableTab === 'blocks'">
+            <button type="button" (click)="activeTableTab = 'blocks'">Blocks</button>
+          </li>
+          <li class="tab" [class.active]="activeTableTab === 'payments'">
+            <button type="button" (click)="activeTableTab = 'payments'">Payments</button>
+          </li>
+        </ul>
+      </div>
+      <div class="card-content">
+        <div class="wrap-table scrolled-content" *ngIf="activeTableTab === 'blocks'">
+          <table>
+            <thead>
+            <tr>
+              <th>Height</th>
+              <th>Difficulty</th>
+              <th>Block Hash</th>
+              <th>Time Found</th>
+              <th>Effort</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let block of blocks">
+              <td>{{block['height']}}</td>
+              <td>{{block['difficulty']}}</td>
+              <td>
+                <a [href]="'#'">{{block['hash']}}</a>
+              </td>
+              <td>{{block['startTime'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
+              <td>{{(block['shares'] * 100) / 413260 | number : '1.0-0'}}%</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="wrap-table scrolled-content" *ngIf="activeTableTab === 'payments'">
+          <table>
+            <thead>
+            <tr>
+              <th>Time Sent</th>
+              <th>Transaction Hash</th>
+              <th>Amount</th>
+              <th>Fee</th>
+              <th>Mixin</th>
+              <th>Payees</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

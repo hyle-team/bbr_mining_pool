@@ -1,0 +1,46 @@
+<header>
+  <div class="container">
+    <div class="content-row">
+      <div class="content-col logo">
+        Mining Pool
+      </div>
+
+      <ul class="content-col tabs">
+        <li class="tab" [routerLinkActive]="'active'">
+          <button [routerLink]="['/dashboard']">Dashboard</button>
+        </li>
+        <li class="tab" [routerLinkActive]="'active'">
+          <button [routerLink]="['/account']">Account</button>
+        </li>
+        <li class="tab" [routerLinkActive]="'active'">
+          <button [routerLink]="['/stats']">Stats</button>
+        </li>
+        <li class="tab" [routerLinkActive]="'active'">
+          <button [routerLink]="['/docs']">Docs</button>
+        </li>
+      </ul>
+
+      <div class="content-col get-alias">
+        <button>Get Alias</button>
+      </div>
+      <div class="content-col btn-mobile-nav">
+        <button type="button" (click)="toggleMobileNav()" [ngClass]="{'show': navIsOpen === true }"></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="mobile-nav" [ngClass]="{'show': navIsOpen === true }">
+  <ul>
+    <li><a [routerLink]="['/dashboard']" routerLinkActive="active">Dashboard</a></li>
+    <li><a [routerLink]="['/account']" routerLinkActive="active">Account</a></li>
+    <li><a [routerLink]="['/stats']" routerLinkActive="active">Stats</a></li>
+    <li><a [routerLink]="['/docs']" routerLinkActive="active">Docs</a></li>
+    <li class="wrap-alias-btn"><button type="button">Get Alias</button></li>
+  </ul>
+</nav>
+
+
+<div class="container">
+  <router-outlet></router-outlet>
+</div>

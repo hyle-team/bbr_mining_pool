@@ -1,0 +1,79 @@
+.content-row {
+  margin-top: 4rem;
+
+  @media (max-width: 991.98px) {
+    flex-direction: column;
+
+    .content-col:not(:first-child) {
+      margin-top: 4rem;
+    }
+  }
+}
+
+.tabs {
+  margin: 0 -2rem;
+  padding: 0;
+
+  .tab {
+    margin: 0 2rem;
+  }
+}
+
+.card-content-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+
+  label {
+    flex: 1 0 auto;
+  }
+
+  span, a {
+    flex: 0 1 100%;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+.network-card {
+
+  .card-content-row {
+
+    span {
+      max-width: 12rem;
+    }
+
+    a {
+      color: #64dde2;
+      width: 12rem;
+      max-width: 12rem;
+    }
+  }
+}
+
+.pool-card {
+
+  .card-content-row {
+
+    span {
+      max-width: 10rem;
+    }
+  }
+}
+
+.config-card {
+
+  .card-content-row {
+
+    span {
+      color: #64dde2;
+      max-width: 3rem;
+    }
+  }
+}
+
+.wrap-table {
+  overflow-x: auto;
+}

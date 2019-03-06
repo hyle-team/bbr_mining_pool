@@ -1,0 +1,221 @@
+<div class="content-row">
+  <div class="content-col">
+    <div class="card enter-wallet">
+      <div class="card-header">
+        Wallet
+      </div>
+      <div class="card-content">
+        <input type="text" placeholder="Enter your wallet here" [(ngModel)]="walletAddress">
+        <button type="button" (click)="getInfoWallet()">Look up</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="walletData">
+
+  <div class="content-row">
+    <div class="content-col">
+      <div class="card">
+        <div class="card-header">
+          Overview
+        </div>
+        <div class="card-content">
+
+          <div class="wrap-overview-tables">
+            <table class="">
+              <tbody>
+              <tr>
+                <td>Unconfirmed Balance</td>
+                <td>{{walletData['overview']['unconfirmed'] | number : '1.2-4'}} BBR</td>
+              </tr>
+              <tr>
+                <td>Total Paid</td>
+                <td>{{walletData['overview']['total'] | number : '1.2-4'}} BBR</td>
+              </tr>
+              <tr>
+                <td>Total Shares</td>
+                <td>{{walletData['overview']['shares'] | number : '1.0-0'}}</td>
+              </tr>
+              <tr>
+                <td>Payment Threshold</td>
+                <td>{{walletData['overview']['threshold'] | number : '1.2-4'}} BBR</td>
+              </tr>
+              <tr>
+                <td>Email Notification</td>
+                <td>No set yet</td>
+              </tr>
+              </tbody>
+            </table>
+
+            <table>
+              <tbody>
+              <tr>
+                <td>Confirmed Balance</td>
+                <td>{{walletData['overview']['confirmed'] | number : '1.2-4'}} BBR</td>
+              </tr>
+              <tr>
+                <td>24h Payments</td>
+                <td>{{walletData['overview']['h24'] | number : '1.2-4'}} BBR</td>
+              </tr>
+              <tr>
+                <td>24h Income</td>
+                <td>{{walletData['overview']['h24'] | number : '1.2-4'}} BBR</td>
+              </tr>
+              <tr>
+                <td>Current HashRate</td>
+                <td>{{walletData['overview']['hashRate']}} H/s</td>
+              </tr>
+              <tr>
+                <td>Payment Enable</td>
+                <td>ON</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-row">
+    <div class="content-col">
+      <div class="card">
+        <div class="card-header">
+          <ul class="tabs">
+            <li class="tab" [class.active]="miningTabSelected === 'hashrate'">
+              <button type="button" (click)="miningTabSelected = 'hashrate'">Hashrate</button>
+            </li>
+            <li class="tab" [class.active]="miningTabSelected === 'workers'">
+              <button type="button" (click)="miningTabSelected = 'workers'">Workers</button>
+            </li>
+          </ul>
+        </div>
+        <div class="card-content">
+          <div [chart]="chart" *ngIf="miningTabSelected === 'hashrate'"></div>
+          <div class="wrap-table scrolled-content" *ngIf="miningTabSelected === 'workers'">
+            <table>
+              <thead>
+              <tr>
+                <th>Num</th>
+                <th>Name</th>
+                <th>Hashrate</th>
+                <th>Last Hash</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>1</td>
+                <td>Aperture Science</td>
+                <td>0 Mh/s</td>
+                <td>1 day ago</td>
+                <td>Active</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Aperture Science</td>
+                <td>0 Mh/s</td>
+                <td>1 day ago</td>
+                <td>Active</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Aperture Science</td>
+                <td>0 Mh/s</td>
+                <td>1 day ago</td>
+                <td>Active</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Aperture Science</td>
+                <td>0 Mh/s</td>
+                <td>1 day ago</td>
+                <td>Active</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>Aperture Science</td>
+                <td>0 Mh/s</td>
+                <td>1 day ago</td>
+                <td>Active</td>
+                <td>1</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-row">
+    <div class="content-col">
+      <div class="card">
+        <div class="card-header">
+          <ul class="tabs">
+            <li class="tab" [class.active]="rewardTabSelected === 'blocks'">
+              <button type="button" (click)="rewardTabSelected = 'blocks'">Blocks</button>
+            </li>
+            <li class="tab" [class.active]="rewardTabSelected === 'payments'">
+              <button type="button" (click)="rewardTabSelected = 'payments'">Payments</button>
+            </li>
+          </ul>
+        </div>
+        <div class="card-content">
+          <div class="wrap-table scrolled-content" *ngIf="rewardTabSelected === 'blocks'">
+            <table>
+              <thead>
+              <tr>
+                <th>Height</th>
+                <th>Difficulty</th>
+                <th>Block Hash</th>
+                <th>Time Found</th>
+                <th>Effort</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="wrap-table scrolled-content" *ngIf="rewardTabSelected === 'payments'">
+            <table>
+              <thead>
+              <tr>
+                <th>Time Sent</th>
+                <th>Transaction Hash</th>
+                <th>Amount</th>
+                <th>Fee</th>
+                <th>Mixin</th>
+                <th>Payees</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let payment of walletData['payments']['transactions']">
+                <td>{{payment['time'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
+                <td>
+                  <a [href]="'#'">{{payment['tx']}}</a>
+                </td>
+                <td>
+                  {{payment['balance']/1000000000000 | number : '1.4-4'}}
+                </td>
+                <td>0.0010</td>
+                <td>3</td>
+                <td>1</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

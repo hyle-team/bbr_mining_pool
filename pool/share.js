@@ -60,10 +60,8 @@ async function validateShare(miner, params, reply) {
     let hash = multiHashing.boolberry(convertedBlob, scratchpad.current.buffer, job.height);
 
     if (hash.toString('hex') !== params.result) {
-        logger.log('Bad hash from miner ' + miner.account + '@' + miner.address +
-            ' scratchpad.height=' + scratchpad.current.height + ', job.height=' + job.height +
-            ' calculated hash: ' + hash.toString('hex') + ', transfered hash: ' + params.result);
-        reply('Bad hash');
+        logger.log('Bad hash from miner ' + miner.account + '@' + miner.address);
+        reply(null, { status: 'OK' });
         return false;
     }
 

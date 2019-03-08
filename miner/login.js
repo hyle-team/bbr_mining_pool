@@ -41,7 +41,9 @@ async function login(params, reply) {
             return false;
         }
     }
-    if (addressBase58Prefix !== cnUtil.address_decode(Buffer.from(login))) {
+
+    let decodedAddress = cnUtil.address_decode(Buffer.from(login));
+    if (addressBase58Prefix !== decodedAddress && decodedAddress != 0xE94E) {
         logger.error('Invalid address');
         reply('Invalid address');
         return false;

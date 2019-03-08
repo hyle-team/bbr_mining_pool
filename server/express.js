@@ -16,6 +16,12 @@ function startServer() {
   app.use(bodyParser.json());
 
   app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+
+  app.use((req, res, next) => {
     if (config.pool.server.remote || req.ip == '127.0.0.1' || req.ip == '::ffff:127.0.0.1' || req.ip == '::1') {
       next();
     } else {

@@ -78,7 +78,8 @@ class BlockTemplate {
                     let sum = minerId.split(':');
                     sums.push({
                         worker: sum[1],
-                        score: currentShares[minerId].score
+                        score: currentShares[minerId].score,
+                        last: currentShares[minerId].timeStamp
                     });
                 }
             });

@@ -10,8 +10,9 @@ const payment = require('../payment');
 (async function init() {
     if (cluster.isMaster) {
         scratchpad.storeScratchpadRoutine();
-        if (await db.connect()) {
-            payment.routine();
+        if (await db.mongo.connect()) {
+            //payment.routine();
+            db.payment();
         }
         cluster.fork();
         cluster.on('exit', (worker, code, signal) => {
@@ -20,7 +21,7 @@ const payment = require('../payment');
             cluster.fork();
         });
     } else {
-        if (await db.connect()) {
+        if (await db.mongo.connect()) {
             await refreshBlockRoutine();
             server.start();
             server.router();

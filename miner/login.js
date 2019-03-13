@@ -10,7 +10,7 @@ const addressBase58Prefix = cnUtil.address_decode(Buffer.from(config.pool.addres
 
 async function login(params, reply) {
     if (!BlockTemplate.current()) {
-        reply('no blocktemplate');
+        logger.debug('no blocktemplate');
         reply('no blocktemplate');
         return false;
     }

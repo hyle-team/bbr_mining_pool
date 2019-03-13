@@ -41,8 +41,8 @@ function startServer() {
   app.get('/blocks', async (req, res) => {
     let height = BlockTemplate.current().height;
     let promises = []
-    promises.push(db.getCandidates(height));
-    promises.push(db.getBlocks(height, 100));
+    promises.push(db.mongo.getCandidates(height));
+    promises.push(db.mongo.getBlocks(height, 100));
     Promise.all(promises)
       .then(data => {
         res.end(JSON.stringify(data));
@@ -53,12 +53,12 @@ function startServer() {
   });
 
   app.get('/tx/:wallet/', async (req, res) => {
-    let transactions = await db.getTransactions(req.params.wallet);
+    let transactions = await db.mongo.getTransactions(req.params.wallet);
     res.send(transactions)
   });
 
   app.get('/balance/:wallet/', async (req, res) => {
-    let balance = await db.getBalance(req.params.wallet);
+    let balance = await db.mongo.getBalance(req.params.wallet);
     res.send(balance)
   });
 
@@ -81,7 +81,7 @@ function startServer() {
   });
 
   app.get('/queue', async (req, res) => {
-    let requests = await db.getAliasRequests(100);
+    let requests = await db.mongo.getAliasRequests(100);
     res.send(requests)
   });
 
@@ -89,8 +89,8 @@ function startServer() {
     let promises = [];
     let current = BlockTemplate.current();
     promises.push(BlockTemplate.getBlockHeader());
-    promises.push(db.getCurrentHashrate());
-    promises.push(db.getBlocks(current.height, 100));
+    promises.push(db.mongo.getCurrentHashrate());
+    promises.push(db.mongo.getBlocks(current.height, 100));
     Promise.all(promises)
       .then(data => {
         const units = config.pool.payment.units;
@@ -145,11 +145,11 @@ function startServer() {
     let height = BlockTemplate.current().height;
     let unlockHeight = height - config.pool.block.unlockDepth;
     let miner = req.params.wallet;
-    promises.push(db.getCandidates(height));
-    promises.push(db.getBalance(miner));
-    promises.push(db.getPaymentsStats(miner));
-    promises.push(db.getTotalShares(miner));
-    promises.push(db.getShareDetails(miner, unlockHeight));
+    promises.push(db.mongo.getCandidates(height));
+    promises.push(db.mongo.getBalance(miner));
+    promises.push(db.mongo.getPaymentsStats(miner));
+    promises.push(db.mongo.getTotalShares(miner));
+    promises.push(db.mongo.getShareDetails(miner, unlockHeight));
     Promise.all(promises)
       .then(data => {
         const units = config.pool.payment.units;

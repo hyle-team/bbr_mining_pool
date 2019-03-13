@@ -3,7 +3,7 @@ const config = require('../config');
 const logger = require('../log');
 const db = require('../db');
 
-const units = config.pool.payment.units
+const units = config.pool.payment.units;
 
 async function routine () {
     let response = await rpc.getBalance();
@@ -12,7 +12,7 @@ async function routine () {
     }
     logger.log('Wallet balance:', response.result.balance / units, 'unlocked:', response.result.unlocked_balance / units)
 
-    var balances = await db.getBalance();
+    var balances = await db.mongo.getBalance();
     const threshold = config.pool.payment.threshold;
     const denomination = config.pool.payment.denomination;
 
@@ -44,7 +44,7 @@ async function routine () {
             balances.splice(i, 1);
         };
     };
-    await db.proccessPayments(balances);
+    await db.mongo.proccessPayments(balances);
     setTimeout(routine, config.pool.payment.interval);
 
 };

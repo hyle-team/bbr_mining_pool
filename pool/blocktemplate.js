@@ -21,7 +21,7 @@ info.tx_count = -1;
 var currentShares = {}; // pool round shares
 var startTime; // pool round start time
 var endTime; // pool roudn end time
-var lastBlock; // last pool block candidate time
+var lastBlock = new Date(); // last pool block candidate time
 
 class BlockTemplate {
     constructor(template) {
@@ -95,15 +95,20 @@ class BlockTemplate {
         }
     }
 
-    static async storeCandidate(miner, job, hash, height) {
+    static async storeCandidate(height, miner, job, hash) {
         BlockTemplate.addMinerShare(miner, job);
         lastBlock = endTime = new Date();
         let blockHeader = await BlockTemplate.getBlockHeader(height);
         if (blockHeader) {
             let totalShares = BlockTemplate.getTotalShares();
-            db.storeCandidate(blockHeader, totalShares, hash, startTime, endTime);
-            db.storeRoundShares(height, currentShares, startTime, endTime);
+            db.mongo.storeCandidate(blockHeader, totalShares, hash, startTime, endTime);
+            db.mongo.storeRoundShares(height, currentShares, startTime, endTime);
             clearRound();
+        }
+
+        var header = await BlockTemplate.getBlockHeader(height);
+        if (header) {
+            db.block.storeCandidate(header, hash)
         }
     }
 
@@ -180,7 +185,10 @@ function PushBlockTemlate(template) {
 async function UnlockBlocks() {
     let unlockHeight = currentBlockTemplate.height - config.pool.block.unlockDepth;
 
-    let blockCandidates = await db.getCandidates(unlockHeight);
+    db.block.unlock(unlockHeight);
+
+
+    let blockCandidates = await db.mongo.getCandidates(unlockHeight);
     if (blockCandidates.length === 0) {
         return;
     }
@@ -191,7 +199,7 @@ async function UnlockBlocks() {
             let logBalance = blockHeader.reward / config.pool.payment.units;
             orphan = blockHeader.hash != blockCandidate.hash;
             logger.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR (orphan: ${orphan})`);
-            let shares = await db.getShares(blockCandidate.height);
+            let shares = await db.mongo.getShares(blockCandidate.height);
             if (orphan) {
                 shares.forEach(share => {
                     UpdateShares(share.miner, share.worker, share.score, share.shares, new Date());
@@ -211,9 +219,9 @@ async function UnlockBlocks() {
                         }
                     });
                 });
-                db.storeBlockRewards(rewardList);
+                db.mongo.storeBlockRewards(rewardList);
             }
-            db.unlockBlock(blockCandidate.height, orphan);
+            db.mongo.unlockBlock(blockCandidate.height, orphan);
         }
     }
 }

@@ -35,21 +35,21 @@ async function isAvailable(alias) {
 async function request(address, alias) {
     if (addressBase58Prefix == cnUtil.address_decode(Buffer.from(address))) {
         if (await isAvailable(alias)) {
-            let shares = await db.getTotalShares(address);
-            db.addAliasRequest(address, alias, shares.total);
+            let shares = await db.mongo.getTotalShares(address);
+            db.mongo.addAliasRequest(address, alias, shares.total);
             return true;
         }
     }
 }
 
 async function updateQueue() {
-    await db.updateAliasQueue(current.alias);
+    await db.mongo.updateAliasQueue(current.alias);
     getNext = true;
 }
 
 async function getCurrent() {
     if (getNext) {
-        let nextAlias = await db.getAliasRequests();
+        let nextAlias = await db.mongo.getAliasRequests();
         if (nextAlias.length > 0) {
             current.alias = nextAlias[0].alias;
             current.address = nextAlias[0].address;

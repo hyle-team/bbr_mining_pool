@@ -1,10 +1,11 @@
-const cnUtil = require('cryptonote-util');
+const crUtil = require('currency-util');
 const logger = require('../log');
-const db = require('../db');
 const rpc = require('../rpc');
 const config = require('../config');
+const Redis = require('ioredis');
+const redis = new Redis();
 
-const addressBase58Prefix = cnUtil.address_decode(Buffer.from(config.pool.address));
+const addressBase58Prefix = crUtil.address_decode(Buffer.from(config.pool.address));
 
 var getNext = true;
 var current = {
@@ -33,26 +34,27 @@ async function isAvailable(alias) {
 }
 
 async function request(address, alias) {
-    if (addressBase58Prefix == cnUtil.address_decode(Buffer.from(address))) {
+    if (addressBase58Prefix == crUtil.address_decode(Buffer.from(address))) {
         if (await isAvailable(alias)) {
-            let shares = await db.mongo.getTotalShares(address);
-            db.mongo.addAliasRequest(address, alias, shares.total);
+            let shares = await redis.hget('miners:' + address, 'total-shares') || 0;
+            await redis.zadd('aliases:queue', shares, [address, alias].join(':'));
             return true;
         }
     }
 }
 
 async function updateQueue() {
-    await db.mongo.updateAliasQueue(current.alias);
+    await redis.zrem('aliases:queue', [current.address, current.alias].join(':'))
     getNext = true;
 }
 
 async function getCurrent() {
     if (getNext) {
-        let nextAlias = await db.mongo.getAliasRequests();
+        let nextAlias = await redis.zrevrangebyscore('aliases:queue', '+inf', '-inf', ['LIMIT', '0', '1']);
+        nextAlias = nextAlias.toString().split(':');
         if (nextAlias.length > 0) {
-            current.alias = nextAlias[0].alias;
-            current.address = nextAlias[0].address;
+            current.address = nextAlias[0];
+            current.alias = nextAlias[1];
         } else {
             current.alias = '';
             current.address = '';

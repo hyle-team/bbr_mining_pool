@@ -45,8 +45,8 @@ async function routine () {
             }
         }
     }
-
     await redis.pipeline(commands).exec();
+    setTimeout(routine, config.pool.payment.interval);
 }
 
 module.exports = routine;

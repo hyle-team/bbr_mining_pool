@@ -217,34 +217,6 @@ async function getLastBlockTime() {
         return stat.lastBlockFound;
 }
 
-async function getAliasRequests(limit = 1) {
-    let col = db.collection('requests');
-    return await col.find({},
-        { projection: { _id: 0 } })
-        .sort([['score', -1], ['time', -1]])
-        .limit(limit)
-        .toArray();
-}
-
-async function addAliasRequest(wallet, alias, score) {
-    db.collection('requests').updateOne({ 'address': wallet },
-        {
-            $set: {
-                'alias': alias,
-                'score': score,
-                'time': new Date()
-            }
-        },
-        { upsert: true });
-}
-
-async function updateAliasQueue(alias) {
-    let res = await db.collection('requests').findOneAndDelete({ 'alias': alias });
-    if (res.value) {
-        db.collection('aliases').insertOne(res.value);
-    }
-}
-
 module.exports = {
     connect: connect,
     storeCandidate: storeCandidate,
@@ -262,7 +234,4 @@ module.exports = {
     getTotalShares: getTotalShares,
     getShareDetails: getShareDetails,
     getLastBlockTime: getLastBlockTime,
-    getAliasRequests: getAliasRequests,
-    addAliasRequest: addAliasRequest,
-    updateAliasQueue: updateAliasQueue
 };

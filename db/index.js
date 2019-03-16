@@ -5,5 +5,5 @@ const payment = require('./payment');
 module.exports = { 
     mongo: mongo,
     block: block,
-    payment: payment
+    paymentRoutine: payment
 };

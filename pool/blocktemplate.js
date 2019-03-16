@@ -1,12 +1,11 @@
 const events = require('events');
 const rpc = require('../rpc');
 const logger = require('../log');
-const db = require('../db');
 const config = require('../config');
 const scratchpad = require('./scratchpad');
 const alias = require('./alias');
 const crypto = require('crypto');
-const cnUtil = require('cryptonote-util');
+const crUtil = require('currency-util');
 const instanceId = crypto.randomBytes(4);
 
 const blockTemplateCount = 3;
@@ -17,11 +16,6 @@ var newBlockTemplate = new events.EventEmitter();
 var info = {};
 info.last_block_hash = '';
 info.tx_count = -1;
-
-var currentShares = {}; // pool round shares
-var startTime; // pool round start time
-var endTime; // pool roudn end time
-var lastBlock = new Date(); // last pool block candidate time
 
 class BlockTemplate {
     constructor(template) {
@@ -48,74 +42,8 @@ class BlockTemplate {
         return validBlockTemplates;
     }
 
-    static lastBlockTime() {
-        return lastBlock;
-    }
-
     static getInfo() {
         return info;
-    }
-
-    static currentHashRate(miner = null, workers = false) {
-        if (miner && workers) {
-            let time = (new Date() - startTime) / 1000;
-            let sums = BlockTemplate.getTotalShares(miner, true);
-            for (let i = 0; i < sums.length; i++) {
-                sums[i].score = Math.round(sums[i].score / time);
-            }
-            return sums;
-        } else {
-            let time = (new Date() - startTime) / 1000;
-            return Math.round(BlockTemplate.getTotalShares(miner) / time);
-        }
-    }
-
-    static getTotalShares(miner = null, workers = false) {
-        if (miner && workers) {
-            var sums = [];
-            Object.keys(currentShares).forEach(minerId => {
-                if (minerId.includes(miner)) {
-                    let sum = minerId.split(':');
-                    sums.push({
-                        worker: sum[1],
-                        score: currentShares[minerId].score,
-                        last: currentShares[minerId].timeStamp
-                    });
-                }
-            });
-            return sums;
-        } else {
-            let sum = 0;
-            Object.keys(currentShares).forEach(minerId => {
-                if ((miner && minerId.includes(miner)) || (!miner)) {
-                    sum += currentShares[minerId].score;
-                }
-            });
-            return sum;
-        }
-    }
-
-    static async storeCandidate(height, miner, job, hash) {
-        BlockTemplate.addMinerShare(miner, job);
-        lastBlock = endTime = new Date();
-        let blockHeader = await BlockTemplate.getBlockHeader(height);
-        if (blockHeader) {
-            let totalShares = BlockTemplate.getTotalShares();
-            db.mongo.storeCandidate(blockHeader, totalShares, hash, startTime, endTime);
-            db.mongo.storeRoundShares(height, currentShares, startTime, endTime);
-            clearRound();
-        }
-
-        var header = await BlockTemplate.getBlockHeader(height);
-        if (header) {
-            db.block.storeCandidate(header, hash)
-        }
-    }
-
-    static addMinerShare(miner, job) {
-        let now = new Date();
-        job.score = job.difficulty * Math.pow(Math.E, ((startTime - now) / config.pool.share.weight));
-        UpdateShares(miner.account, miner.pass, job.score, job.difficulty, now);
     }
 
     static async refresh() {
@@ -162,7 +90,7 @@ class BlockTemplate {
 
     nextBlob() {
         this.buffer.writeUInt32BE(++this.extraNonce, this.reserveOffset);
-        return cnUtil.convert_blob_bb(this.buffer).toString('hex');
+        return crUtil.convert_blob(this.buffer).toString('hex');
     }
 
     hashEquals(template) {
@@ -179,73 +107,6 @@ function PushBlockTemlate(template) {
     startTime = new Date();
     scratchpad.getFullScratchpad();
     newBlockTemplate.emit('NewTemplate');
-    UnlockBlocks();
-}
-
-async function UnlockBlocks() {
-    let unlockHeight = currentBlockTemplate.height - config.pool.block.unlockDepth;
-
-    db.block.unlock(unlockHeight);
-
-
-    let blockCandidates = await db.mongo.getCandidates(unlockHeight);
-    if (blockCandidates.length === 0) {
-        return;
-    }
-
-    for (let blockCandidate of blockCandidates) {
-        let blockHeader = await BlockTemplate.getBlockHeader(blockCandidate.height);
-        if (blockHeader) {
-            let logBalance = blockHeader.reward / config.pool.payment.units;
-            orphan = blockHeader.hash != blockCandidate.hash;
-            logger.log(`Unlocking block ${blockCandidate.height} with reward of ${logBalance} BBR (orphan: ${orphan})`);
-            let shares = await db.mongo.getShares(blockCandidate.height);
-            if (orphan) {
-                shares.forEach(share => {
-                    UpdateShares(share.miner, share.worker, share.score, share.shares, new Date());
-                });
-            } else {
-                let feePercent = config.pool.fee / 100;
-                let reward = Math.round(blockHeader.reward - (blockHeader.reward * feePercent));
-                var rewardList = [];
-                shares.forEach(share => {
-                    let percent = share.score / blockCandidate.shares;
-                    let workerReward = Math.round(reward * percent);
-                    rewardList.push({
-                        updateOne: {
-                            filter: { 'miner': share.miner },
-                            update: { $inc: { 'balance': workerReward } },
-                            upsert: true
-                        }
-                    });
-                });
-                db.mongo.storeBlockRewards(rewardList);
-            }
-            db.mongo.unlockBlock(blockCandidate.height, orphan);
-        }
-    }
-}
-
-function clearRound() {
-    endTime = startTime = null;
-    Object.keys(currentShares).forEach(minerId => {
-        delete currentShares[minerId];
-    });
-}
-
-function UpdateShares(miner, worker, score, shares, timeStamp) {
-    let entry = miner + ':' + worker;
-    if (currentShares.hasOwnProperty(entry)) {
-        currentShares[entry].score += score;
-        currentShares[entry].shares += shares;
-        currentShares[entry].timeStamp = timeStamp;
-    } else {
-        currentShares[entry] = {
-            score: score,
-            shares: shares,
-            timeStamp: timeStamp
-        }
-    }
 }
 
 module.exports = BlockTemplate;

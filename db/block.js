@@ -61,14 +61,21 @@ async function storeCandidate(height, hash) {
             commands.push(['hincrby', 'miners:' + account, 'total-shares', shares]);
         }
 
+        let sTime = roundStart.split('-')[0];
+        let eTime = roundStop.split('-')[0];
+
         let candidate = {
+            status: 'candidate',
+            height: height,
             difficulty: header.difficulty,
             hash: hash,
             reward: header.reward,
             shares: sumShares,
             score: sumScore,
-            startTime: roundStart.split('-')[0],
-            endTime: roundStop.split('-')[0]
+            effort: Math.round(100 * sumShares / header.difficulty),
+            startTime: sTime,
+            endTime: eTime,
+            duration: Math.round((eTime - sTime) / 1000)
         }
         commands.push(['hmset', 'candidates:' + header.height, candidate]);
 
@@ -118,6 +125,7 @@ async function unlock() {
                 commands.push(['del', 'shares:' + height]);
                 commands.push(['rename', 'candidates:' + height, 'blocks:' + height]);
                 commands.push(['hset', 'blocks:' + height, 'status', status]);
+                commands.push(['zadd', 'pool:block-list', [height, 'blocks:' + height]]);
                 await redis.pipeline(commands).exec();
             }
         }

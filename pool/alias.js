@@ -43,11 +43,6 @@ async function request(address, alias) {
     }
 }
 
-async function updateQueue() {
-    await redis.zrem('aliases:queue', [current.address, current.alias].join(':'))
-    getNext = true;
-}
-
 async function getCurrent() {
     if (getNext) {
         let nextAlias = await redis.zrevrangebyscore('aliases:queue', '+inf', '-inf', ['LIMIT', '0', '1']);
@@ -64,10 +59,29 @@ async function getCurrent() {
     return current;
 }
 
+async function updateQueue() {
+    await redis.zrem('aliases:queue', [current.address, current.alias].join(':'))
+    getNext = true;
+}
+
+async function getQueue() {
+    let aliases = await redis.zrevrangebyscore('aliases:queue', '+inf', '-inf');
+    let list = [];
+    for (let i = 0, aLen = aliases.length; i < aLen; i++) {
+        let alias = aliases[i].split(':');
+        list.push({
+            address: alias[0],
+            alias: alias[1]
+        });
+    } 
+    return list;
+}
+
 module.exports = {
     getDetails: getDetails,
     isAvailable: isAvailable,
     request: request,
     getCurrent: getCurrent,
-    updateQueue: updateQueue
+    updateQueue: updateQueue,
+    getQueue: getQueue
 }

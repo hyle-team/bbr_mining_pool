@@ -39,105 +39,53 @@ function startServer() {
   });
 
   app.get('/blocks', async (req, res) => {
-    let height = BlockTemplate.current().height;
-    let promises = []
-    promises.push(db.mongo.getCandidates(height));
-    promises.push(db.mongo.getBlocks(height, 100));
-    Promise.all(promises)
-      .then(data => {
-        res.end(JSON.stringify(data));
-      })
-      .catch(err => {
-        res.end('Cannot query block data: ' + err);
-      });
+    let blocks = await db.stats.getLastBlocks();
+    res.send(blocks);
   });
 
-  app.get('/tx/:wallet/', async (req, res) => {
-    let transactions = await db.mongo.getTransactions(req.params.wallet);
+  app.get('/blocks/:count', async (req, res) => {
+    let blocks = await db.stats.getLastBlocks(req.params.count);
+    res.send(blocks);
+  });
+
+  app.get('/blocks/:count/:offeset', async (req, res) => {
+    let blocks = await db.stats.getLastBlocks(req.params.count, req.params.offset);
+    res.send(blocks);
+  });
+
+  app.get('/tx/:account/', async (req, res) => {
+    let transactions = await db.stats.getLastTransactions(req.params.account);
     res.send(transactions)
   });
 
-  app.get('/balance/:wallet/', async (req, res) => {
-    let balance = await db.mongo.getBalance(req.params.wallet);
-    res.send(balance)
+  app.get('/tx/:account/:timeStamp', async (req, res) => {
+    let transactions = await db.stats.getLastTransactions(req.params.account, req.params.timeStamp);
+    res.send(transactions)
+  });
+
+  app.get('/balance/:account/', async (req, res) => {
+    let balance = await db.stats.getBalance(req.params.account);
+    res.send(balance.toString());
   });
 
   app.get('/alias/:address/:alias/', async (req, res) => {
     let request = await alias.request(req.params.address, req.params.alias);
-    if (request) {
-      res.send("Alias registration request added: " + request);
-    } else {
-      res.send("Alias registration request failed");
-    }
+    res.send((request) ? true : false);
   });
 
   app.get('/check/:alias/', async (req, res) => {
     let availability = await alias.isAvailable(req.params.alias);
-    if (availability) {
-      res.send("Alias is available");
-    } else {
-      res.send("Alias is not available");
-    }
+    res.send(availability);
   });
 
   app.get('/queue', async (req, res) => {
-    let requests = await db.mongo.getAliasRequests(100);
+    let requests = await alias.getQueue();
     res.send(requests)
   });
 
   app.get('/dashboard', async (req, res) => {
-    let promises = [];
-    let current = BlockTemplate.current();
-    promises.push(BlockTemplate.getBlockHeader());
-    promises.push(db.mongo.getCurrentHashrate());
-    promises.push(db.mongo.getBlocks(current.height, 100));
-    Promise.all(promises)
-      .then(data => {
-        const units = config.pool.payment.units;
-        const dateNowSeconds = Date.now() / 1000 | 0;
-        let header = data[0];
-        let hashRate = data[1];
-        let blocks = data[2];
-
-        if (!hashRate) {
-          hashRate = BlockTemplate.currentHashRate();
-        }
-
-        let network = {};
-        if (header) {
-          network.hashRate = Math.round(header.difficulty / 120);
-          network.blockFound = Math.round(dateNowSeconds - header.timestamp);
-          network.difficulty = header.difficulty;
-          network.blockHeight = header.height;
-          network.lastReward = header.reward / units;
-          network.lastHash = header.hash;
-        };
-
-        let pool = {};
-        let currentShares = BlockTemplate.getTotalShares();
-        pool.hashRate = hashRate;
-        pool.blockFound = dateNowSeconds - BlockTemplate.lastBlockTime() / 1000 | 0;
-        pool.miners = Miner.minersCount();
-        pool.fee = config.pool.fee;
-        pool.effort = Math.round(100 * currentShares / current.difficulty);
-
-        let chartsData = [];
-        for (let block of blocks) {
-          let timeSpan = (block.endTime - block.startTime) / 1000;
-          chartsData.push({
-            difficulty: block.difficulty,
-            hashRate: Math.round(block.shares / timeSpan),
-            effort: 100 * block.shares / block.difficulty,
-            time: block.endTime
-          });
-        };
-
-        let output = {};
-        output.network = network;
-        output.pool = pool;
-        output.charts = chartsData;
-        res.end(JSON.stringify(output));
-      });
+    let output = await db.stats.getDashboard()
+    res.end(JSON.stringify(output));
   });
 
   app.get('/miner/:wallet', async (req, res) => {

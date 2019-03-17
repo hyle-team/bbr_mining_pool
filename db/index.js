@@ -1,9 +1,9 @@
-const mongo = require('./mongo');
+const stats = require('./stats');
 const block = require('./block');
 const payment = require('./payment');
 
 module.exports = { 
-    mongo: mongo,
+    stats: stats,
     block: block,
     paymentRoutine: payment
 };

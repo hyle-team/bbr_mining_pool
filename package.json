@@ -8,10 +8,9 @@
   "dependencies": {
     "bignum": "^0.13.0",
     "body-parser": "^1.18.3",
-    "cookie-parser": "^1.4.3",
-    "cryptonote-util": "git://github.com/clintar/node-cryptonote-util.git#integrated_addr",
+    "cookie-parser": "^1.4.4",
+    "currency-util": "git+https://github.com/hyle-team/boolberry-node-util.git",
     "express": "^4.16.4",
-    "mongodb": "^3.1.13",
-    "multi-hashing": "git://github.com/AlekseiBo/node-multi-hashing.git"
+    "ioredis": "^4.6.2"
   }
 }

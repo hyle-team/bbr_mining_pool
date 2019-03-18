@@ -1,9 +1,9 @@
 const stats = require('./stats');
 const block = require('./block');
-const payment = require('./payment');
+const balance = require('./balance');
 
 module.exports = { 
     stats: stats,
     block: block,
-    paymentRoutine: payment
+    balance: balance
 };

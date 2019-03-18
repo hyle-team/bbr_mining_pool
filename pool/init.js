@@ -9,7 +9,8 @@ const db = require('../db');
 (async function init() {
     if (cluster.isMaster) {
         await db.block.init();
-        db.paymentRoutine();
+        db.balance.paymentRoutine();
+        db.stats.statsChecpointRoutine();
         scratchpad.storeScratchpadRoutine();
         unlockBlockRoutine();
         cluster.fork();
@@ -18,13 +19,10 @@ const db = require('../db');
             logger.error('Code:', code, 'Signal:', signal);
             cluster.fork();
         });
-
+    } else {
         await refreshBlockRoutine();
         server.start();
         server.router();
-
-    } else {
-
     }
 })();
 

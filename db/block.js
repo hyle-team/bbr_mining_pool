@@ -1,15 +1,18 @@
 const logger = require('../log');
 const config = require('../config');
 const rpc = require('../rpc');
+const balance = require('./balance');
 const Redis = require('ioredis');
 const redis = new Redis();
+
+const maxlen = config.pool.stats.history;
 
 async function init() {
     await redis.set('pool:round:start', Date.now() + '-0');
 }
 
 async function storeMinerShare(candidate, height, account, worker, share, score) {
-    let res = await redis.xadd('hashes', '*', [
+    let res = await redis.xadd('hashes', 'maxlen', '~', maxlen, '*', [
         'height', height,
         'account', account,
         'worker', worker,
@@ -19,6 +22,7 @@ async function storeMinerShare(candidate, height, account, worker, share, score)
     if (candidate) {
         await redis.set('pool:round:stop', res);
     }
+    redis.hset('miners:' + account, 'last_' + worker, Date.now());
 }
 
 async function storeCandidate(height, hash) {
@@ -30,8 +34,6 @@ async function storeCandidate(height, hash) {
         let roundStart = await redis.getset('pool:round:start', nextStart.join('-'));
 
         let hashes = await redis.xrevrange('hashes', roundStop, roundStart);
-        //logger.debug('hashes', JSON.stringify(hashes));
-
         let sumShares = 0;
         let sumScore = 0;
         let accountScore = {};
@@ -58,7 +60,7 @@ async function storeCandidate(height, hash) {
             let score = accountScore[account].score;
             let shares = accountScore[account].shares;
             commands.push(['sadd', 'shares:' + header.height, [account, shares, score].join(':')]);
-            commands.push(['hincrby', 'miners:' + account, 'total-shares', shares]);
+            commands.push(['hincrby', 'miners:' + account, 'total_shares', shares]);
         }
 
         let sTime = roundStart.split('-')[0];
@@ -81,6 +83,7 @@ async function storeCandidate(height, hash) {
 
         await redis.pipeline(commands).exec();
     }
+    balance.updateUnconfirmedBalance();
 }
 
 async function unlock() {
@@ -119,7 +122,7 @@ async function unlock() {
                         let share = shares[i].split(':');
                         let percent = share[2] / block.score;
                         let reward = Math.round(totalReward * percent);
-                        commands.push(['zincrby', 'balances', reward, share[0]]);
+                        commands.push(['zincrby', 'balances:confirmed', reward, share[0]]);
                     }
                 }
                 commands.push(['del', 'shares:' + height]);
@@ -130,6 +133,7 @@ async function unlock() {
             }
         }
     }
+    balance.updateUnconfirmedBalance();
 }
 
 async function roundStart() {

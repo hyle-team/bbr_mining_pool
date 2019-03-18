@@ -3,9 +3,7 @@ const bodyParser = require('body-parser');
 const logger = require('../log');
 const db = require('../db');
 const config = require('../config');
-const BlockTemplate = require('../pool/blocktemplate');
 const alias = require('../pool/alias');
-const Miner = require('../miner');
 
 function startServer() {
   const app = express();
@@ -54,17 +52,17 @@ function startServer() {
   });
 
   app.get('/tx/:account/', async (req, res) => {
-    let transactions = await db.stats.getLastTransactions(req.params.account);
+    let transactions = await db.balance.getLastTransactions(req.params.account);
     res.send(transactions)
   });
 
   app.get('/tx/:account/:timeStamp', async (req, res) => {
-    let transactions = await db.stats.getLastTransactions(req.params.account, req.params.timeStamp);
+    let transactions = await db.balance.getLastTransactions(req.params.account, req.params.timeStamp);
     res.send(transactions)
   });
 
   app.get('/balance/:account/', async (req, res) => {
-    let balance = await db.stats.getBalance(req.params.account);
+    let balance = await db.balance.getBalance(req.params.account);
     res.send(balance.toString());
   });
 
@@ -88,61 +86,11 @@ function startServer() {
     res.end(JSON.stringify(output));
   });
 
-  app.get('/miner/:wallet', async (req, res) => {
-    let promises = [];
-    let height = BlockTemplate.current().height;
-    let unlockHeight = height - config.pool.block.unlockDepth;
-    let miner = req.params.wallet;
-    promises.push(db.mongo.getCandidates(height));
-    promises.push(db.mongo.getBalance(miner));
-    promises.push(db.mongo.getPaymentsStats(miner));
-    promises.push(db.mongo.getTotalShares(miner));
-    promises.push(db.mongo.getShareDetails(miner, unlockHeight));
-    Promise.all(promises)
-      .then(data => {
-        const units = config.pool.payment.units;
-        let sumReward = 0;
-        let sumShares = BlockTemplate.getTotalShares();
-        let minerCurrentShares = BlockTemplate.getTotalShares(miner);
-        let minerShares = data[4].total + minerCurrentShares;
+  app.get('/miner/:account', async (req, res) => {
+    let output = await db.stats.getCurrentMinerStats(req.params.account);
+    res.end(JSON.stringify(output));
 
-        for (let i = 0; i < data[0].length; i++) {
-          sumReward += data[0][i].reward;
-          sumShares += data[0][i].shares;
-        }
-
-        let unconfirmed = sumReward * minerShares / sumShares / units;
-        let confirmed = (data[1].length > 0) ? data[1][0].balance / units : 0;
-        let total = 0;
-        let h24 = 0;
-        let shares = data[3].total + minerCurrentShares;
-        let hashRate = data[4].average + BlockTemplate.currentHashRate(miner);
-
-        let payments = {};
-        if (data[2].length > 0) {
-          total = data[2][0].total / units;
-          h24 = data[2][0].h24 / units;
-          payments.transactions = data[2][0].transactions;
-        }
-
-        let overview = {};
-        overview.unconfirmed = unconfirmed;
-        overview.confirmed = confirmed;
-        overview.total = total;
-        overview.h24 = h24;
-        overview.shares = shares;
-        overview.threshold = config.pool.payment.threshold / units;
-        overview.hashRate = hashRate;
-
-        let workers = {};
-        workers.hasrate = BlockTemplate.currentHashRate(miner, true);
-
-        let output = {};
-        output.overview = overview;
-        output.payments = payments;
-        output.workers = workers;
-        res.end(JSON.stringify(output));
-      });
+    return;
   });
 }
 

@@ -18,7 +18,7 @@
         "remote" : false,
         "api" : 3000,
         "port" : 6000,
-        "difficulty" : 3500000
+        "difficulty" : 3250000
     },
 
     "share" : {
@@ -36,14 +36,15 @@
 
     "block": {
         "unlockDepth": 10,
-        "unlockInterval": 60000
+        "unlockInterval": 120000
     },
 
     "logger": {
-        "size": 1000
+        "size": 10000
     },
 
     "stats": {
+        "history": 500000,
         "interval": 600000,
         "frame": 600000
     },
@@ -60,7 +61,7 @@
         "fee": 2000000000,
         "threshold": 1000000000000,
         "denomination": 100000000000,
-        "interval" : 3600000
+        "interval" : 60000
     },
 
     "address" : "",

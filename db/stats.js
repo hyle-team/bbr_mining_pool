@@ -212,7 +212,7 @@ async function getCurrentMinerStats(account) {
 
     let overview = {};
     overview.unconfirmed_balance = unconfirmed;
-    overview.confirmed_confirmed = confirmed;
+    overview.confirmed_balance = confirmed;
     overview.total_payments = miner.total_payments / units;
     overview.h24_payments = transactions.h24_payments;
     overview.total_shares = miner.total_shares;

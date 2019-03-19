@@ -108,8 +108,7 @@ async function getCurrentPoolStats(miners = false) {
     timeDepth = now - 30 * 24 * 3600 * 1000;
     let stats = await redis.xrevrange('pool:stats', now, timeDepth);
     for (let i = 0; i < stats.length; i++) {
-        let time = parseInt(stats[i][0].split('-')[0]);
-        stats[i][0] = new Date(time).toUTCString();
+        stats[i][0] = parseInt(stats[i][0].split('-')[0]);
     }
 
     var pool = {};
@@ -188,11 +187,10 @@ async function getFullMinerStats(account, timeDepth = null) {
     }
 
     for (let i = 0; i < stats.length; i++) {
-        let time = parseInt(stats[i][0].split('-')[0]);
-        stats[i][0] = new Date(time).toUTCString();
+        stats[i][0] = parseInt(stats[i][0].split('-')[0]);
     }
 
-    output.current_hashrate = stats[0][1][stats[0][1].length - 1];
+    output.current_hashrate = (stats.length > 0) ? stats[0][1][stats[0][1].length - 1] : null;
     output.worker_last_shares = workers;
     output.hasrate_chart = stats;
     return output;    

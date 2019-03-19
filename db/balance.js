@@ -17,10 +17,9 @@ async function getLastTransactions(account, sum24h = false, timeStamp = '0') {
         Date.now(), timeStamp);
 
     for (let i = 0, length = tx.length; i < length; i++) {
-        let time = parseInt(tx[i][0].split('-')[0]);
-        tx[i][0] = new Date(time).toUTCString();
+        tx[i][0] = parseInt(tx[i][0].split('-')[0]);
         tx[i][1][1] /= units;
-        if(sum24h && time > h24) {
+        if(sum24h && tx[i][0] > h24) {
             h24_payments += tx[i][1][1];
         }
     }

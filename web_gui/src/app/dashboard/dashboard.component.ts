@@ -167,13 +167,13 @@ export class DashboardComponent implements OnInit {
     this.service.getDashboard().subscribe(data => {
       this.network = data['network'];
       this.pool = data['pool'];
-      this.charts = data['charts'];
+      this.charts = data['pool']['stats'];
 
       this.charts.forEach(item => {
-        const itemDate = new Date(item.time).getTime();
-        this.chartsData.hashRate.unshift([itemDate, item.hashRate]);
-        this.chartsData.difficulty.unshift([itemDate, item.difficulty]);
-        this.chartsData.effort.unshift([itemDate, item.effort]);
+        const itemDate = new Date(item[0]).getTime();
+        this.chartsData.hashRate.unshift([itemDate, parseFloat(item[1][3])]);
+        this.chartsData.difficulty.unshift([itemDate, parseFloat(item[1][1])]);
+        this.chartsData.effort.unshift([itemDate, parseFloat(item[1][5])]);
       });
 
       this.hashRateChart = DashboardComponent.drawChart(this.chartsData.hashRate, '100, 221, 226');
@@ -182,7 +182,7 @@ export class DashboardComponent implements OnInit {
     });
 
     this.service.getBlocks().subscribe(data => {
-      this.blocks = data[1];
+      this.blocks = data;
     });
 
   }

@@ -7,7 +7,7 @@ import {map} from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
-  private serverApi = location.protocol + '//' + location.hostname + ':3000';
+  private serverApi = 'http://' + location.hostname + ':3000';
 
   constructor(private http: HttpClient) {
   }

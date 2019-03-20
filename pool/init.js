@@ -5,14 +5,14 @@ const BlockTemplate = require('./blocktemplate');
 const scratchpad = require('./scratchpad');
 const server = require('../server');
 const db = require('../db');
-const payment = require('../payment');
 
 (async function init() {
     if (cluster.isMaster) {
+        await db.block.init();
+        db.balance.paymentRoutine();
+        db.stats.statsChecpointRoutine();
         scratchpad.storeScratchpadRoutine();
-        if (await db.connect()) {
-            payment.routine();
-        }
+        unlockBlockRoutine();
         cluster.fork();
         cluster.on('exit', (worker, code, signal) => {
             logger.error('Cluster worker', worker.process.pid, 'has died');
@@ -20,16 +20,19 @@ const payment = require('../payment');
             cluster.fork();
         });
     } else {
-        if (await db.connect()) {
-            await refreshBlockRoutine();
-            server.start();
-            server.router();
-        }
+        await refreshBlockRoutine();
+        server.start();
+        server.router();
     }
 })();
 
 async function refreshBlockRoutine() {
     await BlockTemplate.refresh();
     setTimeout(refreshBlockRoutine, config.pool.refreshBlockInterval);
+}
+
+async function unlockBlockRoutine() {
+    await db.block.unlock();
+    setTimeout(unlockBlockRoutine, config.pool.block.unlockInterval);
 }
 

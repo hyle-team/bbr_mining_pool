@@ -1,9 +1,9 @@
-const multiHashing = require('multi-hashing');
-const cnUtil = require('cryptonote-util');
+const crUtil = require('currency-util');
 const rpc = require('../rpc');
 const config = require('../config');
 const logger = require('../log');
 const BlockTemplate = require('./blocktemplate');
+const db = require('../db');
 const scratchpad = require('./scratchpad');
 const alias = require('./alias');
 const bignum = require('bignum');
@@ -15,7 +15,7 @@ async function validateShare(miner, params, reply) {
     var job = miner.validJobs.find(function (job) { return job.id === params.job_id; });
     if (!job) {
         reply('Invalid job id');
-        logger.log('Invalid job id');
+        logger.error('Invalid job id');
         return false;
     }
 
@@ -23,14 +23,14 @@ async function validateShare(miner, params, reply) {
     if (!noncePattern.test(params.nonce)) {
         updateStats(miner, false);
         reply('Invalid nonce');
-        logger.log('Invalid nonce');
+        logger.error('Invalid nonce');
         return false;
     }
 
     if (job.submissions.includes(params.nonce)) {
         updateStats(miner, false);
         reply('Duplicate share');
-        logger.log('Duplicate share');
+        logger.error('Duplicate share');
         return false;
     }
     job.submissions.push(params.nonce);
@@ -41,7 +41,7 @@ async function validateShare(miner, params, reply) {
 
     if (!blockTemplate) {
         reply('Block expired');
-        logger.log('Block expired');
+        logger.error('Block expired');
         return false;
     }
 
@@ -56,14 +56,12 @@ async function validateShare(miner, params, reply) {
         Buffer.from(params.nonce, 'hex').copy(shareBuffer, 1);
     }
 
-    let convertedBlob = cnUtil.convert_blob_bb(shareBuffer);
-    let hash = multiHashing.boolberry(convertedBlob, scratchpad.current.buffer, job.height);
+    let convertedBlob = crUtil.convert_blob(shareBuffer);
+    let hash = crUtil.get_pow_hash(convertedBlob, scratchpad.current.buffer, job.height);
 
     if (hash.toString('hex') !== params.result) {
-        logger.log('Bad hash from miner ' + miner.account + '@' + miner.address +
-            ' scratchpad.height=' + scratchpad.current.height + ', job.height=' + job.height +
-            ' calculated hash: ' + hash.toString('hex') + ', transfered hash: ' + params.result);
-        reply('Bad hash');
+        logger.log('Bad hash from miner ' + miner.account + '@' + miner.address);
+        reply(null, { status: 'OK' });
         return false;
     }
 
@@ -78,12 +76,12 @@ async function validateShare(miner, params, reply) {
         let response = await rpc.submitBlock([shareBuffer.toString('hex')]);
         if (response.error) {
             logger.error('Error submitting block:', JSON.stringify(response.error));
-            BlockTemplate.addMinerShare(miner, job);
+            storeMinerShare(false, current.height, miner, job);
         } else {
             logger.log('BLOCK SUBMITED', JSON.stringify(response.result));
-            const cryptoNight = multiHashing['cryptonight'];
-            let blockFastHash = cryptoNight(Buffer.concat([Buffer.from([convertedBlob.length]), convertedBlob]), true).toString('hex');
-            BlockTemplate.storeCandidate(miner, job, blockFastHash, current.height);
+            let blockHash = crUtil.get_id_hash(Buffer.concat([Buffer.from([convertedBlob.length]), convertedBlob])).toString('hex');
+            await storeMinerShare(true, current.height, miner, job);
+            await db.block.storeCandidate(current.height, blockHash);
             await alias.updateQueue();
         }
     } else if (hashDiff.lt(job.difficulty) && (hashDiff / job.difficulty) < 0.995) {
@@ -91,9 +89,16 @@ async function validateShare(miner, params, reply) {
         reply('Low difficulty share');
         return false;
     } else {
-        BlockTemplate.addMinerShare(miner, job);
+        storeMinerShare(false, current.height, miner, job);
     }
     return true;
+}
+
+async function storeMinerShare (candidate, height, miner, job) {
+    let diff = job.difficulty;
+    let roundStart = await db.block.roundStart();
+    let score = diff * Math.pow(Math.E, ((roundStart - Date.now()) / config.pool.share.weight));
+    await db.block.storeMinerShare(candidate, height, miner.account, miner.pass, diff, score);
 }
 
 function getTargetHex(miner) {

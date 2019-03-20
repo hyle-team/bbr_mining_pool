@@ -1,4 +1,4 @@
-const cnUtil = require('cryptonote-util');
+const crUtil = require('currency-util');
 const config = require('../config');
 const logger = require('../log');
 const alias = require('../pool/alias');
@@ -6,11 +6,11 @@ const BlockTemplate = require('../pool/blocktemplate');
 
 const donateSeparator = '#';
 const fixedDiffSeparator = '_';
-const addressBase58Prefix = cnUtil.address_decode(Buffer.from(config.pool.address));
+const addressBase58Prefix = crUtil.address_decode(Buffer.from(config.pool.address));
 
 async function login(params, reply) {
     if (!BlockTemplate.current()) {
-        reply('no blocktemplate');
+        logger.debug('no blocktemplate');
         reply('no blocktemplate');
         return false;
     }
@@ -41,7 +41,9 @@ async function login(params, reply) {
             return false;
         }
     }
-    if (addressBase58Prefix !== cnUtil.address_decode(Buffer.from(login))) {
+
+    let decodedAddress = crUtil.address_decode(Buffer.from(login));
+    if (addressBase58Prefix !== decodedAddress && decodedAddress != 0xE94E) {
         logger.error('Invalid address');
         reply('Invalid address');
         return false;

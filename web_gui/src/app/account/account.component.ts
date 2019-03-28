@@ -12,8 +12,7 @@ export class AccountComponent implements OnInit {
   walletAddress: string;
   walletData: any;
   miningTabSelected: string;
-  rewardTabSelected: string;
-  charts;
+  charts = {};
   chart: Chart;
   workersList: any[] = [];
 
@@ -153,8 +152,7 @@ export class AccountComponent implements OnInit {
   }
 
   constructor(private service: ApiService) {
-    this.miningTabSelected = 'workers';
-    this.rewardTabSelected = 'payments';
+    this.miningTabSelected = 'total';
   }
 
   ngOnInit() {
@@ -162,28 +160,48 @@ export class AccountComponent implements OnInit {
 
   getInfoWallet() {
     this.service.getMiner(this.walletAddress).subscribe(data => {
+      this.workersList = [];
+      this.charts = {};
       this.walletData = data;
+      const localInfo = data['workers']['hasrate_chart'];
 
-      this.charts = data['workers']['hasrate_chart'];
-      let arrChart = [];
-
-      this.charts.forEach(item => {
+      localInfo.forEach(item => {
         const itemDate = new Date(item[0]).getTime();
-        arrChart.push([itemDate, parseFloat(item[1][item[1].length - 1])]);
+        if ( !this.charts['total'] ) {
+          this.charts['total'] = [];
+        }
+        this.charts['total'].push([itemDate, parseFloat(item[1][item[1].length - 1])]);
         let name = '';
         let amount = '';
         for (let i = 0; i < item[1].length - 2; i++) {
-          if ( i % 2 === 0 ) {
+          if (i % 2 === 0) {
             name = item[1][i].split(':')[1];
-          }else{
+          } else {
             amount = item[1][i];
-            this.workersList.push({name: name, amount: amount});
+            if ( !this.charts[name] ) {
+              this.charts[name] = [];
+            }
+            this.charts[name].push([itemDate, parseFloat(amount)]);
           }
         }
       });
-      this.chart = AccountComponent.drawChart(arrChart, '100, 221, 226');
-
+      this.setChart('total');
+      let nameWorker = '';
+      let amountWorker = '';
+      for (let i = 0; i < localInfo[0][1].length - 2; i++) {
+        if (i % 2 === 0) {
+          nameWorker = localInfo[0][1][i].split(':')[1];
+        } else {
+          amountWorker = localInfo[0][1][i];
+          this.workersList.push({name: nameWorker, amount: amountWorker});
+        }
+      }
     });
+  }
+
+  setChart(name) {
+    this.miningTabSelected = name;
+    this.chart = AccountComponent.drawChart(this.charts[this.miningTabSelected], '100, 221, 226');
   }
 
 }

@@ -38,7 +38,7 @@ async function getUnconfirmedBalance(account) {
 }
 
 async function paymentRoutine() {
-    let response = await rpc.sweepBelow(config.pool.address, threshold);
+    let response = await rpc.sweepBelow(config.pool.address, config.pool.payment.sweep);
     if (response.error) {
         logger.error('Could not sweep wallet outputs');
     }

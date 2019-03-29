@@ -68,6 +68,21 @@ async function transfer(destinations) {
     return response;
 }
 
+async function sweepBelow(address, amount) {
+    let params = {
+        address: address,
+        amount: amount,
+        fee: config.pool.payment.fee,
+        mixin: config.pool.payment.mixin
+    };
+    let dataBinary = new DataBinary('sweep_below', params);
+    let response = await request.jsonRequest(config.pool.wallet.host, config.pool.wallet.port, JSON.stringify(dataBinary))
+        .catch((error) => {
+            return ({ error: error });
+        });
+    return response;
+}
+
 async function getBlockHeaderByHeight(height) {
     let dataBinary = new DataBinary('getblockheaderbyheight', { height: height });
     let response = await request.jsonRequest(config.pool.daemon.host, config.pool.daemon.port, JSON.stringify(dataBinary))
@@ -119,6 +134,7 @@ module.exports = {
     getAliasDetails: getAliasDetails,
     getBalance: getBalance,
     transfer: transfer,
+    sweepBelow, sweepBelow,
     getBlockHeaderByHeight: getBlockHeaderByHeight,
     getLastBlockHeader: getLastBlockHeader,
     getInfo: getInfo,

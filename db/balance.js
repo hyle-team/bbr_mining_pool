@@ -38,11 +38,10 @@ async function getUnconfirmedBalance(account) {
 }
 
 async function paymentRoutine() {
-    let response = await rpc.getBalance();
+    let response = await rpc.sweepBelow(config.pool.address, threshold);
     if (response.error) {
-        logger.log('Could not retrieve wallet balance');
+        logger.error('Could not sweep wallet outputs');
     }
-    logger.log('Wallet balance:', response.result.balance / units, 'unlocked:', response.result.unlocked_balance / units)
 
     let commands = [];
     let balances = await redis.zrange('balances:confirmed', 0, -1, 'WITHSCORES');

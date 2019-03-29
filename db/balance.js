@@ -39,7 +39,7 @@ async function getUnconfirmedBalance(account) {
 
 async function paymentRoutine() {
     let commands = [];
-    let balances = await redis.zrange('balances:confirmed', 0, -1, 'WITHSCORES');
+    let balances = await redis.zrevrange('balances:confirmed', 0, -1, 'WITHSCORES');
 
     for (let i = 0, bLen = balances.length; i < bLen; i += 2) {
         let account = balances[i];

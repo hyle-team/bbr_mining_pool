@@ -7,27 +7,27 @@
       <div class="card-content">
         <div class="card-content-row">
           <label>Hash Rate</label>
-          <span>{{network['hashRate']}} GH/sec</span>
+          <span>{{network['current_hasrate'] | hashPowerConverter : 'speed'}}</span>
         </div>
         <div class="card-content-row">
           <label>Block Found</label>
-          <span>{{network['blockFound']}} min ago</span>
+          <span>{{network['last_block_found'] | timeAgo}}</span>
         </div>
         <div class="card-content-row">
           <label>Difficulty</label>
-          <span>{{network['difficulty']}}</span>
+          <span>{{network['difficulty'] | hashPowerConverter}}</span>
         </div>
         <div class="card-content-row">
           <label>Block Height</label>
-          <span>{{network['blockHeight']}}</span>
+          <span>{{network['height']}}</span>
         </div>
         <div class="card-content-row">
           <label>Last Reward</label>
-          <span>{{network['lastReward']}} BBR</span>
+          <span>{{network['last_reward']}} BBR</span>
         </div>
         <div class="card-content-row">
           <label>Last Hash</label>
-          <a [href]="'#'">{{network['lastHash']}}</a>
+          <a target="_blank" [href]="'https://explorer.boolberry.com/block/'+network['last_hash']">{{network['last_hash']}}</a>
         </div>
       </div>
     </div>
@@ -40,19 +40,19 @@
       <div class="card-content">
         <div class="card-content-row">
           <label>Hash Rate</label>
-          <span>{{pool['hashRate']}} MH/sec</span>
+          <span>{{pool['current_hashrate'] | hashPowerConverter : 'speed'}}</span>
         </div>
         <div class="card-content-row">
           <label>Block found</label>
-          <span>{{pool['blockFound']}} min ago</span>
+          <span>{{pool['last_block_found'] | timeAgo}}</span>
         </div>
         <div class="card-content-row">
           <label>Connected Miners</label>
-          <span>{{pool['miners']}}</span>
+          <span>{{pool['miner_count']}}</span>
         </div>
         <div class="card-content-row">
-          <label>Donations</label>
-          <span>{{pool['effort']}}%</span>
+          <label>Round effort</label>
+          <span>{{pool['current_effort']}}%</span>
         </div>
         <div class="card-content-row">
           <label>Total Pool Fee</label>
@@ -152,13 +152,13 @@
             </thead>
             <tbody>
             <tr *ngFor="let block of blocks">
-              <td>{{block['height']}}</td>
-              <td>{{block['difficulty']}}</td>
+              <td>{{block[0]['height']}}</td>
+              <td>{{block[0]['difficulty'] | hashPowerConverter}}</td>
               <td>
-                <a [href]="'#'">{{block['hash']}}</a>
+                <a target="_blank" [href]="'https://explorer.boolberry.com/block/'+block[0]['hash']">{{block[0]['hash']}}</a>
               </td>
-              <td>{{block['startTime'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
-              <td>{{(block['shares'] * 100) / 413260 | number : '1.0-0'}}%</td>
+              <td>{{block[0]['startTime'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
+              <td>{{block[0]['effort']}}%</td>
             </tr>
             </tbody>
           </table>

@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -12,6 +11,8 @@ import { StatsComponent } from './stats/stats.component';
 import { DocsComponent } from './docs/docs.component';
 
 import { ChartModule } from 'angular-highcharts';
+import { TimeAgoPipe } from './_helpers/pipes/time-ago.pipe';
+import { HashPowerConverterPipe } from './_helpers/pipes/hash-power-converter.pipe';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,9 @@ import { ChartModule } from 'angular-highcharts';
     DashboardComponent,
     AccountComponent,
     StatsComponent,
-    DocsComponent
+    DocsComponent,
+    TimeAgoPipe,
+    HashPowerConverterPipe
   ],
   imports: [
     BrowserModule,

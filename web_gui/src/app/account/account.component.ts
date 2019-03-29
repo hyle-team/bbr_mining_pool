@@ -12,22 +12,22 @@ export class AccountComponent implements OnInit {
   walletAddress: string;
   walletData: any;
   miningTabSelected: string;
-  rewardTabSelected: string;
-  charts: object;
+  charts = {};
   chart: Chart;
+  workersList: any[] = [];
 
-  constructor(private service: ApiService) {
-    this.miningTabSelected = 'workers';
-    this.rewardTabSelected = 'payments';
-  }
+  static drawChart(chartData, chartColorSeriesRGB): Chart {
+    const chartColor = '#0c68cc';
+    const chartColorSeries = 'rgb(' + chartColorSeriesRGB + ')';
+    let pointStyle = 'background-color: rgba(' + chartColorSeriesRGB + ', 0.55);';
+    pointStyle = pointStyle + ' font-size: 12px;';
+    pointStyle = pointStyle + ' color: white;';
+    pointStyle = pointStyle + ' border-radius: 5px;';
+    pointStyle = pointStyle + ' padding: 0 5px;';
+    pointStyle = pointStyle + ' box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16)';
+    const point = '<div style="' + pointStyle + '">{point.y} {point.x:%d %b, %H:%M GMT}</div>';
 
-  ngOnInit() {
-
-    this.service.getDashboard().subscribe(data => {
-      this.charts = data['charts'];
-    });
-
-    this.chart = new Chart({
+    return new Chart({
       title: {text: ''},
       credits: {enabled: false},
       exporting: {enabled: false},
@@ -45,10 +45,10 @@ export class AccountComponent implements OnInit {
         title: {
           text: ''
         },
-        gridLineColor: '#0c68cc',
+        gridLineColor: chartColor,
         gridLineWidth: 1,
         tickWidth: 1,
-        tickColor: '#0c68cc',
+        tickColor: chartColor,
         labels: {
           style: {
             color: '#fff',
@@ -60,12 +60,12 @@ export class AccountComponent implements OnInit {
 
       xAxis: {
         type: 'datetime',
-        gridLineColor: '#0c68cc',
-        lineColor: '#0c68cc',
+        gridLineColor: chartColor,
+        lineColor: chartColor,
         lineWidth: 1,
         tickWidth: 1,
         tickLength: 10,
-        tickColor: '#0c68cc',
+        tickColor: chartColor,
         labels: {
           style: {
             color: '#fff',
@@ -75,9 +75,9 @@ export class AccountComponent implements OnInit {
         },
         minPadding: 0,
         maxPadding: 0,
-        minRange: 86400000,
+        // minRange: 86400000,
         // tickInterval: 86400000,
-        minTickInterval: 3600000,
+        minTickInterval: 60000,
         endOnTick: true,
       },
 
@@ -91,15 +91,14 @@ export class AccountComponent implements OnInit {
         footerFormat: '',
 
         xDateFormat: '%b %Y',
-        // pointFormat: '<div style="background-color: {series.color}; color: white; border-radius: 3px; padding: 0 5px;">{point.y} {point.x:%d %b, %H:%M GMT}</div>',
-        pointFormat: '<div style="background-color: rgba(49, 155, 251, 0.55); font-size: 12px; color: white; border-radius: 5px; padding: 0 5px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16)">{point.y} {point.x:%d %b, %H:%M GMT}</div>',
+        pointFormat: point,
         shared: true,
         padding: 0
       },
 
       plotOptions: {
         area: {
-          color: '#319bfb',
+          color: chartColorSeries,
           shadow: true,
           states: {
             hover: {
@@ -114,8 +113,8 @@ export class AccountComponent implements OnInit {
               y2: 1
             },
             stops: [
-              [0, 'rgba(49, 155, 251, 0.55)'],
-              [1, 'rgba(49, 155, 251, 0.1)']
+              [0, 'rgba(' + chartColorSeriesRGB + ', 0.55)'],
+              [1, 'rgba(' + chartColorSeriesRGB + ', 0.1)']
             ]
           },
           marker: {
@@ -123,7 +122,7 @@ export class AccountComponent implements OnInit {
             radius: 4,
             states: {
               hover: {
-                fillColor: '#319bfb',
+                fillColor: chartColorSeries,
                 radiusPlus: 0,
                 lineWidthPlus: 2
               },
@@ -146,21 +145,63 @@ export class AccountComponent implements OnInit {
       series: [
         {
           type: 'area',
-          data: [
-            [new Date('2019-02-21T15:40:51.468Z').getTime(), 415600],
-            [new Date('2019-03-21T15:40:51.468Z').getTime(), 615600],
-            [new Date('2019-04-21T15:40:51.468Z').getTime(), 315600],
-          ]
+          data: chartData
         }
       ]
     });
+  }
 
+  constructor(private service: ApiService) {
+    this.miningTabSelected = 'total';
+  }
+
+  ngOnInit() {
   }
 
   getInfoWallet() {
     this.service.getMiner(this.walletAddress).subscribe(data => {
+      this.workersList = [];
+      this.charts = {};
       this.walletData = data;
+      const localInfo = data['workers']['hasrate_chart'];
+
+      localInfo.forEach(item => {
+        const itemDate = new Date(item[0]).getTime();
+        if ( !this.charts['total'] ) {
+          this.charts['total'] = [];
+        }
+        this.charts['total'].push([itemDate, parseFloat(item[1][item[1].length - 1])]);
+        let name = '';
+        let amount = '';
+        for (let i = 0; i < item[1].length - 2; i++) {
+          if (i % 2 === 0) {
+            name = item[1][i].split(':')[1];
+          } else {
+            amount = item[1][i];
+            if ( !this.charts[name] ) {
+              this.charts[name] = [];
+            }
+            this.charts[name].push([itemDate, parseFloat(amount)]);
+          }
+        }
+      });
+      this.setChart('total');
+      let nameWorker = '';
+      let amountWorker = '';
+      for (let i = 0; i < localInfo[0][1].length - 2; i++) {
+        if (i % 2 === 0) {
+          nameWorker = localInfo[0][1][i].split(':')[1];
+        } else {
+          amountWorker = localInfo[0][1][i];
+          this.workersList.push({name: nameWorker, amount: amountWorker});
+        }
+      }
     });
+  }
+
+  setChart(name) {
+    this.miningTabSelected = name;
+    this.chart = AccountComponent.drawChart(this.charts[this.miningTabSelected], '100, 221, 226');
   }
 
 }

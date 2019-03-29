@@ -26,49 +26,54 @@
             <table class="">
               <tbody>
               <tr>
-                <td>Unconfirmed Balance</td>
-                <td>{{walletData['overview']['unconfirmed'] | number : '1.2-4'}} BBR</td>
+                <td>Current HashRate</td>
+                <td *ngIf="walletData['overview']['current_hashrate'] === null">Stand by…</td>
+                <td *ngIf="walletData['overview']['current_hashrate'] !== null">{{walletData['overview']['current_hashrate'] | hashPowerConverter : 'speed'}}</td>
               </tr>
               <tr>
-                <td>Total Paid</td>
-                <td>{{walletData['overview']['total'] | number : '1.2-4'}} BBR</td>
+                <td>Daily average</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Weekly average</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Monthly average</td>
+                <td>-</td>
               </tr>
               <tr>
                 <td>Total Shares</td>
-                <td>{{walletData['overview']['shares'] | number : '1.0-0'}}</td>
+                <td>{{walletData['overview']['total_shares'] | hashPowerConverter}}</td>
+              </tr>
+              <tr>
+                <td>Blocks found</td>
+                <td>-</td>
+              </tr>
+              </tbody>
+            </table>
+
+            <table>
+              <tbody>
+              <tr>
+                <td>Total Paid</td>
+                <td>{{walletData['overview']['total_payments'] | number : '1.2-2'}} BBR</td>
+              </tr>
+              <tr>
+                <td>Unconfirmed Balance</td>
+                <td>{{walletData['overview']['unconfirmed_balance'] | number : '1.2-2'}} BBR</td>
+              </tr>
+              <tr>
+                <td>Confirmed Balance</td>
+                <td>{{walletData['overview']['confirmed_balance'] | number : '1.2-2'}} BBR</td>
+              </tr>
+              <tr>
+                <td>24 hours Payments</td>
+                <td>{{walletData['overview']['h24_payments'] | number : '1.2-2'}} BBR</td>
               </tr>
               <tr>
                 <td>Payment Threshold</td>
-                <td>{{walletData['overview']['threshold'] | number : '1.2-4'}} BBR</td>
-              </tr>
-              <tr>
-                <td>Email Notification</td>
-                <td>No set yet</td>
-              </tr>
-              </tbody>
-            </table>
-
-            <table>
-              <tbody>
-              <tr>
-                <td>Confirmed Balance</td>
-                <td>{{walletData['overview']['confirmed'] | number : '1.2-4'}} BBR</td>
-              </tr>
-              <tr>
-                <td>24h Payments</td>
-                <td>{{walletData['overview']['h24'] | number : '1.2-4'}} BBR</td>
-              </tr>
-              <tr>
-                <td>24h Income</td>
-                <td>{{walletData['overview']['h24'] | number : '1.2-4'}} BBR</td>
-              </tr>
-              <tr>
-                <td>Current HashRate</td>
-                <td>{{walletData['overview']['hashRate']}} H/s</td>
-              </tr>
-              <tr>
-                <td>Payment Enable</td>
-                <td>ON</td>
+                <td>{{walletData['overview']['payout_threshold'] | number : '1.2-2'}} BBR</td>
               </tr>
               </tbody>
             </table>
@@ -79,74 +84,41 @@
     </div>
   </div>
 
+
   <div class="content-row">
     <div class="content-col">
       <div class="card">
         <div class="card-header">
-          <ul class="tabs">
-            <li class="tab" [class.active]="miningTabSelected === 'hashrate'">
-              <button type="button" (click)="miningTabSelected = 'hashrate'">Hashrate</button>
-            </li>
-            <li class="tab" [class.active]="miningTabSelected === 'workers'">
-              <button type="button" (click)="miningTabSelected = 'workers'">Workers</button>
-            </li>
-          </ul>
+          Workers
         </div>
         <div class="card-content">
-          <div [chart]="chart" *ngIf="miningTabSelected === 'hashrate'"></div>
-          <div class="wrap-table scrolled-content" *ngIf="miningTabSelected === 'workers'">
+          <div class="wrap-table scrolled-content">
             <table>
               <thead>
               <tr>
-                <th>Num</th>
                 <th>Name</th>
-                <th>Hashrate</th>
-                <th>Last Hash</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>hashrate (10 min)</th>
+                <th>hashrate (24h)</th>
+                <th>Shares</th>
+                <th>Stale</th>
+                <th>Invalid</th>
+                <th>Blocks</th>
+                <th>Remove</th>
               </tr>
               </thead>
               <tbody>
-              <tr>
-                <td>1</td>
-                <td>Aperture Science</td>
-                <td>0 Mh/s</td>
-                <td>1 day ago</td>
-                <td>Active</td>
-                <td>1</td>
+
+              <tr *ngFor="let worker of workersList">
+                <td>{{ worker.name }}</td>
+                <td>{{ worker.amount | hashPowerConverter : 'speed' }}</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
               </tr>
-              <tr>
-                <td>2</td>
-                <td>Aperture Science</td>
-                <td>0 Mh/s</td>
-                <td>1 day ago</td>
-                <td>Active</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Aperture Science</td>
-                <td>0 Mh/s</td>
-                <td>1 day ago</td>
-                <td>Active</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>4</td>
-                <td>Aperture Science</td>
-                <td>0 Mh/s</td>
-                <td>1 day ago</td>
-                <td>Active</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>5</td>
-                <td>Aperture Science</td>
-                <td>0 Mh/s</td>
-                <td>1 day ago</td>
-                <td>Active</td>
-                <td>1</td>
-              </tr>
+
               </tbody>
             </table>
           </div>
@@ -155,60 +127,55 @@
     </div>
   </div>
 
+
   <div class="content-row">
     <div class="content-col">
       <div class="card">
         <div class="card-header">
           <ul class="tabs">
-            <li class="tab" [class.active]="rewardTabSelected === 'blocks'">
-              <button type="button" (click)="rewardTabSelected = 'blocks'">Blocks</button>
+            <li class="tab" [class.active]="miningTabSelected === 'total'">
+              <button type="button" (click)="setChart('total')">Hashrate</button>
             </li>
-            <li class="tab" [class.active]="rewardTabSelected === 'payments'">
-              <button type="button" (click)="rewardTabSelected = 'payments'">Payments</button>
+            <li class="tab" *ngFor="let worker of workersList" [class.active]="miningTabSelected === worker.name">
+              <button type="button" (click)="setChart(worker.name)">"{{worker.name}}"</button>
             </li>
           </ul>
         </div>
         <div class="card-content">
-          <div class="wrap-table scrolled-content" *ngIf="rewardTabSelected === 'blocks'">
+          <div [chart]="chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="content-row">
+    <div class="content-col">
+      <div class="card">
+        <div class="card-header">
+          Payments
+        </div>
+        <div class="card-content">
+          <div class="wrap-table scrolled-content">
             <table>
               <thead>
               <tr>
-                <th>Height</th>
-                <th>Difficulty</th>
-                <th>Block Hash</th>
-                <th>Time Found</th>
-                <th>Effort</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="wrap-table scrolled-content" *ngIf="rewardTabSelected === 'payments'">
-            <table>
-              <thead>
-              <tr>
-                <th>Time Sent</th>
+                <th>Time</th>
                 <th>Transaction Hash</th>
                 <th>Amount</th>
-                <th>Fee</th>
                 <th>Mixin</th>
-                <th>Payees</th>
               </tr>
               </thead>
               <tbody>
-              <tr *ngFor="let payment of walletData['payments']['transactions']">
-                <td>{{payment['time'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
+              <tr *ngFor="let payment of walletData['payments']">
+                <td>{{payment[0] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
                 <td>
-                  <a [href]="'#'">{{payment['tx']}}</a>
+                  <a target="_blank" [href]="'https://explorer.boolberry.com/transaction/'+payment[1][3]">{{payment[1][3]}}</a>
                 </td>
                 <td>
-                  {{payment['balance']/1000000000000 | number : '1.4-4'}}
+                  {{payment[1][1]}}
                 </td>
-                <td>0.0010</td>
-                <td>3</td>
-                <td>1</td>
+                <td>-</td>
               </tr>
               </tbody>
             </table>

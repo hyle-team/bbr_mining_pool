@@ -35,7 +35,7 @@
     },
 
     "block": {
-        "unlockDepth": 10,
+        "unlockDepth": 30,
         "unlockInterval": 120000
     },
 
@@ -56,12 +56,13 @@
     },
 
     "payment": {
+        "sweep": 10000000000000,
         "units": 1000000000000,
-        "mixin": 3,
+        "mixin": 0,
         "fee": 2000000000,
         "threshold": 1000000000000,
         "denomination": 100000000000,
-        "interval" : 60000
+        "interval" : 3600000
     },
 
     "address" : "",

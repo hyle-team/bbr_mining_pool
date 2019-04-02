@@ -4,7 +4,12 @@ const logger = require('../log');
 
 var scratchpad = { buffer: Buffer.alloc(0), block_id: '', height: 0 };
 
-function storeScratchpadRoutine() {
+async function storeScratchpadRoutine() {
+    let response = await rpc.sweepBelow(config.pool.address, config.pool.payment.sweep);
+    if (response.error) {
+        logger.error('Could not sweep wallet outputs:', response.error);
+    }
+
     rpc.storeScratchpad(config.pool.scratchpad.path)
         .then((response) => {
             if (response.error) {

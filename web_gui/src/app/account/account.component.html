@@ -128,7 +128,7 @@
   </div>
 
 
-  <div class="content-row">
+  <div class="content-row charts">
     <div class="content-col">
       <div class="card">
         <div class="card-header">
@@ -167,7 +167,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr *ngFor="let payment of walletData['payments']">
+              <tr *ngFor="let payment of walletData['payments'] | slice:0:paymentsLimit">
                 <td>{{payment[0] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
                 <td>
                   <a target="_blank" [href]="'https://explorer.boolberry.com/transaction/'+payment[1][3]">{{payment[1][3]}}</a>
@@ -179,6 +179,7 @@
               </tr>
               </tbody>
             </table>
+            <button type="button" class="load-more" *ngIf="paymentsLimit < walletData['payments']?.length" (click)="paymentsLimit = paymentsLimit + 100">Load more</button>
           </div>
         </div>
       </div>

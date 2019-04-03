@@ -15,6 +15,7 @@ export class AccountComponent implements OnInit {
   charts = {};
   chart: Chart;
   workersList: any[] = [];
+  paymentsLimit: number;
 
   static drawChart(chartData, chartColorSeriesRGB): Chart {
     const chartColor = '#0c68cc';
@@ -23,9 +24,10 @@ export class AccountComponent implements OnInit {
     pointStyle = pointStyle + ' font-size: 12px;';
     pointStyle = pointStyle + ' color: white;';
     pointStyle = pointStyle + ' border-radius: 5px;';
-    pointStyle = pointStyle + ' padding: 0 5px;';
-    pointStyle = pointStyle + ' box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16)';
-    const point = '<div style="' + pointStyle + '">{point.y} {point.x:%d %b, %H:%M GMT}</div>';
+    pointStyle = pointStyle + ' padding: 2px 7px;';
+    pointStyle = pointStyle + ' box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);';
+    pointStyle = pointStyle + ' font-weight: 100;';
+    const point = '<div style="' + pointStyle + '"><b>{point.y}</b> {point.x:%d %b, %H:%M GMT}</div>';
 
     return new Chart({
       title: {text: ''},
@@ -35,8 +37,11 @@ export class AccountComponent implements OnInit {
       chart: {
         type: 'line',
         backgroundColor: 'transparent',
-        height: 160,
-        zoomType: null
+        height: 200,
+        zoomType: null,
+        style: {
+          fontFamily: 'Helvetica'
+        }
       },
 
       yAxis: {
@@ -153,6 +158,7 @@ export class AccountComponent implements OnInit {
 
   constructor(private service: ApiService) {
     this.miningTabSelected = 'total';
+    this.paymentsLimit = 10;
   }
 
   ngOnInit() {

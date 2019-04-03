@@ -1,27 +1,29 @@
 <header>
   <div class="container">
     <div class="content-row">
-      <div class="content-col logo">
+      <div class="content-col logo" [routerLink]="['/']" >
         Mining Pool
       </div>
 
-      <ul class="content-col tabs">
-        <li class="tab" [routerLinkActive]="'active'">
-          <button [routerLink]="['/dashboard']">Dashboard</button>
-        </li>
-        <li class="tab" [routerLinkActive]="'active'">
-          <button [routerLink]="['/account']">Account</button>
-        </li>
-        <li class="tab" [routerLinkActive]="'active'">
-          <button [routerLink]="['/stats']">Stats</button>
-        </li>
-        <li class="tab" [routerLinkActive]="'active'">
-          <button [routerLink]="['/docs']">Docs</button>
-        </li>
-      </ul>
+      <nav class="desktop-nav">
+        <ul class="content-col tabs">
+          <li class="tab" >
+            <a [routerLink]="['/']" routerLinkActive='active' [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+          </li>
+          <li class="tab" >
+            <a [routerLink]="['/account']" routerLinkActive='active'>Account</a>
+          </li>
+          <li class="tab" >
+            <a [routerLink]="['/stats']" routerLinkActive='active'>Stats</a>
+          </li>
+          <li class="tab" >
+            <a [routerLink]="['/docs']" routerLinkActive='active'>Docs</a>
+          </li>
+        </ul>
+      </nav>
 
       <div class="content-col get-alias">
-        <button>Get Alias</button>
+        <button type="button">Get Alias</button>
       </div>
       <div class="content-col btn-mobile-nav">
         <button type="button" (click)="toggleMobileNav()" [ngClass]="{'show': navIsOpen === true }"></button>

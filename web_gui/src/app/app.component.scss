@@ -5,7 +5,7 @@
 }
 $heightMobileNav: 44rem;
 header {
-  border-bottom: #0c68cc solid 0.1rem;
+  border-bottom: rgba(#0c68cc, .5) solid 0.1rem;
   height: 8rem;
   position: relative;
   z-index: 11;
@@ -21,6 +21,7 @@ header {
       justify-content: flex-start;
       font-size: 3rem;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .get-alias {
@@ -37,22 +38,30 @@ header {
         cursor: pointer;
         width: 16rem;
         height: 5rem;
+        font-size: 1.8rem;
+        font-weight: 500;
       }
     }
     .btn-mobile-nav {
       display: none;
       justify-content: flex-end;
+      max-width: 72px;
       @media (max-width: 767.98px) {
         display: flex;
       }
       button {
-        width: 3.1rem;
-        height: 2.9rem;
+        //width: 3.1rem;
+        //height: 2.9rem;
+        width: 8rem;
+        height: 8rem;
+        position: absolute;
+        top: 0;
+        right: 0;
         background-color: transparent;
         border: none;
         background-image: url(../assets/img/mobile-nav.svg);
         background-repeat: no-repeat;
-        background-position: 0 0;
+        background-position: center center;
         cursor: pointer;
         &.show {
           background-image: url(../assets/img/close.svg);
@@ -60,7 +69,7 @@ header {
       }
     }
     @media (max-width: 767.98px) {
-      .get-alias, .tabs {
+      .get-alias, .desktop-nav {
         display: none;
       }
     }
@@ -70,18 +79,50 @@ header {
   }
 }
 
+nav {
+  height: 100%;
+  ul {
+    > li {
+      > a {
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 300;
+        display: flex;
+        height: 100%;
+        align-items: center;
+        text-decoration: none;
+        margin: 0 1rem;
+        position: relative;
+        &.active {
+          font-weight: 500;
+          &:after {
+            content: '';
+            position: absolute;
+            bottom: -0.1rem;
+            left: 0;
+            background-color: #64dde2;
+            width: 100%;
+            height: 0.3rem;
+          }
+        }
+      }
+    }
+  }
+}
 
 nav.mobile-nav {
   height: 0;
   position: absolute;
   left: 0;
-  top: 0;
+  top: -1px;
   width: 100%;
   transition: 0.5s;
   display: flex;
   flex-direction: column;
   background-color: #001c3b;
   z-index: -1;
+  max-width: 100%;
+  overflow: hidden;
   ul {
     margin: 0;
     padding: 0;

@@ -40,23 +40,10 @@
   font-style: normal;
 }
 
-//@font-face {
-//  font-family: Helvetica;
-//  src: url(./assets/fonts/HelveticaNeueBold.ttf);
-//  font-weight: 600;
-//  font-style: normal;
-//}
 @font-face {
   font-family: Helvetica;
   src: url(./assets/fonts/Helvetica_Neue/HelveticaNeueCyr-Bold.otf);
   font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: Helvetica;
-  src: url(./assets/fonts/Helvetica_Neue/HelveticaNeueCyr-UltraLight.otf);
-  font-weight: 800;
   font-style: normal;
 }
 
@@ -98,7 +85,7 @@ input[type="reset"]::-moz-focus-inner,
 input[type="button"]::-moz-focus-inner,
 input[type="submit"]::-moz-focus-inner,
 input[type="submit"]::-moz-focus-inner,
-input[type="file"] > input[type="button"]::-moz-focus-inner { /* */
+input[type="file"] > input[type="button"]::-moz-focus-inner {
   border: none;
 }
 
@@ -234,10 +221,15 @@ table {
     height: 4rem;
 
     th, td {
-      padding: 0 0.5rem;
+      padding: 0 .5rem;
       text-align: left;
       white-space: nowrap;
-
+      &:first-child {
+        padding-left: 0;
+      }
+      &:last-child {
+        padding-right: 0;
+      }
       a {
         color: #64dde2;
       }
@@ -254,6 +246,7 @@ table {
   cursor: pointer;
   border-bottom: 1px solid #fff;
   transition: 0.25s;
+
   &:hover {
     border-color: transparent;
   }

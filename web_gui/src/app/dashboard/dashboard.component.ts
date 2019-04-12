@@ -68,7 +68,7 @@ export class DashboardComponent implements OnInit {
             color: '#fff',
             fontSize: '14px',
           },
-          format: '{value} '
+          // format: '{value} '
         }
       },
 

@@ -179,9 +179,7 @@ async function getFullMinerStats(account, timeDepth = null) {
 
     let workers = await redis.hgetall('miners:' + account);
     for (let id in workers) {
-        if(!id.startsWith('last_')) {
-            delete workers[id];
-        } else {
+        if(id.startsWith('last_')) {
             workers[id] = Math.round((now - workers[id]) / 1000);
         }
     }
@@ -191,7 +189,7 @@ async function getFullMinerStats(account, timeDepth = null) {
     }
 
     output.current_hashrate = (stats.length > 0) ? stats[0][1][stats[0][1].length - 1] : null;
-    output.worker_last_shares = workers;
+    output.worker_stats = workers;
     output.hasrate_chart = stats;
     return output;    
 }

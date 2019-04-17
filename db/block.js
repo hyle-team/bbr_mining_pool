@@ -25,6 +25,20 @@ async function storeMinerShare(candidate, height, account, worker, share, score)
     redis.hset('miners:' + account, 'last_' + worker, Date.now());
 }
 
+async function updateShareStats(account, worker, status) {
+    let commands = [];
+    commands.push(['hincrby', 'miners:' + account, 'total_' + worker, 1]);
+    if (status === 'invalid') {
+        commands.push(['hincrby', 'miners:' + account, 'invalid_' + worker, 1]);
+    } else if (status === 'stale') {
+        commands.push(['hincrby', 'miners:' + account, 'stale_' + worker, 1]);
+    } else if (status === 'block') {
+        commands.push(['hincrby', 'miners:' + account, 'blocks_' + worker, 1]);
+        commands.push(['hincrby', 'miners:' + account, 'total_blocks', 1]);
+    }
+    redis.pipeline(commands).exec();
+}
+
 async function storeCandidate(height, hash) {
     let header = await getBlockHeader(height);
     if (header) {
@@ -161,6 +175,7 @@ async function getBlockHeader(height = null) {
 module.exports = {
     init: init,
     storeMinerShare: storeMinerShare,
+    updateShareStats: updateShareStats,
     storeCandidate: storeCandidate,
     unlock: unlock,
     roundStart: roundStart

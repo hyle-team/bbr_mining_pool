@@ -16,6 +16,7 @@ async function validateShare(miner, params, reply) {
     if (!job) {
         reply('Invalid job id');
         logger.error('Invalid job id');
+        db.block.updateShareStats(miner.account, miner.pass, 'invalid');
         return false;
     }
 
@@ -24,6 +25,7 @@ async function validateShare(miner, params, reply) {
         updateStats(miner, false);
         reply('Invalid nonce');
         logger.error('Invalid nonce');
+        db.block.updateShareStats(miner.account, miner.pass, 'invalid');
         return false;
     }
 
@@ -31,6 +33,7 @@ async function validateShare(miner, params, reply) {
         updateStats(miner, false);
         reply('Duplicate share');
         logger.error('Duplicate share');
+        db.block.updateShareStats(miner.account, miner.pass, 'invalid');
         return false;
     }
     job.submissions.push(params.nonce);
@@ -42,6 +45,7 @@ async function validateShare(miner, params, reply) {
     if (!blockTemplate) {
         reply('Block expired');
         logger.error('Block expired');
+        db.block.updateShareStats(miner.account, miner.pass, 'stale');
         return false;
     }
 
@@ -62,6 +66,7 @@ async function validateShare(miner, params, reply) {
     if (hash.toString('hex') !== params.result) {
         logger.log('Bad hash from miner ' + miner.account + '@' + miner.address);
         reply(null, { status: 'OK' });
+        db.block.updateShareStats(miner.account, miner.pass, 'stale');
         return false;
     }
 
@@ -77,19 +82,23 @@ async function validateShare(miner, params, reply) {
         if (response.error) {
             logger.error('Error submitting block:', JSON.stringify(response.error));
             storeMinerShare(false, current.height, miner, job);
+            db.block.updateShareStats(miner.account, miner.pass, 'valid');
         } else {
             logger.log('BLOCK SUBMITED', JSON.stringify(response.result));
             let blockHash = crUtil.get_id_hash(Buffer.concat([Buffer.from([convertedBlob.length]), convertedBlob])).toString('hex');
             await storeMinerShare(true, current.height, miner, job);
             await db.block.storeCandidate(current.height, blockHash);
             await alias.updateQueue();
+            db.block.updateShareStats(miner.account, miner.pass, 'block');
         }
     } else if (hashDiff.lt(job.difficulty) && (hashDiff / job.difficulty) < 0.995) {
         logger.log('Block rejected due low diff, found by', miner.account);
         reply('Low difficulty share');
+        db.block.updateShareStats(miner.account, miner.pass, 'invalid');
         return false;
     } else {
         storeMinerShare(false, current.height, miner, job);
+        db.block.updateShareStats(miner.account, miner.pass, 'valid');
     }
     return true;
 }

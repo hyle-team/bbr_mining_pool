@@ -12,7 +12,9 @@
 }
 
 .enter-wallet {
-
+ .card-header {
+   //font-weight: 500;
+ }
   input {
     background-color: rgba(#64dde2, 0.1);
     border: none;
@@ -77,6 +79,18 @@
   }
   > table {
     width: 40%;
+    tbody {
+      tr {
+        td {
+          &:first-child {
+            font-weight: 700;
+          }
+          &:last-child {
+            font-weight: 500;
+          }
+        }
+      }
+    }
     @media (max-width: 575.98px) {
       width: 100%;
     }

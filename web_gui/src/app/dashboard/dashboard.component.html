@@ -1,4 +1,4 @@
-<div class="content-row">
+<div class="content-row main_info">
   <div class="content-col">
     <div class="card network-card" *ngIf="network">
       <div class="card-header">
@@ -100,7 +100,7 @@
   </div>
 </div>
 
-<div class="content-row">
+<div class="content-row charts">
   <div class="content-col">
     <div class="card">
       <div class="card-header">
@@ -151,17 +151,18 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let block of blocks">
+            <tr *ngFor="let block of blocks  | slice:0:blocksLimit">
               <td>{{block[0]['height']}}</td>
               <td>{{block[0]['difficulty'] | hashPowerConverter}}</td>
               <td>
                 <a target="_blank" [href]="'https://explorer.boolberry.com/block/'+block[0]['hash']">{{block[0]['hash']}}</a>
               </td>
-              <td>{{block[0]['startTime'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
+              <td> {{block[0]['startTime'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
               <td>{{block[0]['effort']}}%</td>
             </tr>
             </tbody>
           </table>
+          <button type="button" class="load-more" *ngIf="blocksLimit < blocks?.length" (click)="blocksLimit = blocksLimit + 100">Load more</button>
         </div>
         <div class="wrap-table scrolled-content" *ngIf="activeTableTab === 'payments'">
           <table>

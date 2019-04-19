@@ -235,6 +235,31 @@ table {
       }
     }
   }
+  &.dashboard-table {
+    th, td {
+      padding: 0 3rem;
+    }
+    @media (max-width:1199.98px) {
+      th, td {
+        padding: 0 1rem;
+      }
+    }
+  }
+  &.account-table {
+    th, td {
+      padding: 0 6rem;
+    }
+    @media (min-width: 992px) and (max-width: 1199.98px) {
+      th, td {
+        padding: 0 3rem;
+      }
+    }
+    @media (max-width: 991.98px){
+      th, td {
+        padding: 0 1rem;
+      }
+    }
+  }
 }
 
 .load-more {
@@ -246,7 +271,9 @@ table {
   cursor: pointer;
   border-bottom: 1px solid #fff;
   transition: 0.25s;
-
+  @media (max-width: 991.98px){
+    margin-bottom: 30px;
+  }
   &:hover {
     border-color: transparent;
   }

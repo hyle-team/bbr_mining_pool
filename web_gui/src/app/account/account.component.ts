@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Chart } from 'angular-highcharts';
-import { ApiService } from '../_helpers/services/api.service';
+import {Component, OnInit} from '@angular/core';
+import {Chart} from 'angular-highcharts';
+import {ApiService} from '../_helpers/services/api.service';
 
 @Component({
   selector: 'app-account',
@@ -29,15 +29,32 @@ export class AccountComponent implements OnInit {
     pointStyle = pointStyle + ' font-weight: 100;';
     const point = '<div style="' + pointStyle + '"><b>{point.y}</b> {point.x:%d %b, %H:%M GMT}</div>';
 
+
     return new Chart({
       title: {text: ''},
       credits: {enabled: false},
       exporting: {enabled: false},
       legend: {enabled: false},
+
+      navigator: {
+        enabled: true,
+        height: 5,
+        maskFill: '#64DDE2',
+        maskInside: true,
+        outlineWidth: 0,
+        handles: {
+          backgroundColor: '#64DDE2',
+          borderColor: '#64DDE2',
+          width: 7,
+          height: 7,
+          symbols: ['doublearrow', 'doublearrow'],
+        }
+      },
+
       chart: {
         type: 'line',
         backgroundColor: 'transparent',
-        height: 200,
+        height: 250,
         zoomType: null,
         style: {
           fontFamily: 'Helvetica'
@@ -57,9 +74,8 @@ export class AccountComponent implements OnInit {
         labels: {
           style: {
             color: '#fff',
-            fontSize: '14px'
+            fontSize: '14px',
           },
-          // format: '{value} '
         }
       },
 
@@ -80,8 +96,6 @@ export class AccountComponent implements OnInit {
         },
         minPadding: 0,
         maxPadding: 0,
-        // minRange: 86400000,
-        // tickInterval: 86400000,
         minTickInterval: 60000,
         endOnTick: true,
       },
@@ -99,6 +113,70 @@ export class AccountComponent implements OnInit {
         pointFormat: point,
         shared: true,
         padding: 0
+      },
+
+      rangeSelector: {
+        enabled: true,
+        inputEnabled: false,
+        allButtonsEnabled: true,
+        verticalAlign: 'bottom',
+        x: -60,
+        height: 45,
+        buttonPosition: {
+          align: 'center',
+          y: 5,
+        },
+        labelStyle: {
+          display: 'none',
+        },
+        buttons: [{
+          type: 'all',
+          text: 'All'
+        }, {
+          type: 'day',
+          count: 1,
+          text: 'Days'
+        }, {
+          type: 'hour',
+          count: 1,
+          text: 'Hours'
+        }, {
+          type: 'minute',
+          count: 10,
+          text: '10 min'
+        }],
+        buttonSpacing: 0,
+        buttonTheme: {
+          width: 70,
+          height: null,
+          fill: 'transparent',
+          stroke: '#64DDE2',
+          'stroke-width': 1,
+          r: 0,
+          padding: 3,
+          style: {
+            color: '#64DDE2',
+          },
+          states: {
+            hover: {
+              fill: '#64DDE2',
+              style: {
+                color: '#09284A'
+              }
+            },
+            select: {
+              fill: '#64DDE2',
+              stroke: '#64DDE2',
+              'stroke-width': 1,
+              style: {
+                color: '#09284A',
+                opacity: 1,
+                fontWeight: 400,
+              }
+            },
+          }
+        },
+        selected: 0,
       },
 
       plotOptions: {
@@ -147,12 +225,10 @@ export class AccountComponent implements OnInit {
         }
       },
 
-      series: [
-        {
-          type: 'area',
-          data: chartData
-        }
-      ]
+      series: [{
+        type: 'area',
+        data: chartData,
+      }]
     });
   }
 
@@ -169,11 +245,13 @@ export class AccountComponent implements OnInit {
       this.workersList = [];
       this.charts = {};
       this.walletData = data;
-      const localInfo = data['workers']['hasrate_chart'];
+      const hashRateChartInfo = data['workers']['hasrate_chart'];
+      // const workerStatsInfo = data['workers']['worker_stats'];
+      const workerStatsInfo = Object.entries(this.walletData.workers.worker_stats);
 
-      localInfo.forEach(item => {
+      hashRateChartInfo.forEach(item => {
         const itemDate = new Date(item[0]).getTime();
-        if ( !this.charts['total'] ) {
+        if (!this.charts['total']) {
           this.charts['total'] = [];
         }
         this.charts['total'].push([itemDate, parseFloat(item[1][item[1].length - 1])]);
@@ -184,24 +262,58 @@ export class AccountComponent implements OnInit {
             name = item[1][i].split(':')[1];
           } else {
             amount = item[1][i];
-            if ( !this.charts[name] ) {
+            if (!this.charts[name]) {
               this.charts[name] = [];
             }
             this.charts[name].push([itemDate, parseFloat(amount)]);
           }
         }
       });
+
       this.setChart('total');
+
       let nameWorker = '';
-      let amountWorker = '';
-      for (let i = 0; i < localInfo[0][1].length - 2; i++) {
+      let hashRateWorker = '';
+      let hashRate24Worker, totalWorker, staleWorker, invalidWorker, blocksWorker;
+
+      for (let i = 0; i < hashRateChartInfo[0][1].length - 2; i++) {
         if (i % 2 === 0) {
-          nameWorker = localInfo[0][1][i].split(':')[1];
+          nameWorker = hashRateChartInfo[0][1][i].split(':')[1];
         } else {
-          amountWorker = localInfo[0][1][i];
-          this.workersList.push({name: nameWorker, amount: amountWorker});
+          hashRateWorker = hashRateChartInfo[0][1][i];
+          hashRate24Worker = '';
+          totalWorker = '';
+          staleWorker = '';
+          invalidWorker = '';
+          blocksWorker = '';
+          // for (let index = 0; index < workerStatsInfo.length; index++) {
+          //   console.log(index);
+          // }
+
+          this.workersList.push(
+            {
+              name: nameWorker,
+              hashrate: hashRateWorker,
+            }
+          );
         }
       }
+
+      for (let index = 0; index < workerStatsInfo.length; index++) {
+        console.log(workerStatsInfo[index]);
+        // this.workersList.push(
+        //   {
+        //     hashrate24: hashRate24Worker,
+        //     total: totalWorker,
+        //     stale: staleWorker,
+        //     invalid: invalidWorker,
+        //     blocks: blocksWorker,
+        //   }
+        // );
+
+      }
+      // console.log(this.workersList);
+
     });
   }
 

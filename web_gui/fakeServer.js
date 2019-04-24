@@ -1779,8 +1779,26 @@ http.createServer(function (req, res) {
         ["Mon, 18 Mar 2019 11:31:00 GMT", ["amount", 43.8, "tx", "dde43fd25df1fd4f1334ba6e988d4b9eecd7a99be67d04e54e47d87f674ac34a"]]
       ],
       "workers": {
-        "current_hashrate": "162255",
-        "worker_last_shares": {"last_x13": 35, "last_": 119},
+        "current_hashrate": "187216028",
+        "worker_last_shares": {
+          "last_x13": 35,
+          "last_": 119
+        },
+        "worker_stats": {
+          "last":27,
+          "totalshares":"636196595",
+          "total_payments":"800900000000000",
+          "last_x":19,
+          "totalx":"22",
+          "total":"17",
+          "invalidx":"2",
+          "invalid":"1",
+          "stalex":"0",
+          "stale":"0",
+          "blocks":"6",
+          "blocks_x":"8",
+          "totalblocks":"14"
+        },
         "hasrate_chart": [
           ["Mon, 18 Mar 2019 12:16:47 GMT", ["@alex:x13", "81659", "@alex:", "80597", "total", "162255"]],
           ["Mon, 18 Mar 2019 12:16:37 GMT", ["@alex:x13", "81659", "@alex:", "84656", "total", "166315"]],

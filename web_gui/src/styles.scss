@@ -160,6 +160,9 @@ a, div {
         tr {
           &:hover, &:focus {
             background-color: rgba(#64DDE2, .5);
+            td {
+              //font-weight: 700;
+            }
           }
         }
       }
@@ -347,19 +350,19 @@ table {
 }
 
 .load-more {
-  margin: 15px auto 10px;
+  margin: 1.5rem auto 1rem;
   display: flex;
   background: transparent;
   cursor: pointer;
   transition: 0.25s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
-  border-radius: 5px;
-  border: 1px solid #64dde2;
-  font-size: 12px;
-  color: #64dde2;;
-  padding: 5px 20px;
+  box-shadow: 0 1.2rem 1.6rem rgba(0, 0, 0, 0.16);
+  border-radius: 0.5rem;
+  border: 0.1rem solid #64dde2;
+  font-size: 1.2rem;
+  color: #64dde2;
+  padding: 0.5rem 2rem;
   @media (max-width: 991.98px) {
-    margin-bottom: 30px;
+    margin-bottom: 3rem;
   }
 }
 
@@ -396,19 +399,3 @@ table {
 .highcharts-navigator-xaxis text {
   font-size: 0 !important;
 }
-//.highcharts-range-selector-buttons {
-//  border: 1px solid red !important;
-//  border-radius: 5px !important;
-//  overflow: hidden !important;
-//  vertical-align: middle !important;
-//}
-//.highcharts-button {
-//  border: 1px solid red !important;
-//  border-radius: 5px !important;
-//  overflow: hidden !important;
-//  vertical-align: middle !important;
-//  text {
-//    vertical-align: middle;
-//    font-size: 12px;
-//  }
-//}

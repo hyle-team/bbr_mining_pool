@@ -16,6 +16,11 @@ export class AccountComponent implements OnInit {
   chart: Chart;
   workersList: any[] = [];
   paymentsLimit: number;
+  dailyAverage: any;
+  dailyAverage24: any;
+  weeklyAverage: any;
+  monthlyAverage: any;
+
 
   static drawChart(chartData, chartColorSeriesRGB): Chart {
     const chartColor = '#0c68cc';
@@ -235,6 +240,8 @@ export class AccountComponent implements OnInit {
   constructor(private service: ApiService) {
     this.miningTabSelected = 'total';
     this.paymentsLimit = 10;
+    // this.walletAddress = '@mc';
+
   }
 
   ngOnInit() {
@@ -246,9 +253,55 @@ export class AccountComponent implements OnInit {
       this.charts = {};
       this.walletData = data;
       const hashRateChartInfo = data['workers']['hasrate_chart'];
-      // const workerStatsInfo = data['workers']['worker_stats'];
-      const workerStatsInfo = Object.entries(this.walletData.workers.worker_stats);
+      const workerStatsInfo = data['workers']['worker_stats'];
 
+      const dailyPeriod = Math.round(new Date().getTime() / 1000) - (24 * 3600);
+      const weeklyPeriod = Math.round(new Date().getTime() / 1000) - (24 * 7 * 3600);
+      const monthlyPeriod = Math.round(new Date().getTime() / 1000) - (24 * 30 * 3600);
+
+      let dailyTotal = 0;
+      let dailyLen = 0;
+      let weeklyTotal = 0;
+      let weeklyLen = 0;
+      let monthlyTotal = 0;
+      let monthlyLen = 0;
+
+      let dailyTotal24 = 0;
+      let dailyLen24 = 0;
+      let nameWorker2 = '';
+
+      for (let i = 0; i < hashRateChartInfo.length; i++) {
+        if (dailyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
+          dailyTotal += parseInt(hashRateChartInfo[i][1][3], 10);
+          dailyLen++;
+        }
+        if (weeklyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
+          weeklyTotal += parseInt(hashRateChartInfo[i][1][3], 10);
+          weeklyLen++;
+        }
+        if (monthlyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
+          monthlyTotal += parseInt(hashRateChartInfo[i][1][3], 10);
+          monthlyLen++;
+        }
+
+        for (let y = 0; y < hashRateChartInfo[1][1].length - 2; y++) {
+          if (y % 2 === 0) {
+            nameWorker2 = hashRateChartInfo[0][1][y].split(':')[1];
+          } else {
+            if (dailyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
+              dailyTotal24 += parseInt(hashRateChartInfo[i][1][1], 10);
+              dailyLen24++;
+            }
+          }
+        }
+      }
+      this.dailyAverage = dailyTotal / dailyLen;
+      this.dailyAverage24 = dailyTotal24 / dailyLen24;
+      this.weeklyAverage = weeklyTotal / weeklyLen;
+      this.monthlyAverage = monthlyTotal / monthlyLen;
+
+
+      // charts
       hashRateChartInfo.forEach(item => {
         const itemDate = new Date(item[0]).getTime();
         if (!this.charts['total']) {
@@ -256,16 +309,16 @@ export class AccountComponent implements OnInit {
         }
         this.charts['total'].push([itemDate, parseFloat(item[1][item[1].length - 1])]);
         let name = '';
-        let amount = '';
+        let hashrate = '';
         for (let i = 0; i < item[1].length - 2; i++) {
           if (i % 2 === 0) {
             name = item[1][i].split(':')[1];
           } else {
-            amount = item[1][i];
+            hashrate = item[1][i];
             if (!this.charts[name]) {
               this.charts[name] = [];
             }
-            this.charts[name].push([itemDate, parseFloat(amount)]);
+            this.charts[name].push([itemDate, parseFloat(hashrate)]);
           }
         }
       });
@@ -274,46 +327,34 @@ export class AccountComponent implements OnInit {
 
       let nameWorker = '';
       let hashRateWorker = '';
-      let hashRate24Worker, totalWorker, staleWorker, invalidWorker, blocksWorker;
+      let totalWorker, staleWorker, invalidWorker, blocksWorker, staleInterestWorker, invalidInteresWorker;
 
       for (let i = 0; i < hashRateChartInfo[0][1].length - 2; i++) {
         if (i % 2 === 0) {
           nameWorker = hashRateChartInfo[0][1][i].split(':')[1];
         } else {
           hashRateWorker = hashRateChartInfo[0][1][i];
-          hashRate24Worker = '';
-          totalWorker = '';
-          staleWorker = '';
-          invalidWorker = '';
-          blocksWorker = '';
-          // for (let index = 0; index < workerStatsInfo.length; index++) {
-          //   console.log(index);
-          // }
-
+          totalWorker = workerStatsInfo['total_' + nameWorker];
+          staleWorker = workerStatsInfo['stale_' + nameWorker];
+          staleInterestWorker = (staleWorker / totalWorker) * 100;
+          invalidWorker = workerStatsInfo['invalid_' + nameWorker];
+          invalidInteresWorker = (invalidWorker / totalWorker) * 100;
+          blocksWorker = workerStatsInfo['blocks_' + nameWorker];
           this.workersList.push(
             {
               name: nameWorker,
               hashrate: hashRateWorker,
+              hashrate24: this.dailyAverage24,
+              total: totalWorker,
+              stale: staleWorker,
+              staleInterest: staleInterestWorker.toFixed(1),
+              invalidInterest: invalidInteresWorker.toFixed(1),
+              invalid: invalidWorker,
+              blocks: blocksWorker
             }
           );
         }
       }
-
-      for (let index = 0; index < workerStatsInfo.length; index++) {
-        console.log(workerStatsInfo[index]);
-        // this.workersList.push(
-        //   {
-        //     hashrate24: hashRate24Worker,
-        //     total: totalWorker,
-        //     stale: staleWorker,
-        //     invalid: invalidWorker,
-        //     blocks: blocksWorker,
-        //   }
-        // );
-
-      }
-      // console.log(this.workersList);
-
     });
   }
 

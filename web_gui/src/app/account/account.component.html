@@ -29,17 +29,17 @@
             </div>
             <div>
               <span class="title">Daily average</span>
-              <span class="value">-</span>
+              <span class="value">{{dailyAverage  | hashPowerConverter : 'speed'}}</span>
             </div>
             <div>
               <span class="title">Weekly average</span>
-              <span class="value">-</span>
+              <span class="value">{{weeklyAverage | hashPowerConverter : 'speed'}}</span>
             </div>
           </div>
           <div class="right-box">
             <div>
               <span class="title">Monthly average</span>
-              <span class="value">-</span>
+              <span class="value">{{monthlyAverage | hashPowerConverter : 'speed'}}</span>
             </div>
             <div>
               <span class="title">Total Shares</span>
@@ -47,7 +47,7 @@
             </div>
             <div>
               <span class="title">Block found</span>
-              <span class="value">-</span>
+              <span class="value">{{walletData.workers.worker_stats.total_blocks}}</span>
             </div>
           </div>
         </div>
@@ -119,12 +119,12 @@
               <tr *ngFor="let worker of workersList">
                 <td>{{ worker.name }}</td>
                 <td>{{ worker.hashrate | hashPowerConverter : 'speed' }}</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>Remove</td>
+                <td>{{worker.hashrate24 | hashPowerConverter : 'speed' }}</td>
+                <td>{{worker.total}} </td>
+                <td>{{worker.stale}}  ({{worker.staleInterest}}%)</td>
+                <td>{{worker.invalid}} ({{worker.invalidInterest}}%)</td>
+                <td>{{worker.blocks}}</td>
+                <td><button type="button" class="remove-worker">Remove</button></td>
               </tr>
 
               </tbody>
@@ -146,7 +146,7 @@
               <button type="button" (click)="setChart('total')">Hashrate</button>
             </li>
             <li class="tab" *ngFor="let worker of workersList" [class.active]="miningTabSelected === worker.name">
-              <button type="button" (click)="setChart(worker.name)">"{{worker.name}}"</button>
+              <button type="button" (click)="setChart(worker.name)">{{worker.name}}</button>
             </li>
           </ul>
         </div>

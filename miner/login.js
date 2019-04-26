@@ -42,12 +42,12 @@ async function login(params, reply) {
         }
     }
 
-    let decodedAddress = crUtil.address_decode(Buffer.from(login));
-    if (addressBase58Prefix !== decodedAddress && decodedAddress != 0xE94E) {
+    if (!crUtil.is_address_valid(Buffer.from(login))) {
         logger.error('Invalid address');
         reply('Invalid address');
         return false;
     }
+    
 
     return true;
 }

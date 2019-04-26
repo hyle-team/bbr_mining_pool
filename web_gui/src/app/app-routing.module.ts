@@ -28,10 +28,10 @@ const routes: Routes = [
     component: DocsComponent
   },
   {
-    path: '',
-    redirectTo: '/',
-    pathMatch: 'full'
-  },
+    path: '**',
+    redirectTo: '',
+    component: DashboardComponent
+  }
 ];
 
 @NgModule({

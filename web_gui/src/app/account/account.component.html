@@ -2,7 +2,7 @@
   <div class="content-col">
     <div class="card enter-wallet">
       <div class="card-header">
-        Wallet
+        <i class="ms-Icon ms-Icon--Work"></i>Wallet
       </div>
       <div class="card-content">
         <input type="text" placeholder="Enter your wallet here" [(ngModel)]="walletAddress">
@@ -14,82 +14,90 @@
 
 <div *ngIf="walletData">
 
-  <div class="content-row">
+  <div class="content-row stats_reward">
     <div class="content-col">
       <div class="card">
         <div class="card-header">
-          Overview
+          <i class="ms-Icon ms-Icon--GroupedList"></i>Stats
         </div>
-        <div class="card-content">
-
-          <div class="wrap-overview-tables">
-            <table class="">
-              <tbody>
-              <tr>
-                <td>Current HashRate</td>
-                <td *ngIf="walletData['overview']['current_hashrate'] === null">Stand by…</td>
-                <td *ngIf="walletData['overview']['current_hashrate'] !== null">{{walletData['overview']['current_hashrate'] | hashPowerConverter : 'speed'}}</td>
-              </tr>
-              <tr>
-                <td>Daily average</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Weekly average</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Monthly average</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Total Shares</td>
-                <td>{{walletData['overview']['total_shares'] | hashPowerConverter}}</td>
-              </tr>
-              <tr>
-                <td>Blocks found</td>
-                <td>-</td>
-              </tr>
-              </tbody>
-            </table>
-
-            <table>
-              <tbody>
-              <tr>
-                <td>Total Paid</td>
-                <td>{{walletData['overview']['total_payments'] | number : '1.2-2'}} BBR</td>
-              </tr>
-              <tr>
-                <td>Unconfirmed Balance</td>
-                <td>{{walletData['overview']['unconfirmed_balance'] | number : '1.2-2'}} BBR</td>
-              </tr>
-              <tr>
-                <td>Confirmed Balance</td>
-                <td>{{walletData['overview']['confirmed_balance'] | number : '1.2-2'}} BBR</td>
-              </tr>
-              <tr>
-                <td>24 hours Payments</td>
-                <td>{{walletData['overview']['h24_payments'] | number : '1.2-2'}} BBR</td>
-              </tr>
-              <tr>
-                <td>Payment Threshold</td>
-                <td>{{walletData['overview']['payout_threshold'] | number : '1.2-2'}} BBR</td>
-              </tr>
-              </tbody>
-            </table>
+        <div class="card-content two-box">
+          <div class="left-box">
+            <div>
+              <span class="title">Current hashRate</span>
+              <span *ngIf="walletData['overview']['current_hashrate'] === null">Stand by…</span>
+              <span *ngIf="walletData['overview']['current_hashrate'] !== null">{{walletData['overview']['current_hashrate'] | hashPowerConverter : 'speed'}}</span>
+            </div>
+            <div>
+              <span class="title">Daily average</span>
+              <span class="value">{{dailyAverage  | hashPowerConverter : 'speed'}}</span>
+            </div>
+            <div>
+              <span class="title">Weekly average</span>
+              <span class="value">{{weeklyAverage | hashPowerConverter : 'speed'}}</span>
+            </div>
           </div>
+          <div class="right-box">
+            <div>
+              <span class="title">Monthly average</span>
+              <span class="value">{{monthlyAverage | hashPowerConverter : 'speed'}}</span>
+            </div>
+            <div>
+              <span class="title">Total Shares</span>
+              <span class="value">{{walletData['overview']['total_shares'] | hashPowerConverter}}</span>
+            </div>
+            <div>
+              <span class="title">Block found</span>
+              <span class="value">{{walletData.workers.worker_stats.total_blocks}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="content-col">
+      <div class="card">
+        <div class="card-header">
+          <i class="ms-Icon ms-Icon--Ribbon"></i>Reward
+        </div>
+        <div class="card-content two-box">
+          <div class="left-box">
+            <div>
+              <span class="title">Total Paid</span>
+              <span class="value">{{walletData['overview']['total_payments'] | number : '1.2-2'}} BBR</span>
+            </div>
+            <div>
+              <span class="title">Unconfirmed Balance</span>
+              <span class="value">{{walletData['overview']['unconfirmed_balance'] | number : '1.2-2'}} BBR</span>
+            </div>
+            <div>
+              <span class="title">Confirmed Balance</span>
+              <span class="value">{{walletData['overview']['confirmed_balance'] | number : '1.2-2'}} BBR</span>
+            </div>
+          </div>
+          <div class="right-box">
+            <div>
+              <span class="title">24h Payments</span>
+              <span class="value">{{walletData['overview']['h24_payments'] | number : '1.2-2'}} BBR</span>
+            </div>
+            <div>
+              <span class="title">Payment Threshold</span>
+              <span class="value">{{walletData['overview']['payout_threshold'] | number : '1.2-2'}} BBR</span>
+            </div>
+            <div>
+              <span class="title"></span>
+              <span class="value"></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-
-  <div class="content-row">
+  <div class="content-row workers">
     <div class="content-col">
       <div class="card">
         <div class="card-header">
-          Workers
+          <i class="ms-Icon ms-Icon--Processing"></i>Workers
         </div>
         <div class="card-content">
           <div class="wrap-table scrolled-content">
@@ -99,24 +107,24 @@
                 <th>Name</th>
                 <th>hashrate (10 min)</th>
                 <th>hashrate (24h)</th>
-                <th>Shares</th>
+                <th>Total</th>
                 <th>Stale</th>
                 <th>Invalid</th>
                 <th>Blocks</th>
-                <th>Remove</th>
+                <th></th>
               </tr>
               </thead>
               <tbody>
 
               <tr *ngFor="let worker of workersList">
                 <td>{{ worker.name }}</td>
-                <td>{{ worker.amount | hashPowerConverter : 'speed' }}</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
+                <td>{{ worker.hashrate | hashPowerConverter : 'speed' }}</td>
+                <td>{{worker.hashrate24 | hashPowerConverter : 'speed' }}</td>
+                <td>{{worker.total}} </td>
+                <td>{{worker.stale}}  ({{worker.staleInterest}}%)</td>
+                <td>{{worker.invalid}} ({{worker.invalidInterest}}%)</td>
+                <td>{{worker.blocks}}</td>
+                <td><button type="button" class="remove-worker">Remove</button></td>
               </tr>
 
               </tbody>
@@ -132,12 +140,13 @@
     <div class="content-col">
       <div class="card">
         <div class="card-header">
+          <i class="ms-Icon ms-Icon--LineChart"></i>
           <ul class="tabs">
             <li class="tab" [class.active]="miningTabSelected === 'total'">
               <button type="button" (click)="setChart('total')">Hashrate</button>
             </li>
             <li class="tab" *ngFor="let worker of workersList" [class.active]="miningTabSelected === worker.name">
-              <button type="button" (click)="setChart(worker.name)">"{{worker.name}}"</button>
+              <button type="button" (click)="setChart(worker.name)">{{worker.name}}</button>
             </li>
           </ul>
         </div>
@@ -153,14 +162,14 @@
     <div class="content-col">
       <div class="card">
         <div class="card-header">
-          Payments
+          <i class="ms-Icon ms-Icon--Money"></i>Payments
         </div>
         <div class="card-content">
           <div class="wrap-table scrolled-content">
             <table class="account-table">
               <thead>
               <tr>
-                <th>Time</th>
+                <th>Time Send</th>
                 <th>Transaction Hash</th>
                 <th>Amount</th>
                 <th>Mixin</th>

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Chart } from 'angular-highcharts';
-import { ApiService } from '../_helpers/services/api.service';
+import {Component, OnInit} from '@angular/core';
+import {Chart} from 'angular-highcharts';
+import {ApiService} from '../_helpers/services/api.service';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -8,7 +9,6 @@ import { ApiService } from '../_helpers/services/api.service';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-
   activeChartTab = 'hashrate';
   activeTableTab = 'blocks';
   network;
@@ -38,15 +38,32 @@ export class DashboardComponent implements OnInit {
     pointStyle = pointStyle + ' font-weight: 100;';
     const point = '<div style="' + pointStyle + '"><b>{point.y}</b> {point.x:%d %b, %H:%M GMT}</div>';
 
+
     return new Chart({
       title: {text: ''},
       credits: {enabled: false},
       exporting: {enabled: false},
       legend: {enabled: false},
+
+      navigator: {
+        enabled: true,
+        height: 5,
+        maskFill: '#64DDE2',
+        maskInside: true,
+        outlineWidth: 0,
+        handles: {
+          backgroundColor: '#64DDE2',
+          borderColor: '#64DDE2',
+          width: 7,
+          height: 7,
+          symbols: ['doublearrow', 'doublearrow'],
+        }
+      },
+
       chart: {
         type: 'line',
         backgroundColor: 'transparent',
-        height: 200,
+        height: 250,
         zoomType: null,
         style: {
           fontFamily: 'Helvetica'
@@ -68,7 +85,6 @@ export class DashboardComponent implements OnInit {
             color: '#fff',
             fontSize: '14px',
           },
-          // format: '{value} '
         }
       },
 
@@ -89,8 +105,6 @@ export class DashboardComponent implements OnInit {
         },
         minPadding: 0,
         maxPadding: 0,
-        // minRange: 86400000,
-        // tickInterval: 86400000,
         minTickInterval: 60000,
         endOnTick: true,
       },
@@ -108,6 +122,70 @@ export class DashboardComponent implements OnInit {
         pointFormat: point,
         shared: true,
         padding: 0
+      },
+
+      rangeSelector: {
+        enabled: true,
+        inputEnabled: false,
+        allButtonsEnabled: true,
+        verticalAlign: 'bottom',
+        x: -60,
+        height: 45,
+        buttonPosition: {
+          align: 'center',
+          y: 5,
+        },
+        labelStyle: {
+          display: 'none',
+        },
+        buttons: [{
+          type: 'all',
+          text: 'All'
+        }, {
+          type: 'day',
+          count: 1,
+          text: 'Days'
+        }, {
+          type: 'hour',
+          count: 1,
+          text: 'Hours'
+        }, {
+          type: 'minute',
+          count: 10,
+          text: '10 min'
+        }],
+        buttonSpacing: 0,
+        buttonTheme: {
+          width: 70,
+          height: null,
+          fill: 'transparent',
+          stroke: '#64DDE2',
+          'stroke-width': 1,
+          r: 0,
+          padding: 3,
+          style: {
+            color: '#64DDE2',
+          },
+          states: {
+            hover: {
+              fill: '#64DDE2',
+              style: {
+                color: '#09284A'
+              }
+            },
+            select: {
+              fill: '#64DDE2',
+              stroke: '#64DDE2',
+              'stroke-width': 1,
+              style: {
+                color: '#09284A',
+                opacity: 1,
+                fontWeight: 400,
+              }
+            },
+          }
+        },
+        selected: 0,
       },
 
       plotOptions: {
@@ -156,12 +234,10 @@ export class DashboardComponent implements OnInit {
         }
       },
 
-      series: [
-        {
-          type: 'area',
-          data: chartData
-        }
-      ]
+      series: [{
+        type: 'area',
+        data: chartData,
+      }]
     });
   }
 
@@ -170,7 +246,6 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-
     this.service.getDashboard().subscribe(data => {
       this.network = data['network'];
       this.pool = data['pool'];

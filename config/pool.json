@@ -28,12 +28,6 @@
         "weight" : 240000
     },
 
-    "mongodb": {
-        "host": "localhost",
-        "port": 27017,
-        "dbName" : "bbr-pool"
-    },
-
     "block": {
         "unlockDepth": 30,
         "unlockInterval": 120000

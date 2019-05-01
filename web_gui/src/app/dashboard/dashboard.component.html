@@ -1,16 +1,17 @@
 <div class="content-row main_info">
+
   <div class="content-col">
     <div class="card network-card" *ngIf="network">
       <div class="card-header">
-        Network
+        <i class="ms-Icon ms-Icon--Globe"></i>Network
       </div>
       <div class="card-content">
         <div class="card-content-row">
-          <label>Hash Rate</label>
+          <label>Hashrate</label>
           <span>{{network['current_hasrate'] | hashPowerConverter : 'speed'}}</span>
         </div>
         <div class="card-content-row">
-          <label>Block Found</label>
+          <label>Block found</label>
           <span>{{network['last_block_found'] | timeAgo}}</span>
         </div>
         <div class="card-content-row">
@@ -18,15 +19,15 @@
           <span>{{network['difficulty'] | hashPowerConverter}}</span>
         </div>
         <div class="card-content-row">
-          <label>Block Height</label>
+          <label>Block height</label>
           <span>{{network['height']}}</span>
         </div>
         <div class="card-content-row">
-          <label>Last Reward</label>
-          <span>{{network['last_reward']}} BBR</span>
+          <label>Last reward</label>
+          <span>{{network['last_reward'] | number : '1.2-2' }} BBR</span>
         </div>
         <div class="card-content-row">
-          <label>Last Hash</label>
+          <label>Last hash</label>
           <a target="_blank" [href]="'https://explorer.boolberry.com/block/'+network['last_hash']">{{network['last_hash']}}</a>
         </div>
       </div>
@@ -35,11 +36,11 @@
   <div class="content-col">
     <div class="card pool-card" *ngIf="pool">
       <div class="card-header">
-        Pool
+        <i class="ms-Icon ms-Icon--PlugDisconnected"></i>Pool
       </div>
       <div class="card-content">
         <div class="card-content-row">
-          <label>Hash Rate</label>
+          <label>Hashrate</label>
           <span>{{pool['current_hashrate'] | hashPowerConverter : 'speed'}}</span>
         </div>
         <div class="card-content-row">
@@ -47,7 +48,7 @@
           <span>{{pool['last_block_found'] | timeAgo}}</span>
         </div>
         <div class="card-content-row">
-          <label>Connected Miners</label>
+          <label>Connected miners</label>
           <span>{{pool['miner_count']}}</span>
         </div>
         <div class="card-content-row">
@@ -55,12 +56,12 @@
           <span>{{pool['current_effort']}}%</span>
         </div>
         <div class="card-content-row">
-          <label>Total Pool Fee</label>
+          <label>Total pool fee</label>
           <span>{{pool['fee']}}%</span>
         </div>
         <div class="card-content-row">
-          <label>Block Found Every</label>
-          <span></span>
+          <label>Block found every</label>
+          <span>{{blockFoundEvery}}</span>
         </div>
       </div>
     </div>
@@ -68,7 +69,7 @@
   <div class="content-col">
     <div class="card config-card">
       <div class="card-header">
-        Config
+        <i class="ms-Icon ms-Icon--Info"></i>Info
       </div>
       <div class="card-content">
         <div class="card-content-row">
@@ -104,6 +105,7 @@
   <div class="content-col">
     <div class="card">
       <div class="card-header">
+        <i class="ms-Icon ms-Icon--LineChart"></i>
         <ul class="tabs">
           <li class="tab" [class.active]="activeChartTab === 'hashrate'">
             <button type="button" (click)="activeChartTab = 'hashrate'">Hashrate</button>
@@ -129,13 +131,14 @@
   <div class="content-col">
     <div class="card">
       <div class="card-header">
+        <i class="ms-Icon ms-Icon--GridViewMedium"></i>
         <ul class="tabs">
           <li class="tab" [class.active]="activeTableTab === 'blocks'">
             <button type="button" (click)="activeTableTab = 'blocks'">Blocks</button>
           </li>
-          <li class="tab" [class.active]="activeTableTab === 'payments'">
-            <button type="button" (click)="activeTableTab = 'payments'">Payments</button>
-          </li>
+<!--          <li class="tab" [class.active]="activeTableTab === 'payments'">-->
+<!--            <button type="button" (click)="activeTableTab = 'payments'">Payments</button>-->
+<!--          </li>-->
         </ul>
       </div>
       <div class="card-content">

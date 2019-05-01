@@ -2,8 +2,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-
 import { AppRoutingModule } from './app-routing.module';
+
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AccountComponent } from './account/account.component';
@@ -11,6 +11,12 @@ import { StatsComponent } from './stats/stats.component';
 import { DocsComponent } from './docs/docs.component';
 
 import { ChartModule } from 'angular-highcharts';
+import * as highstock from 'highcharts/modules/stock.src';
+
+import * as Highcharts from 'highcharts';
+import StockModule from 'highcharts/modules/stock';
+StockModule(Highcharts);
+
 import { TimeAgoPipe } from './_helpers/pipes/time-ago.pipe';
 import { HashPowerConverterPipe } from './_helpers/pipes/hash-power-converter.pipe';
 
@@ -31,7 +37,7 @@ import { HashPowerConverterPipe } from './_helpers/pipes/hash-power-converter.pi
     ChartModule,
     FormsModule
   ],
-  providers: [],
+  providers: [{provide: ChartModule, useFactory: () => [ highstock ] }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

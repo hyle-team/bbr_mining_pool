@@ -40,6 +40,9 @@ header {
         height: 5rem;
         font-size: 1.8rem;
         font-weight: 500;
+        &:disabled {
+          cursor: default;
+        }
       }
     }
     .btn-mobile-nav {

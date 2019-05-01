@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Chart} from 'angular-highcharts';
 import {ApiService} from '../_helpers/services/api.service';
-
+import {ActivatedRoute} from '@angular/router';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,6 +10,7 @@ import {ApiService} from '../_helpers/services/api.service';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
+  dashboardData: any;
   activeChartTab = 'hashrate';
   activeTableTab = 'blocks';
   network;
@@ -23,10 +25,10 @@ export class DashboardComponent implements OnInit {
   difficultyChart: Chart;
   effortChart: Chart;
   blocks;
-  payments;
   blocksLimit: number;
+  blockFoundEvery: any;
 
-  static drawChart(chartData, chartColorSeriesRGB): Chart {
+  static drawChart(chartData, chartColorSeriesRGB, chartName): Chart {
     const chartColor = '#0c68cc';
     const chartColorSeries = 'rgb(' + chartColorSeriesRGB + ')';
     let pointStyle = 'background-color: rgba(' + chartColorSeriesRGB + ', 0.55);';
@@ -85,7 +87,12 @@ export class DashboardComponent implements OnInit {
             color: '#fff',
             fontSize: '14px',
           },
-        }
+        },
+        plotLines: [{
+          color: '#fff',
+          width: 1,
+          value: chartName === 'effort' ? 100 : null
+        }]
       },
 
       xAxis: {
@@ -94,14 +101,14 @@ export class DashboardComponent implements OnInit {
         lineColor: chartColor,
         lineWidth: 1,
         tickWidth: 1,
-        tickLength: 10,
+        tickLength: 5,
         tickColor: chartColor,
         labels: {
           style: {
             color: '#fff',
-            fontSize: '14px'
+            fontSize: '12px',
+            marginTop: '15px',
           },
-          format: '{value:%d %b}'
         },
         minPadding: 0,
         maxPadding: 0,
@@ -139,8 +146,13 @@ export class DashboardComponent implements OnInit {
           display: 'none',
         },
         buttons: [{
-          type: 'all',
-          text: 'All'
+          type: 'month',
+          count: 1,
+          text: 'Months'
+        }, {
+          type: 'week',
+          count: 1,
+          text: 'Weeks'
         }, {
           type: 'day',
           count: 1,
@@ -149,10 +161,6 @@ export class DashboardComponent implements OnInit {
           type: 'hour',
           count: 1,
           text: 'Hours'
-        }, {
-          type: 'minute',
-          count: 10,
-          text: '10 min'
         }],
         buttonSpacing: 0,
         buttonTheme: {
@@ -236,37 +244,83 @@ export class DashboardComponent implements OnInit {
 
       series: [{
         type: 'area',
+        dataGrouping: {
+          enabled: false
+        },
+        pointInterval: 24 * 3600 * 1000 * 31,
         data: chartData,
       }]
     });
   }
 
-  constructor(private service: ApiService) {
+  constructor(
+    private service: ApiService,
+    private activatedRoute: ActivatedRoute
+  ) {
     this.blocksLimit = 10;
   }
 
   ngOnInit() {
-    this.service.getDashboard().subscribe(data => {
-      this.network = data['network'];
-      this.pool = data['pool'];
-      this.charts = data['pool']['stats'];
+    this.dashboardData = this.activatedRoute.snapshot.data.resolverService;
+    if (Object.keys(this.dashboardData).length !== 0) {
+      this.network = this.dashboardData['network'];
+      this.pool = this.dashboardData['pool'];
+      this.charts = this.dashboardData['pool']['stats'];
 
       this.charts.forEach(item => {
         const itemDate = new Date(item[0]).getTime();
         this.chartsData.hashRate.unshift([itemDate, parseFloat(item[1][3])]);
         this.chartsData.difficulty.unshift([itemDate, parseFloat(item[1][1])]);
-        this.chartsData.effort.unshift([itemDate, parseFloat(item[1][5])]);
       });
 
-      this.hashRateChart = DashboardComponent.drawChart(this.chartsData.hashRate, '100, 221, 226');
-      this.difficultyChart = DashboardComponent.drawChart(this.chartsData.difficulty, '49, 155, 251');
-      this.effortChart = DashboardComponent.drawChart(this.chartsData.effort, '100, 221, 226');
-    });
+      this.hashRateChart = DashboardComponent.drawChart(this.chartsData.hashRate, '100, 221, 226', 'hashrate');
+      this.difficultyChart = DashboardComponent.drawChart(this.chartsData.difficulty, '49, 155, 251', 'difficulty');
+    }
 
     this.service.getBlocks().subscribe(data => {
       this.blocks = data;
+
+      // chart effort
+      for (let item = 0; item < this.blocks.length; item++) {
+        this.chartsData.effort.unshift([parseInt(this.blocks[item][0].endTime, 10), parseInt(this.blocks[item][0].effort, 10)]);
+      }
+      this.effortChart = DashboardComponent.drawChart(this.chartsData.effort, '100, 221, 226', 'effort');
+
+
+      // Calculation Block Found Every
+      const a = moment(parseInt(this.blocks[0][0].endTime, 10));
+      const b = moment(parseInt(this.blocks[1][0].endTime, 10));
+      const c = moment(parseInt(this.blocks[2][0].endTime, 10));
+      const d = moment(parseInt(this.blocks[3][0].endTime, 10));
+      const e = moment(parseInt(this.blocks[4][0].endTime, 10));
+      const f = moment(parseInt(this.blocks[5][0].endTime, 10));
+      const g = moment(parseInt(this.blocks[6][0].endTime, 10));
+      const h = moment(parseInt(this.blocks[7][0].endTime, 10));
+      const i = moment(parseInt(this.blocks[8][0].endTime, 10));
+      const j = moment(parseInt(this.blocks[9][0].endTime, 10));
+
+      const firstPair = a.diff(b, 'seconds');
+      const secondPair = c.diff(d, 'seconds');
+      const thirdPair = e.diff(f, 'seconds');
+      const fourthPair = g.diff(h, 'seconds');
+      const fifthPair = i.diff(j, 'seconds');
+
+      const sum = firstPair + secondPair + thirdPair + fourthPair + fifthPair;
+      const seconds = Math.round(sum / 5);
+
+      const duration = moment.duration(seconds, 'seconds');
+      if (duration._data.minutes === 0) {
+        this.blockFoundEvery = duration._data.seconds + ' sec';
+      } else if (duration._data.hours === 0) {
+        this.blockFoundEvery = duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+      } else if (duration._data.days === 0) {
+        this.blockFoundEvery = duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+      } else if (duration._data.months === 0) {
+        this.blockFoundEvery = duration._data.days + 'd ' + duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+      } else if (duration._data.years === 0) {
+        this.blockFoundEvery = duration._data.months + 'month ' + duration._data.days + 'd ' + duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+      }
+
     });
-
   }
-
 }

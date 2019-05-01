@@ -24,7 +24,7 @@
         </div>
         <div class="card-content-row">
           <label>Last reward</label>
-          <span>{{network['last_reward']}} BBR</span>
+          <span>{{network['last_reward'] | number : '1.2-2' }} BBR</span>
         </div>
         <div class="card-content-row">
           <label>Last hash</label>
@@ -61,7 +61,7 @@
         </div>
         <div class="card-content-row">
           <label>Block found every</label>
-          <span>-</span>
+          <span>{{blockFoundEvery}}</span>
         </div>
       </div>
     </div>
@@ -69,7 +69,7 @@
   <div class="content-col">
     <div class="card config-card">
       <div class="card-header">
-        <i class="ms-Icon ms-Icon--Info"></i>Config
+        <i class="ms-Icon ms-Icon--Info"></i>Info
       </div>
       <div class="card-content">
         <div class="card-content-row">
@@ -136,9 +136,9 @@
           <li class="tab" [class.active]="activeTableTab === 'blocks'">
             <button type="button" (click)="activeTableTab = 'blocks'">Blocks</button>
           </li>
-          <li class="tab" [class.active]="activeTableTab === 'payments'">
-            <button type="button" (click)="activeTableTab = 'payments'">Payments</button>
-          </li>
+<!--          <li class="tab" [class.active]="activeTableTab === 'payments'">-->
+<!--            <button type="button" (click)="activeTableTab = 'payments'">Payments</button>-->
+<!--          </li>-->
         </ul>
       </div>
       <div class="card-content">

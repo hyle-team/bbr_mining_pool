@@ -6,14 +6,22 @@ import { AccountComponent } from './account/account.component';
 import { StatsComponent } from './stats/stats.component';
 import { DocsComponent } from './docs/docs.component';
 
+import {ResolverService} from './_helpers/services/api.service';
+
 const routes: Routes = [
   {
     path: '',
-    component: DashboardComponent
+    component: DashboardComponent,
+    resolve: {
+      resolverService: ResolverService
+    }
   },
   {
     path: 'dashboard',
-    component: DashboardComponent
+    component: DashboardComponent,
+    resolve: {
+      resolverService: ResolverService
+    }
   },
   {
     path: 'account',
@@ -30,12 +38,16 @@ const routes: Routes = [
   {
     path: '**',
     redirectTo: '',
-    component: DashboardComponent
+    component: DashboardComponent,
+    resolve: {
+      resolverService: ResolverService
+    }
   }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [ResolverService]
 })
 export class AppRoutingModule { }

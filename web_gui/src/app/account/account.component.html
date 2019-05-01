@@ -5,15 +5,18 @@
         <i class="ms-Icon ms-Icon--Work"></i>Wallet
       </div>
       <div class="card-content">
-        <input type="text" placeholder="Enter your wallet here" [(ngModel)]="walletAddress">
-        <button type="button" (click)="getInfoWallet()">Look up</button>
+        <input type="text" placeholder="Enter your wallet here" [(ngModel)]="walletAddress" (keydown.enter)="setAddress()">
+        <button type="button" (click)="setAddress()">Look up</button>
       </div>
     </div>
   </div>
 </div>
 
-<div *ngIf="walletData">
+<div class="wrap-loader" *ngIf="loader === true">
+  <div class="loader"></div>
+</div>
 
+<div *ngIf="show === true">
   <div class="content-row stats_reward">
     <div class="content-col">
       <div class="card">
@@ -23,7 +26,7 @@
         <div class="card-content two-box">
           <div class="left-box">
             <div>
-              <span class="title">Current hashRate</span>
+              <span class="title">Current Hashrate</span>
               <span *ngIf="walletData['overview']['current_hashrate'] === null">Stand by…</span>
               <span *ngIf="walletData['overview']['current_hashrate'] !== null">{{walletData['overview']['current_hashrate'] | hashPowerConverter : 'speed'}}</span>
             </div>
@@ -46,7 +49,7 @@
               <span class="value">{{walletData['overview']['total_shares'] | hashPowerConverter}}</span>
             </div>
             <div>
-              <span class="title">Block found</span>
+              <span class="title">Blocks Found</span>
               <span class="value">{{walletData.workers.worker_stats.total_blocks}}</span>
             </div>
           </div>
@@ -105,8 +108,8 @@
               <thead>
               <tr>
                 <th>Name</th>
-                <th>hashrate (10 min)</th>
-                <th>hashrate (24h)</th>
+                <th>Hashrate (10 min)</th>
+                <th>Hashrate (24h)</th>
                 <th>Total</th>
                 <th>Stale</th>
                 <th>Invalid</th>
@@ -172,7 +175,7 @@
                 <th>Time Send</th>
                 <th>Transaction Hash</th>
                 <th>Amount</th>
-                <th>Mixin</th>
+<!--                <th>Mixin</th>-->
               </tr>
               </thead>
               <tbody>
@@ -182,9 +185,9 @@
                   <a target="_blank" [href]="'https://explorer.boolberry.com/transaction/'+payment[1][3]">{{payment[1][3]}}</a>
                 </td>
                 <td>
-                  {{payment[1][1]}}
+                  {{payment[1][1]}} BBR
                 </td>
-                <td>-</td>
+<!--                <td>-</td>-->
               </tr>
               </tbody>
             </table>

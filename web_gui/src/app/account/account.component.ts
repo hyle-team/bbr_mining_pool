@@ -8,7 +8,6 @@ import {ApiService} from '../_helpers/services/api.service';
   styleUrls: ['./account.component.scss']
 })
 export class AccountComponent implements OnInit {
-
   walletAddress: string;
   walletData: any;
   miningTabSelected: string;
@@ -20,6 +19,8 @@ export class AccountComponent implements OnInit {
   dailyAverage24: any;
   weeklyAverage: any;
   monthlyAverage: any;
+  show: boolean;
+  loader: boolean;
 
 
   static drawChart(chartData, chartColorSeriesRGB): Chart {
@@ -240,14 +241,25 @@ export class AccountComponent implements OnInit {
   constructor(private service: ApiService) {
     this.miningTabSelected = 'total';
     this.paymentsLimit = 10;
-    // this.walletAddress = '@mc';
+    this.show = false;
+    this.loader = true;
 
+    const walletAddressSaved = localStorage.getItem('walletAddress');
+    if (walletAddressSaved && walletAddressSaved.length > 0) {
+      this.walletAddress = walletAddressSaved;
+      this.getInfoWallet();
+    } else {
+      this.loader = false;
+      localStorage.removeItem('walletAddress');
+    }
   }
 
   ngOnInit() {
+
   }
 
   getInfoWallet() {
+    // this.loader = true;
     this.service.getMiner(this.walletAddress).subscribe(data => {
       this.workersList = [];
       this.charts = {};
@@ -355,9 +367,21 @@ export class AccountComponent implements OnInit {
           );
         }
       }
-    });
+    }, (error) => console.log(error),
+      () => { this.show = true; this.loader = false; });
   }
 
+  setAddress() {
+    // if walletAddress === valid
+    if ( this.walletAddress &&  this.walletAddress.length > 0) {
+      localStorage.setItem('walletAddress', this.walletAddress);
+      this.getInfoWallet();
+    } else {
+      this.loader = false;
+      this.show = false;
+      localStorage.removeItem('walletAddress');
+    }
+  }
   setChart(name) {
     this.miningTabSelected = name;
     this.chart = AccountComponent.drawChart(this.charts[this.miningTabSelected], '100, 221, 226');

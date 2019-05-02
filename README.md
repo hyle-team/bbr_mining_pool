@@ -223,3 +223,8 @@ Mining pool settings are stored in ./config/pool.json file. Time values are mill
 - **refreshBlockInterval** (default: 1 sec) - blockchain scan interval
 - **fee** (default: 0%) - in percents pool reward fee
 
+## Known issues
+- web interface doesn't support alias registration
+- remove worker button is disabled
+
+

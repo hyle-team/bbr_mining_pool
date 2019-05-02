@@ -85,7 +85,7 @@ export class DashboardComponent implements OnInit {
         labels: {
           style: {
             color: '#fff',
-            fontSize: '14px',
+            fontSize: '12px',
           },
         },
         plotLines: [{
@@ -97,6 +97,7 @@ export class DashboardComponent implements OnInit {
 
       xAxis: {
         type: 'datetime',
+        ordinal: true,
         gridLineColor: chartColor,
         lineColor: chartColor,
         lineWidth: 1,
@@ -113,7 +114,6 @@ export class DashboardComponent implements OnInit {
         minPadding: 0,
         maxPadding: 0,
         minTickInterval: 60000,
-        endOnTick: true,
       },
 
       tooltip: {
@@ -148,19 +148,51 @@ export class DashboardComponent implements OnInit {
         buttons: [{
           type: 'month',
           count: 1,
-          text: 'Months'
+          text: 'Months',
+          dataGrouping: {
+            enabled: true,
+            approximation: 'average',
+            forced: true,
+            units: [
+              ['week', [1]]
+            ]
+          },
         }, {
           type: 'week',
           count: 1,
-          text: 'Weeks'
+          text: 'Weeks',
+          dataGrouping: {
+            enabled: true,
+            approximation: 'average',
+            forced: true,
+            units: [
+              ['day', [1]]
+            ]
+          },
         }, {
           type: 'day',
           count: 1,
-          text: 'Days'
+          text: 'Days',
+          dataGrouping: {
+            enabled: true,
+            approximation: 'average',
+            forced: true,
+            units: [
+              ['hour', [1]]
+            ]
+          },
         }, {
           type: 'hour',
           count: 1,
-          text: 'Hours'
+          text: 'Hours',
+          dataGrouping: {
+            enabled: true,
+            approximation: 'average',
+            forced: true,
+            units: [
+              ['minute', [10]]
+            ]
+          },
         }],
         buttonSpacing: 0,
         buttonTheme: {
@@ -229,7 +261,6 @@ export class DashboardComponent implements OnInit {
             }
           },
           lineWidth: 2,
-          threshold: null
         },
         series: {
           states: {
@@ -239,16 +270,12 @@ export class DashboardComponent implements OnInit {
               }
             }
           }
-        }
+        },
       },
 
       series: [{
         type: 'area',
-        dataGrouping: {
-          enabled: false
-        },
-        pointInterval: 24 * 3600 * 1000 * 31,
-        data: chartData,
+        data: chartData
       }]
     });
   }

@@ -23,7 +23,7 @@ export class AccountComponent implements OnInit {
   loader: boolean;
 
 
-  static drawChart(chartData, chartColorSeriesRGB): Chart {
+  static drawChart(chartData, chartColorSeriesRGB, chartName): Chart {
     const chartColor = '#0c68cc';
     const chartColorSeries = 'rgb(' + chartColorSeriesRGB + ')';
     let pointStyle = 'background-color: rgba(' + chartColorSeriesRGB + ', 0.55);';
@@ -80,30 +80,35 @@ export class AccountComponent implements OnInit {
         labels: {
           style: {
             color: '#fff',
-            fontSize: '14px',
+            fontSize: '12px',
           },
-        }
+        },
+        plotLines: [{
+          color: '#fff',
+          width: 1,
+          value: chartName === 'effort' ? 100 : null
+        }]
       },
 
       xAxis: {
         type: 'datetime',
+        ordinal: true,
         gridLineColor: chartColor,
         lineColor: chartColor,
         lineWidth: 1,
         tickWidth: 1,
-        tickLength: 10,
+        tickLength: 5,
         tickColor: chartColor,
         labels: {
           style: {
             color: '#fff',
-            fontSize: '14px'
+            fontSize: '12px',
+            marginTop: '15px',
           },
-          format: '{value:%d %b}'
         },
         minPadding: 0,
         maxPadding: 0,
         minTickInterval: 60000,
-        endOnTick: true,
       },
 
       tooltip: {
@@ -136,20 +141,53 @@ export class AccountComponent implements OnInit {
           display: 'none',
         },
         buttons: [{
-          type: 'all',
-          text: 'All'
+          type: 'month',
+          count: 1,
+          text: 'Months',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['week', [1]]
+          //   ]
+          // },
+        }, {
+          type: 'week',
+          count: 1,
+          text: 'Weeks',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['day', [1]]
+          //   ]
+          // },
         }, {
           type: 'day',
           count: 1,
-          text: 'Days'
+          text: 'Days',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['hour', [1]]
+          //   ]
+          // },
         }, {
           type: 'hour',
           count: 1,
-          text: 'Hours'
-        }, {
-          type: 'minute',
-          count: 10,
-          text: '10 min'
+          text: 'Hours',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['minute', [10]]
+          //   ]
+          // },
         }],
         buttonSpacing: 0,
         buttonTheme: {
@@ -218,7 +256,6 @@ export class AccountComponent implements OnInit {
             }
           },
           lineWidth: 2,
-          threshold: null
         },
         series: {
           states: {
@@ -228,12 +265,12 @@ export class AccountComponent implements OnInit {
               }
             }
           }
-        }
+        },
       },
 
       series: [{
         type: 'area',
-        data: chartData,
+        data: chartData
       }]
     });
   }
@@ -384,7 +421,7 @@ export class AccountComponent implements OnInit {
   }
   setChart(name) {
     this.miningTabSelected = name;
-    this.chart = AccountComponent.drawChart(this.charts[this.miningTabSelected], '100, 221, 226');
+    this.chart = AccountComponent.drawChart(this.charts[this.miningTabSelected], '100, 221, 226', 'worker-hashrate');
   }
 
 }

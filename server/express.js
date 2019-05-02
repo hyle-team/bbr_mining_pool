@@ -19,17 +19,20 @@ function startServer() {
     next();
   });
 
-  app.get('/scratchpad', function (req, res) {
-    var file = config.pool.scratchpad.path;
-    res.download(file);
-  });
-
   app.use((req, res, next) => {
     if (config.pool.server.remote || req.ip == '127.0.0.1' || req.ip == '::ffff:127.0.0.1' || req.ip == '::1') {
       next();
-    } else {
+    } else if (req.path === '/scratchpad') {
+      next();
+    }
+    else {
       res.end('Remote connection refused');
     }
+  });
+
+  app.get('/scratchpad', function (req, res) {
+    var file = config.pool.scratchpad.path;
+    res.download(file);
   });
 
   app.get('/log', async (req, res) => {

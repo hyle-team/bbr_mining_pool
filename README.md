@@ -34,6 +34,10 @@ Statistic process uses this script to store pool stats.
 A basic logging implementation.
 - **config/pool.json**
 Pool settings can be updated here.
+- **web_gui**
+Web interface source files
+- **web_gui/dist/frontend**
+Compiled web interface. Your webserver can be configured to use this folder as a website.
 
 
 ## Installation

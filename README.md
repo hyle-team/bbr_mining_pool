@@ -2,7 +2,7 @@
 Mining pool for Boolberry cryptocurrency.
 
 ## Structure Overview
-- *pool/init.js*
+- _pool/init.js_
 This is pool initialisation script. Init.js relies on clusters to start mining system as fork and runs utility processes in the master thread. Among utility routines are payments processing, statistics, DB connection, scratchpad storage routine, block unlocking proccess.
 - pool/blocktemplate.js
 Refresh function handles blockchain scanning for new blocktemplate. It also includes blocktemplate utility functions. When new blocktemplate is received an event is emmited to send new jobs to connected miners.

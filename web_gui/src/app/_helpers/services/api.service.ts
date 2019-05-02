@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-
-import {map} from 'rxjs/operators';
+import {Resolve, ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router';
+import {Observable, of} from 'rxjs';
+import {catchError, map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -17,9 +18,14 @@ export class ApiService {
 
   public getDashboard() {
     const URL = `${this.serverApi}/dashboard`;
-    return this.http.get(URL).pipe(map((response) => {
-      return response;
-    }));
+    return this.http.get(URL).pipe(
+      map((response) => {
+        return response;
+      }),
+      catchError((error) => {
+        return of('No data');
+      })
+    );
   }
 
   public getBlocks() {
@@ -71,6 +77,14 @@ export class ApiService {
       return response;
     }));
   }
+}
 
 
+@Injectable()
+export class ResolverService implements Resolve<any> {
+  constructor(public service: ApiService) {}
+
+  resolve() {
+    return this.service.getDashboard();
+  }
 }

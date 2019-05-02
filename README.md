@@ -2,37 +2,37 @@
 Mining pool for Boolberry cryptocurrency.
 
 ## Structure Overview
-- **pool/init.js
+- **pool/init.js**
 This is pool initialisation script. Init.js relies on clusters to start mining system as fork and runs utility processes in the master thread. Among utility routines are payments processing, statistics, DB connection, scratchpad storage routine, block unlocking proccess.
-- **pool/blocktemplate.js
+- **pool/blocktemplate.js**
 Refresh function handles blockchain scanning for new blocktemplate. It also includes blocktemplate utility functions. When new blocktemplate is received an event is emmited to send new jobs to connected miners.
-- **pool/alias.js
+- **pool/alias.js**
 Functions to manage alias registration queue and check miners logins.
-- **pool/scratchpad.js
+- **pool/scratchpad.js**
 Stores current scratchpad to the given location with given interval. Also consists of addendum handle functions.
-- **pool/share.js
+- **pool/share.js**
 This script contains function to validate and store miners shares, update miners statistics and retarget difficulty based on miner performance.
-- **miner/miner.js
+- **miner/miner.js**
 This is a miner object created for each miner connection. It stores miner details, create miners jobs and handles miners request (login, getjob, submit, keepalived). 
-- **miner/login.js
+- **miner/login.js**
 A helper script to verify miners login info.
-- **rpc/request.js
+- **rpc/request.js**
 This is low-level wallet and daemon remote calls handler.
-- **rpc/call.js
+- **rpc/call.js**
 Script contains all supported RPC calls.
-- **server/stratum.js
+- **server/stratum.js**
 This is a stratum protocol implementation.
-- **server/express.js
+- **server/express.js**
 Pool's web server is built on express.js and offers a list of API calls to monitor pools activity.
-- **db/balance.js
+- **db/balance.js**
 Script takes control of miner balances and reward payments.
-- **db/block.js
+- **db/block.js**
 Miners shares and blocks are stored in DB with this script.
-- **db/stat.js
+- **db/stat.js**
 Statistic process uses this script to store pool stats.
-- **log/logger.js
+- **log/logger.js**
 A basic logging implementation.
-- **config/pool.json
+- **config/pool.json**
 Pool settings can be updated here.
 
 

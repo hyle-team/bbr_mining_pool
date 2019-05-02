@@ -190,36 +190,36 @@ Run Boolberry pool:
 ## Settings
 Mining pool settings are stored in ./config/pool.json file. Time values are milliseconds by default.
 
-- daemon.host (default: localhost) - for Boolberry daemon IP address
-- daemon.port (default: 10102) - Boolberry daemon port
-- wallet.host (default: localhost) - Boolberry wallet IP address
-- wallet.port (default: 10103) - Boolberry wallet port
-- scratchpad.path (default: /boolberry/scratchpad.bin) - Boolberry scratchpad store location
-- scratchpad.path (default: every 4 hours) - Boolberry scratchpad store interval
-- server.remote (default: false) - wether API can be accessed from a remote server or local environment only
-- server.api (default: 3000) - API server port
-- server.port (default: 6000) - stratum server port for miners connection
-- server.difficulty (default: 3,25 MH/s) - starting job difficulty for new connections in hash/sec
-- share.targetTime (deafault: 1 min) - vardiff algorighm target interval between miner shares
-- share.targetTimeSpan (deafault: 30 sec) - vardiff algorighm fluctuation for target time
-- share.timeout (default: 10 min) - timeout for miner connection drop due to inactivity
-- share.weight (default: 240000) - share scoring estimation coefficient
-- block.unlockDepth (default: 30) - block depth to unlock miners rewards
-- block.unlockInterval (default: 2 min) - block unlocking check interval
-- logger.size (default: 10000) - number of cached log messages for API call localhost:port/log
-- stats.history (default: 500000) - max number of pool statistics entries stored in Redis DB
-- stats.interval (default: 10 min) - pool statistics checkpoint save interval
-- stats.interval (default: 10 min) - pool statistics average values estimation time frame
-- ban.time (default: 10 min) - invalid shares miner ban period
-- ban.percent (default: 5%) - invalid shares miner ban percentage
-- ban.checkpoint (default: 50) - shares count between miner shares validity check
-- payment.sweep (default: 0.1 BBR) - RPC sweep_below value
-- payment.units (default: 1 BBR) - value to calculate BBR decimal point
-- payment.mixin (default: 0) - number of mixin for miner payments
-- payment.fee (deafult: 0.002 BBR) - miners reward payment fee
-- payment.threshold (default: 1 BBR) - miners balance payment threshold
-- payment.interval (default: 1 hour) - miners reward payment interval
-- address - pool wallet address
-- refreshBlockInterval (default: 1 sec) - blockchain scan interval
-- fee (default: 0%) - in percents pool reward fee
+- **daemon.host** (default: localhost) - for Boolberry daemon IP address
+- **daemon.port** (default: 10102) - Boolberry daemon port
+- **wallet.host** (default: localhost) - Boolberry wallet IP address
+- **wallet.port** (default: 10103) - Boolberry wallet port
+- **scratchpad.path** (default: /boolberry/scratchpad.bin) - Boolberry scratchpad store location
+- **scratchpad.path** (default: every 4 hours) - Boolberry scratchpad store interval
+- **server.remote** (default: false) - wether API can be accessed from a remote server or local environment only
+- **server.api** (default: 3000) - API server port
+- **server.port** (default: 6000) - stratum server port for miners connection
+- **server.difficulty** (default: 3,25 MH/s) - starting job difficulty for new connections in hash/sec
+- **share.targetTime** (deafault: 1 min) - vardiff algorighm target interval between miner shares
+- **share.targetTimeSpan** (deafault: 30 sec) - vardiff algorighm fluctuation for target time
+- **share.timeout** (default: 10 min) - timeout for miner connection drop due to inactivity
+- **share.weight** (default: 240000) - share scoring estimation coefficient
+- **block.unlockDepth** (default: 30) - block depth to unlock miners rewards
+- **block.unlockInterval** (default: 2 min) - block unlocking check interval
+- **logger.size** (default: 10000) - number of cached log messages for API call localhost:port/log
+- **stats.history** (default: 500000) - max number of pool statistics entries stored in Redis DB
+- **stats.interval** (default: 10 min) - pool statistics checkpoint save interval
+- **stats.interval** (default: 10 min) - pool statistics average values estimation time frame
+- **ban.time** (default: 10 min) - invalid shares miner ban period
+- **ban.percent** (default: 5%) - invalid shares miner ban percentage
+- **ban.checkpoint** (default: 50) - shares count between miner shares validity check
+- **payment.sweep** (default: 0.1 BBR) - RPC sweep_below value
+- **payment.units** (default: 1 BBR) - value to calculate BBR decimal point
+- **payment.mixin** (default: 0) - number of mixin for miner payments
+- **payment.fee** (deafult: 0.002 BBR) - miners reward payment fee
+- **payment.threshold** (default: 1 BBR) - miners balance payment threshold
+- **payment.interval** (default: 1 hour) - miners reward payment interval
+- **address** - pool wallet address
+- **refreshBlockInterval** (default: 1 sec) - blockchain scan interval
+- **fee** (default: 0%) - in percents pool reward fee
 

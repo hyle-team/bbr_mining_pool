@@ -4,6 +4,7 @@ import {ApiService} from '../_helpers/services/api.service';
 import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
 
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -15,6 +16,7 @@ export class DashboardComponent implements OnInit {
   activeTableTab = 'blocks';
   network;
   pool;
+  info;
   charts;
   chartsData = {
     hashRate: [],
@@ -28,6 +30,13 @@ export class DashboardComponent implements OnInit {
   blocksLimit: number;
   blockFoundEvery: any;
 
+  infoAnnouncement: any;
+  infoChat: any;
+  infoMarket: any;
+  infoPricingBTC: any;
+  infoPricingUSD: any;
+  infoWebsite: any;
+
   static drawChart(chartData, chartColorSeriesRGB, chartName): Chart {
     const chartColor = '#0c68cc';
     const chartColorSeries = 'rgb(' + chartColorSeriesRGB + ')';
@@ -39,7 +48,7 @@ export class DashboardComponent implements OnInit {
     pointStyle = pointStyle + ' box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);';
     pointStyle = pointStyle + ' font-weight: 100;';
     const point = '<div style="' + pointStyle + '"><b>{point.y}</b> {point.x:%d %b, %H:%M GMT}</div>';
-
+    let time_break = 3 * 31 * 24 * 3600 * 1000;
 
     return new Chart({
       title: {text: ''},
@@ -114,6 +123,16 @@ export class DashboardComponent implements OnInit {
         minPadding: 0,
         maxPadding: 0,
         minTickInterval: 60000,
+        events: {
+          setExtremes(e) {
+            const delta = e.max - e.min;
+            if (delta <= time_break) {
+
+            } else {
+              console.log(2);
+            }
+          }
+        }
       },
 
       tooltip: {
@@ -124,7 +143,6 @@ export class DashboardComponent implements OnInit {
         useHTML: true,
         headerFormat: '',
         footerFormat: '',
-
         xDateFormat: '%b %Y',
         pointFormat: point,
         shared: true,
@@ -225,7 +243,7 @@ export class DashboardComponent implements OnInit {
             },
           }
         },
-        selected: 0,
+        selected: 1,
       },
 
       plotOptions: {
@@ -262,7 +280,13 @@ export class DashboardComponent implements OnInit {
           },
           lineWidth: 2,
         },
+        line: {
+          dataGrouping: {
+            groupPixelWidth: 10
+          }
+        },
         series: {
+
           states: {
             hover: {
               halo: {
@@ -272,10 +296,10 @@ export class DashboardComponent implements OnInit {
           }
         },
       },
-
       series: [{
         type: 'area',
-        data: chartData
+        data: chartData,
+
       }]
     });
   }
@@ -289,10 +313,18 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.dashboardData = this.activatedRoute.snapshot.data.resolverService;
+
     if (Object.keys(this.dashboardData).length !== 0) {
-      this.network = this.dashboardData['network'];
-      this.pool = this.dashboardData['pool'];
-      this.charts = this.dashboardData['pool']['stats'];
+      this.network = this.dashboardData['data']['network'];
+      this.pool = this.dashboardData['data']['pool'];
+      this.info = this.dashboardData['info'];
+      this.charts = this.dashboardData['data']['pool']['stats'];
+      this.infoAnnouncement = this.info.announcement;
+      this.infoChat = this.info.chat;
+      this.infoMarket = this.info.market;
+      this.infoPricingBTC = this.info.pricingBTC;
+      this.infoPricingUSD = this.info.pricingUSD;
+      this.infoWebsite = this.info.website;
 
       this.charts.forEach(item => {
         const itemDate = new Date(item[0]).getTime();

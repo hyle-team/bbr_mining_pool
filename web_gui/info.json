@@ -1,0 +1,30 @@
+{
+  "announcement": {
+    "name": "Announcement",
+    "linkName": "BitcoinTalk",
+    "link": "https://bitcointalk.org/index.php?topic=577267.0"
+  },
+  "chat": {
+    "name": "Chat",
+    "linkName": "Telegram",
+    "link": "https://t.me/boolberry_bbr"
+  },
+  "market": {
+    "name": "Market",
+    "linkName": "BTC-Alpha",
+    "link": "https://btc-alpha.com/ru/exchange/BBR_BTC/"
+  },
+  "pricingBTC": {
+    "name": "Pricing BTC",
+    "value": "0.00013357"
+  },
+  "pricingUSD": {
+    "name": "Pricing USD",
+    "value": "$ 0.75"
+  },
+  "website": {
+    "name": "Website",
+    "linkName": "Boolberry",
+    "link": "https://boolberry.com/"
+  }
+}

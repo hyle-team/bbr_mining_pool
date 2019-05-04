@@ -1,30 +1,30 @@
 {
-  "announcement": {
-    "name": "Announcement",
-    "linkName": "BitcoinTalk",
-    "link": "https://bitcointalk.org/index.php?topic=577267.0"
+  "item1": {
+    "label": "label 1",
+    "link_name": "link name 1",
+    "link_url": "#http://link_url_1"
   },
-  "chat": {
-    "name": "Chat",
-    "linkName": "Telegram",
-    "link": "https://t.me/boolberry_bbr"
+  "item2": {
+    "label": "label 2",
+    "link_name": "link name 2",
+    "link_url": "#http://link_url_2"
   },
-  "market": {
-    "name": "Market",
-    "linkName": "BTC-Alpha",
-    "link": "https://btc-alpha.com/ru/exchange/BBR_BTC/"
+  "item3": {
+    "label": "label 3",
+    "link_name": "link name 3",
+    "link_url": "#http://link_url_3"
   },
-  "pricingBTC": {
-    "name": "Pricing BTC",
-    "value": "0.00013357"
+  "item4": {
+    "label": "label 4",
+    "text": "some text 1"
   },
-  "pricingUSD": {
-    "name": "Pricing USD",
-    "value": "$ 0.75"
+  "item5": {
+    "label": "label 5",
+    "text": "some text 2"
   },
-  "website": {
-    "name": "Website",
-    "linkName": "Boolberry",
-    "link": "https://boolberry.com/"
+  "item6": {
+    "label": "label 6",
+    "link_name": "link name 4",
+    "link_url": "#http://link_url_4"
   }
 }

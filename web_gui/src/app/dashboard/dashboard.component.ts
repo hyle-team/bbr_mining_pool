@@ -30,12 +30,12 @@ export class DashboardComponent implements OnInit {
   blocksLimit: number;
   blockFoundEvery: any;
 
-  infoAnnouncement: any;
-  infoChat: any;
-  infoMarket: any;
-  infoPricingBTC: any;
-  infoPricingUSD: any;
-  infoWebsite: any;
+  // infoAnnouncement: any;
+  // infoChat: any;
+  // infoMarket: any;
+  // infoPricingBTC: any;
+  // infoPricingUSD: any;
+  // infoWebsite: any;
 
   static drawChart(chartData, chartColorSeriesRGB, chartName): Chart {
     const chartColor = '#0c68cc';
@@ -312,18 +312,18 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.dashboardData = this.activatedRoute.snapshot.data.resolverService;
-
+    console.log(this.dashboardData);
     if (Object.keys(this.dashboardData).length !== 0) {
-      this.network = this.dashboardData['data']['network'];
-      this.pool = this.dashboardData['data']['pool'];
-      this.info = this.dashboardData['info'];
-      this.charts = this.dashboardData['data']['pool']['stats'];
-      this.infoAnnouncement = this.info.announcement;
-      this.infoChat = this.info.chat;
-      this.infoMarket = this.info.market;
-      this.infoPricingBTC = this.info.pricingBTC;
-      this.infoPricingUSD = this.info.pricingUSD;
-      this.infoWebsite = this.info.website;
+      this.network = this.dashboardData['network'];
+      this.pool = this.dashboardData['pool'];
+      // this.info = this.dashboardData['info'];
+      this.charts = this.dashboardData['pool']['stats'];
+      // this.infoAnnouncement = this.info.announcement;
+      // this.infoChat = this.info.chat;
+      // this.infoMarket = this.info.market;
+      // this.infoPricingBTC = this.info.pricingBTC;
+      // this.infoPricingUSD = this.info.pricingUSD;
+      // this.infoWebsite = this.info.website;
 
 
       this.charts.forEach(item => {

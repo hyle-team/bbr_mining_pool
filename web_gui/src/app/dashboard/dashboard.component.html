@@ -73,11 +73,11 @@
         <i class="ms-Icon ms-Icon--Info"></i>Info
       </div>
       <div class="card-content">
-<!--        <div class="card-content-row" *ngFor="let item of info | JsonToNgFor">-->
-<!--          <label>{{item.label}}</label>-->
-<!--          <a *ngIf="item.link_url && item.link_name" href="{{item.link_url}}">{{item.link_name}}</a>-->
-<!--          <span *ngIf="item.text">{{item.text}}</span>-->
-<!--        </div>-->
+        <div class="card-content-row" *ngFor="let item of info | JsonToNgFor">
+          <label>{{item.label}}</label>
+          <a *ngIf="item.link_url && item.link_name" href="{{item.link_url}}">{{item.link_name}}</a>
+          <span *ngIf="item.text">{{item.text}}</span>
+        </div>
       </div>
     </div>
   </div>

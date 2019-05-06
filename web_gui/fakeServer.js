@@ -1,12 +1,6 @@
 const http = require('http');
 const request = require('request');
-const fs = require('fs');
-
-// const info = JSON.parse(fs.readFileSync('./info.json', 'utf8'));
-
 let response = '';
-
-
 
 function getDashboard(hash, callback) {
   let params = {};

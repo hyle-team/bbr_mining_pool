@@ -370,7 +370,7 @@ export class AccountComponent implements OnInit {
         if (!this.charts['total']) {
           this.charts['total'] = [];
         }
-        this.charts['total'].push([itemDate, parseFloat(item[1][item[1].length - 1])]);
+        this.charts['total'].unshift([itemDate, parseFloat(item[1][item[1].length - 1])]);
         let name = '';
         let hashrate = '';
         for (let i = 0; i < item[1].length - 2; i++) {
@@ -381,7 +381,7 @@ export class AccountComponent implements OnInit {
             if (!this.charts[name]) {
               this.charts[name] = [];
             }
-            this.charts[name].push([itemDate, parseFloat(hashrate)]);
+            this.charts[name].unshift([itemDate, parseFloat(hashrate)]);
           }
         }
       });

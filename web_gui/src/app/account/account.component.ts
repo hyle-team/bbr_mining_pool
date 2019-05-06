@@ -399,9 +399,9 @@ export class AccountComponent implements OnInit {
           hashRateWorker = hashRateChartInfo[0][1][i];
           totalWorker = workerStatsInfo['total_' + nameWorker];
           staleWorker = workerStatsInfo['stale_' + nameWorker];
-          staleInterestWorker = (staleWorker / totalWorker) * 100;
+          staleInterestWorker = (parseInt(staleWorker, 10) / parseInt(totalWorker, 10)) * 100;
           invalidWorker = workerStatsInfo['invalid_' + nameWorker];
-          invalidInteresWorker = (invalidWorker / totalWorker) * 100;
+          invalidInteresWorker = (parseInt(invalidWorker, 10) / parseInt(totalWorker, 10)) * 100;
           blocksWorker = workerStatsInfo['blocks_' + nameWorker];
           this.workersList.push(
             {

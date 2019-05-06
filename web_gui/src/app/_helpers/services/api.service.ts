@@ -23,7 +23,7 @@ export class ApiService {
         return response;
       }),
       catchError((error) => {
-        return of('No data');
+        return of('No data', error);
       })
     );
   }

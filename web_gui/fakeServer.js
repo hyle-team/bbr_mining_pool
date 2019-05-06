@@ -2,7 +2,7 @@ const http = require('http');
 const request = require('request');
 const fs = require('fs');
 
-const info = JSON.parse(fs.readFileSync('./info.json', 'utf8'));
+// const info = JSON.parse(fs.readFileSync('./info.json', 'utf8'));
 
 let response = '';
 
@@ -47,7 +47,7 @@ http.createServer(function (req, res) {
     }).on('end', function () {
       getDashboard('1111', function (code, data) {
         res.writeHead(code, headers);
-        res.end(JSON.stringify({info, data}));
+        res.end(JSON.stringify(data));
       });
     });
   } else if (link[1] === 'blocks') {

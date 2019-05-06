@@ -4,11 +4,15 @@ import {ApiService} from '../_helpers/services/api.service';
 import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
 
+// @ts-ignore
+import infoJSON from '../../../info.json';
+
+
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
   dashboardData: any;
@@ -29,13 +33,6 @@ export class DashboardComponent implements OnInit {
   blocks;
   blocksLimit: number;
   blockFoundEvery: any;
-
-  // infoAnnouncement: any;
-  // infoChat: any;
-  // infoMarket: any;
-  // infoPricingBTC: any;
-  // infoPricingUSD: any;
-  // infoWebsite: any;
 
   static drawChart(chartData, chartColorSeriesRGB, chartName): Chart {
     const chartColor = '#0c68cc';
@@ -308,23 +305,16 @@ export class DashboardComponent implements OnInit {
     private activatedRoute: ActivatedRoute
   ) {
     this.blocksLimit = 10;
+
   }
 
   ngOnInit() {
     this.dashboardData = this.activatedRoute.snapshot.data.resolverService;
-    console.log(this.dashboardData);
     if (Object.keys(this.dashboardData).length !== 0) {
       this.network = this.dashboardData['network'];
       this.pool = this.dashboardData['pool'];
-      // this.info = this.dashboardData['info'];
+      this.info = infoJSON;
       this.charts = this.dashboardData['pool']['stats'];
-      // this.infoAnnouncement = this.info.announcement;
-      // this.infoChat = this.info.chat;
-      // this.infoMarket = this.info.market;
-      // this.infoPricingBTC = this.info.pricingBTC;
-      // this.infoPricingUSD = this.info.pricingUSD;
-      // this.infoWebsite = this.info.website;
-
 
       this.charts.forEach(item => {
         const itemDate = new Date(item[0]).getTime();

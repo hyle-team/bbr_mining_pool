@@ -36,6 +36,8 @@ A basic logging implementation.
 Pool settings can be updated here.
 - **web_gui**
 Web interface source files
+- **web_gui/info.json**
+Content for Info section of the dashboard
 - **web_gui/dist/frontend**
 Compiled web interface. Your webserver can be configured to use this folder as a website.
 
@@ -82,20 +84,19 @@ make daemon simplewallet
 ```
 ### Running Boolberry node
 This guide uses [Screen](https://help.ubuntu.com/community/Screen) to run and manage pool required processes. Each process runs in a dedicated Screen session and thus doesn't depend on current terminal session. 
-Run a new screen session:
-```
-screen -S daemon
-```
 Navigate to boolberry build folder:
 ```
 cd ./src
+```
+Run a new screen session:
+```
+screen -S daemon
 ```
 Run Boolberry daemon:
 ```
 ./boolbd
 ```
-
-Wait until Boolberry blockchain is synchronized and close current Screen session by pressing `Ctrl+A`, and then `d` button.
+Wait until Boolberry blockchain is synchronized and close current Screen session by pressing `Ctrl+a`, and then `d` button.
 Run a new screen session:
 ```
 screen -S wallet
@@ -109,7 +110,7 @@ Run Boolberry wallet:
 ```
 ./simplewallet --wallet-file pool_wallet --password <WALLET PASSWORD> --rpc-bind-port 10103
 ```
-Close current Screen session by pressing `Ctrl+A`, and then `d` button.
+Close current Screen session by pressing `Ctrl+a`, and then `d` button.
 For more information please refer to the [Boolberry user guide](https://docs.boolberry.com/)
 ### Installing Redis DB
 Navigate to user home directory:
@@ -140,7 +141,7 @@ Opent Redis configuration file in the editor:
 ```
 nano redis.conf
 ```
-Find entry `stop-writes-on-bgsave-error yes` and change it to `stop-writes-on-bgsave-error no`. Then exit the editor by pressing `Ctrl+X`, then `Shift+Y`, then `Enter`
+Find entry `stop-writes-on-bgsave-error yes` and change it to `stop-writes-on-bgsave-error no`. Then exit the editor by pressing `Ctrl+x`, then `Shift+y`, then `Enter`
 Run Redis process:
 ```
 ./src/redis-server ./redis.conf --daemonize yes
@@ -180,7 +181,7 @@ Find entry `address` and set generated wallet address it's value. Example:
 ```
 “address” : “1EsE4rpuLhYQMKr4dD3t92NkyVZXGhvhL4AcLvLXBNqTRyDgKUmwVPjKUeCq1F3avK2RucftxzhUnFeKFcYXrN1hRU1rmUq”
 ```
-Then exit the editor by pressing `Ctrl+X`, then `Shift+Y`, then `Enter`
+Then exit the editor by pressing `Ctrl+x`, then `Shift+y`, then `Enter`
 ### Running Boolberry pool
 Run a new screen session:
 ```
@@ -230,5 +231,6 @@ Mining pool settings are stored in ./config/pool.json file. Time values are mill
 ## Known issues
 - web interface doesn't support alias registration
 - remove worker button is disabled
+- payment ID is not supported
 
 

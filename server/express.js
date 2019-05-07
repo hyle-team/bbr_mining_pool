@@ -39,6 +39,10 @@ function startServer() {
     res.end(logger.read());
   });
 
+  app.get('/info', async (req, res) => {
+    res.end(JSON.stringify(config.info));
+  });
+
   app.get('/blocks', async (req, res) => {
     let blocks = await db.stats.getLastBlocks();
     res.send(blocks);

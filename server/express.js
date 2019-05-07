@@ -21,7 +21,6 @@ function startServer() {
 
   app.use((req, res, next) => {
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
-    logger.log(ip);
     if (config.pool.server.remote || ip == '127.0.0.1' || ip == '::ffff:127.0.0.1' || ip == '::1') {
       next();
     } else if (req.path === '/scratchpad') {

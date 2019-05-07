@@ -305,7 +305,6 @@ export class DashboardComponent implements OnInit {
     private activatedRoute: ActivatedRoute
   ) {
     this.blocksLimit = 10;
-
   }
 
   ngOnInit() {

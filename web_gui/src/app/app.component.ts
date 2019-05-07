@@ -22,54 +22,54 @@ export class AppComponent implements OnInit {
       }
     });
 
-    this.apiService.getDashboard().subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
-    this.apiService.getBlocks().subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
-    this.apiService.getTx('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
-    this.apiService.getBalance('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
-    this.apiService.setAlias('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF', 'newAlias').subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
-    this.apiService.checkAlias('newAlias').subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
-    this.apiService.getAliasQueue().subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
-    this.apiService.getMiner('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
-      data => {
-        // console.log(data);
-      },
-      err => console.error(err)
-    );
+    // this.apiService.getDashboard().subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
+    // this.apiService.getBlocks().subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
+    // this.apiService.getTx('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
+    // this.apiService.getBalance('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
+    // this.apiService.setAlias('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF', 'newAlias').subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
+    // this.apiService.checkAlias('newAlias').subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
+    // this.apiService.getAliasQueue().subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
+    // this.apiService.getMiner('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
+    //   data => {
+    //     // console.log(data);
+    //   },
+    //   err => console.error(err)
+    // );
   }
 
   ngOnInit() {

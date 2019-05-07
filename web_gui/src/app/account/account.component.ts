@@ -34,7 +34,10 @@ export class AccountComponent implements OnInit {
     pointStyle = pointStyle + ' box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);';
     pointStyle = pointStyle + ' font-weight: 100;';
     const point = '<div style="' + pointStyle + '"><b>{point.y}</b> {point.x:%d %b, %H:%M GMT}</div>';
-
+    const months = 2591696818;
+    const weeks = 604800000;
+    const days = 86400000;
+    const hours = 3600000;
 
     return new Chart({
       title: {text: ''},
@@ -44,6 +47,7 @@ export class AccountComponent implements OnInit {
 
       navigator: {
         enabled: true,
+        adaptToUpdatedData: false,
         height: 5,
         maskFill: '#64DDE2',
         maskInside: true,
@@ -109,6 +113,37 @@ export class AccountComponent implements OnInit {
         minPadding: 0,
         maxPadding: 0,
         minTickInterval: 60000,
+        events: {
+          setExtremes(e) {
+            const delta = e.max - e.min;
+            if (parseInt(String(delta), 10) <= hours) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['minute', [10]];
+                item.chart.redraw();
+              });
+            } else if (parseInt(String(delta), 10) <= days) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['hour', [1]];
+                item.chart.redraw();
+              });
+            } else if (parseInt(String(delta), 10) <= weeks) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['day', [1]];
+                item.chart.redraw();
+              });
+            } else if (parseInt(String(delta), 10) <= months) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['week', [1]];
+                item.chart.redraw();
+              });
+            } else {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['week', [1]];
+                item.chart.redraw();
+              });
+            }
+          },
+        }
       },
 
       tooltip: {
@@ -119,7 +154,6 @@ export class AccountComponent implements OnInit {
         useHTML: true,
         headerFormat: '',
         footerFormat: '',
-
         xDateFormat: '%b %Y',
         pointFormat: point,
         shared: true,
@@ -144,50 +178,18 @@ export class AccountComponent implements OnInit {
           type: 'month',
           count: 1,
           text: 'Months',
-          // dataGrouping: {
-          //   enabled: true,
-          //   approximation: 'average',
-          //   forced: true,
-          //   units: [
-          //     ['week', [1]]
-          //   ]
-          // },
         }, {
           type: 'week',
           count: 1,
           text: 'Weeks',
-          // dataGrouping: {
-          //   enabled: true,
-          //   approximation: 'average',
-          //   forced: true,
-          //   units: [
-          //     ['day', [1]]
-          //   ]
-          // },
         }, {
           type: 'day',
           count: 1,
           text: 'Days',
-          // dataGrouping: {
-          //   enabled: true,
-          //   approximation: 'average',
-          //   forced: true,
-          //   units: [
-          //     ['hour', [1]]
-          //   ]
-          // },
         }, {
           type: 'hour',
           count: 1,
           text: 'Hours',
-          // dataGrouping: {
-          //   enabled: true,
-          //   approximation: 'average',
-          //   forced: true,
-          //   units: [
-          //     ['minute', [10]]
-          //   ]
-          // },
         }],
         buttonSpacing: 0,
         buttonTheme: {
@@ -257,7 +259,20 @@ export class AccountComponent implements OnInit {
           },
           lineWidth: 2,
         },
+        line: {
+          dataGrouping: {
+            groupPixelWidth: 10
+          }
+        },
         series: {
+          dataGrouping: {
+            enabled: true,
+            approximation: 'average',
+            forced: true,
+            units: [
+              ['week', [1]]
+            ]
+          },
           states: {
             hover: {
               halo: {
@@ -267,10 +282,9 @@ export class AccountComponent implements OnInit {
           }
         },
       },
-
       series: [{
         type: 'area',
-        data: chartData
+        data: chartData,
       }]
     });
   }
@@ -356,7 +370,7 @@ export class AccountComponent implements OnInit {
         if (!this.charts['total']) {
           this.charts['total'] = [];
         }
-        this.charts['total'].push([itemDate, parseFloat(item[1][item[1].length - 1])]);
+        this.charts['total'].unshift([itemDate, parseFloat(item[1][item[1].length - 1])]);
         let name = '';
         let hashrate = '';
         for (let i = 0; i < item[1].length - 2; i++) {
@@ -367,7 +381,7 @@ export class AccountComponent implements OnInit {
             if (!this.charts[name]) {
               this.charts[name] = [];
             }
-            this.charts[name].push([itemDate, parseFloat(hashrate)]);
+            this.charts[name].unshift([itemDate, parseFloat(hashrate)]);
           }
         }
       });
@@ -385,9 +399,9 @@ export class AccountComponent implements OnInit {
           hashRateWorker = hashRateChartInfo[0][1][i];
           totalWorker = workerStatsInfo['total_' + nameWorker];
           staleWorker = workerStatsInfo['stale_' + nameWorker];
-          staleInterestWorker = (staleWorker / totalWorker) * 100;
+          staleInterestWorker = (parseInt(staleWorker, 10) / parseInt(totalWorker, 10)) * 100;
           invalidWorker = workerStatsInfo['invalid_' + nameWorker];
-          invalidInteresWorker = (invalidWorker / totalWorker) * 100;
+          invalidInteresWorker = (parseInt(invalidWorker, 10) / parseInt(totalWorker, 10)) * 100;
           blocksWorker = workerStatsInfo['blocks_' + nameWorker];
           this.workersList.push(
             {

@@ -4,10 +4,15 @@ import {ApiService} from '../_helpers/services/api.service';
 import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
 
+// @ts-ignore
+import infoJSON from '../../../info.json';
+
+
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
   dashboardData: any;
@@ -15,6 +20,7 @@ export class DashboardComponent implements OnInit {
   activeTableTab = 'blocks';
   network;
   pool;
+  info;
   charts;
   chartsData = {
     hashRate: [],
@@ -39,7 +45,10 @@ export class DashboardComponent implements OnInit {
     pointStyle = pointStyle + ' box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);';
     pointStyle = pointStyle + ' font-weight: 100;';
     const point = '<div style="' + pointStyle + '"><b>{point.y}</b> {point.x:%d %b, %H:%M GMT}</div>';
-
+    const months = 2591696818;
+    const weeks = 604800000;
+    const days = 86400000;
+    const hours = 3600000;
 
     return new Chart({
       title: {text: ''},
@@ -49,6 +58,7 @@ export class DashboardComponent implements OnInit {
 
       navigator: {
         enabled: true,
+        adaptToUpdatedData: false,
         height: 5,
         maskFill: '#64DDE2',
         maskInside: true,
@@ -114,6 +124,37 @@ export class DashboardComponent implements OnInit {
         minPadding: 0,
         maxPadding: 0,
         minTickInterval: 60000,
+        events: {
+          setExtremes(e) {
+            const delta = e.max - e.min;
+            if (parseInt(String(delta), 10) <= hours) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['minute', [10]];
+                item.chart.redraw();
+              });
+            } else if (parseInt(String(delta), 10) <= days) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['hour', [1]];
+                item.chart.redraw();
+              });
+            } else if (parseInt(String(delta), 10) <= weeks) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['day', [1]];
+                item.chart.redraw();
+              });
+            } else if (parseInt(String(delta), 10) <= months) {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['week', [1]];
+                item.chart.redraw();
+              });
+            } else {
+              this.series.forEach((item) => {
+                item.chart.series[0].options.dataGrouping.units[0] = ['week', [1]];
+                item.chart.redraw();
+              });
+            }
+          },
+        }
       },
 
       tooltip: {
@@ -124,7 +165,6 @@ export class DashboardComponent implements OnInit {
         useHTML: true,
         headerFormat: '',
         footerFormat: '',
-
         xDateFormat: '%b %Y',
         pointFormat: point,
         shared: true,
@@ -149,50 +189,18 @@ export class DashboardComponent implements OnInit {
           type: 'month',
           count: 1,
           text: 'Months',
-          dataGrouping: {
-            enabled: true,
-            approximation: 'average',
-            forced: true,
-            units: [
-              ['week', [1]]
-            ]
-          },
         }, {
           type: 'week',
           count: 1,
           text: 'Weeks',
-          dataGrouping: {
-            enabled: true,
-            approximation: 'average',
-            forced: true,
-            units: [
-              ['day', [1]]
-            ]
-          },
         }, {
           type: 'day',
           count: 1,
           text: 'Days',
-          dataGrouping: {
-            enabled: true,
-            approximation: 'average',
-            forced: true,
-            units: [
-              ['hour', [1]]
-            ]
-          },
         }, {
           type: 'hour',
           count: 1,
           text: 'Hours',
-          dataGrouping: {
-            enabled: true,
-            approximation: 'average',
-            forced: true,
-            units: [
-              ['minute', [10]]
-            ]
-          },
         }],
         buttonSpacing: 0,
         buttonTheme: {
@@ -262,7 +270,20 @@ export class DashboardComponent implements OnInit {
           },
           lineWidth: 2,
         },
+        line: {
+          dataGrouping: {
+            groupPixelWidth: 10
+          }
+        },
         series: {
+          dataGrouping: {
+            enabled: true,
+            approximation: 'average',
+            forced: true,
+            units: [
+              ['week', [1]]
+            ]
+          },
           states: {
             hover: {
               halo: {
@@ -272,10 +293,9 @@ export class DashboardComponent implements OnInit {
           }
         },
       },
-
       series: [{
         type: 'area',
-        data: chartData
+        data: chartData,
       }]
     });
   }
@@ -292,6 +312,7 @@ export class DashboardComponent implements OnInit {
     if (Object.keys(this.dashboardData).length !== 0) {
       this.network = this.dashboardData['network'];
       this.pool = this.dashboardData['pool'];
+      this.info = infoJSON;
       this.charts = this.dashboardData['pool']['stats'];
 
       this.charts.forEach(item => {
@@ -347,7 +368,6 @@ export class DashboardComponent implements OnInit {
       } else if (duration._data.years === 0) {
         this.blockFoundEvery = duration._data.months + 'month ' + duration._data.days + 'd ' + duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
       }
-
     });
   }
 }

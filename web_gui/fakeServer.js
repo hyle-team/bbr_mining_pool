@@ -1,28 +1,28 @@
 const http = require('http');
 const request = require('request');
-
 let response = '';
-
-function getMiner(hash, callback) {
-  let params = {};
-  request.get('http://144.76.183.143:3000/miner/@mc', {json: params}, function (error, response, body) {
-    if (error) callback(400, error); else callback(200, body);
-  });
-}
-
-function getBlocks(hash, callback) {
-  let params = {};
-  request.get('http://144.76.183.143:3000/blocks', {json: params}, function (error, response, body) {
-    if (error) callback(400, error); else callback(200, body);
-  });
-}
 
 function getDashboard(hash, callback) {
   let params = {};
-  request.get('http://144.76.183.143:3000/dashboard', {json: params}, function (error, response, body) {
+  request.get('https://144.76.183.143/api/dashboard', {json: params}, function (error, response, body) {
     if (error) callback(400, error); else callback(200, body);
   });
 }
+function getBlocks(hash, callback) {
+  let params = {};
+  request.get('https://144.76.183.143/api/blocks', {json: params}, function (error, response, body) {
+    if (error) callback(400, error); else callback(200, body);
+  });
+}
+
+function getMiner(hash, callback) {
+  let params = {};
+  request.get('https://144.76.183.143/api/miner/@mc', {json: params}, function (error, response, body) {
+    if (error) callback(400, error); else callback(200, body);
+  });
+}
+
+
 
 http.createServer(function (req, res) {
   console.log('request: ' + req.url);
@@ -41,7 +41,8 @@ http.createServer(function (req, res) {
     }).on('end', function () {
       getDashboard('1111', function (code, data) {
         res.writeHead(code, headers);
-        res.end(JSON.stringify(data));
+        // res.end(JSON.stringify(data));
+        console.log(data);
       });
     });
   } else if (link[1] === 'blocks') {

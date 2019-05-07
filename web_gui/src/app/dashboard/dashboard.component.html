@@ -28,7 +28,8 @@
         </div>
         <div class="card-content-row">
           <label>Last hash</label>
-          <a target="_blank" [href]="'https://explorer.boolberry.com/block/'+network['last_hash']">{{network['last_hash']}}</a>
+          <a target="_blank"
+             [href]="'https://explorer.boolberry.com/block/'+network['last_hash']">{{network['last_hash']}}</a>
         </div>
       </div>
     </div>
@@ -67,34 +68,15 @@
     </div>
   </div>
   <div class="content-col">
-    <div class="card config-card">
+    <div class="card info-card">
       <div class="card-header">
         <i class="ms-Icon ms-Icon--Info"></i>Info
       </div>
       <div class="card-content">
-        <div class="card-content-row">
-          <label>USA, East coast, start diff 12500</label>
-          <span>URL</span>
-        </div>
-        <div class="card-content-row">
-          <label>USA, East coast, start diff 12500</label>
-          <span>URL</span>
-        </div>
-        <div class="card-content-row">
-          <label>USA, East coast, start diff 12500</label>
-          <span>URL</span>
-        </div>
-        <div class="card-content-row">
-          <label>USA, East coast, start diff 12500</label>
-          <span>URL</span>
-        </div>
-        <div class="card-content-row">
-          <label>USA, East coast, start diff 12500</label>
-          <span>URL</span>
-        </div>
-        <div class="card-content-row">
-          <label>USA, East coast, start diff 12500</label>
-          <span>URL</span>
+        <div class="card-content-row" *ngFor="let item of info | JsonToNgFor">
+          <label>{{item.label}}</label>
+          <a target="_blank" *ngIf="item.link_url && item.link_name" href="{{item.link_url}}">{{item.link_name}}</a>
+          <span *ngIf="item.text">{{item.text}}</span>
         </div>
       </div>
     </div>
@@ -136,14 +118,14 @@
           <li class="tab" [class.active]="activeTableTab === 'blocks'">
             <button type="button" (click)="activeTableTab = 'blocks'">Blocks</button>
           </li>
-<!--          <li class="tab" [class.active]="activeTableTab === 'payments'">-->
-<!--            <button type="button" (click)="activeTableTab = 'payments'">Payments</button>-->
-<!--          </li>-->
+          <!--          <li class="tab" [class.active]="activeTableTab === 'payments'">-->
+          <!--            <button type="button" (click)="activeTableTab = 'payments'">Payments</button>-->
+          <!--          </li>-->
         </ul>
       </div>
       <div class="card-content">
         <div class="wrap-table scrolled-content" *ngIf="activeTableTab === 'blocks'">
-          <table class="dashboard-table">
+          <table class="dashboard-table" *ngIf="blocks && blocks.length; else noBlocks">
             <thead>
             <tr>
               <th>Height</th>
@@ -158,14 +140,20 @@
               <td>{{block[0]['height']}}</td>
               <td>{{block[0]['difficulty'] | hashPowerConverter}}</td>
               <td>
-                <a target="_blank" [href]="'https://explorer.boolberry.com/block/'+block[0]['hash']">{{block[0]['hash']}}</a>
+                <a target="_blank"
+                   [href]="'https://explorer.boolberry.com/block/'+block[0]['hash']">{{block[0]['hash']}}</a>
               </td>
               <td> {{block[0]['startTime'] | date : 'dd.MM.yyyy, hh:mm:ss'}}</td>
               <td>{{block[0]['effort']}}%</td>
             </tr>
             </tbody>
           </table>
-          <button type="button" class="load-more" *ngIf="blocksLimit < blocks?.length" (click)="blocksLimit = blocksLimit + 100">Load more</button>
+          <ng-template #noBlocks>
+            <div class="no-data">No data</div>
+          </ng-template>
+          <button type="button" class="load-more" *ngIf="blocksLimit < blocks?.length"
+                  (click)="blocksLimit = blocksLimit + 100">Load more
+          </button>
         </div>
         <div class="wrap-table scrolled-content" *ngIf="activeTableTab === 'payments'">
           <table>

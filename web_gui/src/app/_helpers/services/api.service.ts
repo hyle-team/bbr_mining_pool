@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Resolve, ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router';
+import {Resolve} from '@angular/router';
 import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ export class ApiService {
         return response;
       }),
       catchError((error) => {
-        return of('No data');
+        return of('No data', error);
       })
     );
   }
@@ -78,7 +78,6 @@ export class ApiService {
     }));
   }
 }
-
 
 @Injectable()
 export class ResolverService implements Resolve<any> {

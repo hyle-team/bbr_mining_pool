@@ -125,7 +125,7 @@
       </div>
       <div class="card-content">
         <div class="wrap-table scrolled-content" *ngIf="activeTableTab === 'blocks'">
-          <table class="dashboard-table">
+          <table class="dashboard-table" *ngIf="blocks && blocks.length; else noBlocks">
             <thead>
             <tr>
               <th>Height</th>
@@ -148,6 +148,9 @@
             </tr>
             </tbody>
           </table>
+          <ng-template #noBlocks>
+            <div class="no-data">No data</div>
+          </ng-template>
           <button type="button" class="load-more" *ngIf="blocksLimit < blocks?.length"
                   (click)="blocksLimit = blocksLimit + 100">Load more
           </button>

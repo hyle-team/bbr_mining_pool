@@ -10,6 +10,9 @@ import {AccountComponent} from './account/account.component';
 import {StatsComponent} from './stats/stats.component';
 import {DocsComponent} from './docs/docs.component';
 
+import { ModalComponent } from './_helpers/directives/modal.component';
+import { ModalService } from './_helpers/services/modal.service';
+
 import {ChartModule} from 'angular-highcharts';
 import * as highstock from 'highcharts/modules/stock.src';
 
@@ -30,6 +33,7 @@ import {JsonToNgForPipe} from './_helpers/pipes/json-to-ngfor.pipe';
     AccountComponent,
     StatsComponent,
     DocsComponent,
+    ModalComponent,
 
     // pipes
     TimeAgoPipe,
@@ -43,7 +47,7 @@ import {JsonToNgForPipe} from './_helpers/pipes/json-to-ngfor.pipe';
     ChartModule,
     FormsModule
   ],
-  providers: [{provide: ChartModule, useFactory: () => [highstock]}],
+  providers: [{provide: ChartModule, useFactory: () => [highstock]}, ModalService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

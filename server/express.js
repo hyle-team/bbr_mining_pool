@@ -20,7 +20,8 @@ function startServer() {
   });
 
   app.use((req, res, next) => {
-    if (config.pool.server.remote || req.ip == '127.0.0.1' || req.ip == '::ffff:127.0.0.1' || req.ip == '::1') {
+    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    if (config.pool.server.remote || ip == '127.0.0.1' || ip == '::ffff:127.0.0.1' || ip == '::1') {
       next();
     } else if (req.path === '/scratchpad') {
       next();
@@ -37,6 +38,10 @@ function startServer() {
 
   app.get('/log', async (req, res) => {
     res.end(logger.read());
+  });
+
+  app.get('/info', async (req, res) => {
+    res.end(JSON.stringify(config.info));
   });
 
   app.get('/blocks', async (req, res) => {

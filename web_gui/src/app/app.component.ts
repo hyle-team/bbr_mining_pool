@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from './_helpers/services/api.service';
 import {Router, Event, NavigationEnd} from '@angular/router';
+import {ModalService} from './_helpers/services/modal.service';
 
 @Component({
   selector: 'app-root',
@@ -8,72 +9,34 @@ import {Router, Event, NavigationEnd} from '@angular/router';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'frontend';
   navIsOpen: boolean;
 
-  constructor(private apiService: ApiService, private router: Router) {
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private modalService: ModalService) {
     this.navIsOpen = false;
 
-    router.events.subscribe( (event: Event) => {
+    router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
         if (this.navIsOpen === true) {
           this.navIsOpen = false;
         }
       }
     });
-
-    // this.apiService.getDashboard().subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
-    // this.apiService.getBlocks().subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
-    // this.apiService.getTx('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
-    // this.apiService.getBalance('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
-    // this.apiService.setAlias('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF', 'newAlias').subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
-    // this.apiService.checkAlias('newAlias').subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
-    // this.apiService.getAliasQueue().subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
-    // this.apiService.getMiner('1CR7PTbKuA42P43d4rYmTq8f2i4hqHV7uaW1LFietAGBY3K9vanbstrAx3NtBecmfxA3S7yCSTUG1LthdgukBAoEDk6xwuF').subscribe(
-    //   data => {
-    //     // console.log(data);
-    //   },
-    //   err => console.error(err)
-    // );
   }
 
   ngOnInit() {
 
+  }
+
+  // modal
+  openModal(id: string) {
+    this.modalService.open(id);
+  }
+
+  closeModal(id: string) {
+    this.modalService.close(id);
   }
 
   toggleMobileNav() {

@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Chart} from 'angular-highcharts';
 import {ApiService} from '../_helpers/services/api.service';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-account',
@@ -55,8 +56,8 @@ export class AccountComponent implements OnInit {
         handles: {
           backgroundColor: '#64DDE2',
           borderColor: '#64DDE2',
-          width: 7,
-          height: 7,
+          width: 8,
+          height: 8,
           symbols: ['doublearrow', 'doublearrow'],
         }
       },
@@ -68,6 +69,11 @@ export class AccountComponent implements OnInit {
         zoomType: null,
         style: {
           fontFamily: 'Helvetica'
+        },
+        events: {
+          load() {
+            // console.log(this);
+          },
         }
       },
 
@@ -112,26 +118,43 @@ export class AccountComponent implements OnInit {
         },
         minPadding: 0,
         maxPadding: 0,
-        minTickInterval: 60000,
+        tickInterval: days,
+
         events: {
           setExtremes(e) {
             const delta = e.max - e.min;
+            // Hours
             if (parseInt(String(delta), 10) <= hours) {
+              this.update({
+                tickInterval: 600000
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['minute', [10]];
                 item.chart.redraw();
               });
+              // Days
             } else if (parseInt(String(delta), 10) <= days) {
+              this.update({
+                tickInterval: hours
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['hour', [1]];
                 item.chart.redraw();
               });
+              // Weeks
             } else if (parseInt(String(delta), 10) <= weeks) {
+              this.update({
+                tickInterval: days
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['day', [1]];
                 item.chart.redraw();
               });
+              // Months
             } else if (parseInt(String(delta), 10) <= months) {
+              this.update({
+                tickInterval: weeks
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['week', [1]];
                 item.chart.redraw();
@@ -143,7 +166,7 @@ export class AccountComponent implements OnInit {
               });
             }
           },
-        }
+        },
       },
 
       tooltip: {
@@ -178,18 +201,50 @@ export class AccountComponent implements OnInit {
           type: 'month',
           count: 1,
           text: 'Months',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['week', [1]]
+          //   ]
+          // },
         }, {
           type: 'week',
           count: 1,
           text: 'Weeks',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['day', [1]]
+          //   ]
+          // },
         }, {
           type: 'day',
           count: 1,
           text: 'Days',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['hour', [1]]
+          //   ]
+          // },
         }, {
-          type: 'hour',
-          count: 1,
+          type: 'minute',
+          count: 10,
           text: 'Hours',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['minute', [10]]
+          //   ]
+          // },
         }],
         buttonSpacing: 0,
         buttonTheme: {
@@ -222,7 +277,7 @@ export class AccountComponent implements OnInit {
             },
           }
         },
-        selected: 0,
+        selected: 1,
       },
 
       plotOptions: {
@@ -270,7 +325,7 @@ export class AccountComponent implements OnInit {
             approximation: 'average',
             forced: true,
             units: [
-              ['week', [1]]
+              ['day', [1]]
             ]
           },
           states: {
@@ -312,119 +367,129 @@ export class AccountComponent implements OnInit {
   getInfoWallet() {
     // this.loader = true;
     this.service.getMiner(this.walletAddress).subscribe(data => {
-      this.workersList = [];
-      this.charts = {};
-      this.walletData = data;
-      const hashRateChartInfo = data['workers']['hasrate_chart'];
-      const workerStatsInfo = data['workers']['worker_stats'];
+        this.workersList = [];
+        this.charts = {};
+        this.walletData = data;
+        const hashRateChartInfo = data['workers']['hasrate_chart'];
+        const workerStatsInfo = data['workers']['worker_stats'];
 
-      const dailyPeriod = Math.round(new Date().getTime() / 1000) - (24 * 3600);
-      const weeklyPeriod = Math.round(new Date().getTime() / 1000) - (24 * 7 * 3600);
-      const monthlyPeriod = Math.round(new Date().getTime() / 1000) - (24 * 30 * 3600);
+        const nowDate = Math.round(new Date().getTime() / 1000);
+        const dailyPeriod = Math.round(+moment().subtract(24, 'hours') / 1000);
+        const weeklyPeriod = Math.round(+moment().subtract(1, 'week') / 1000);
+        const monthlyPeriod = Math.round(+moment().subtract(1, 'months') / 1000);
 
-      let dailyTotal = 0;
-      let dailyLen = 0;
-      let weeklyTotal = 0;
-      let weeklyLen = 0;
-      let monthlyTotal = 0;
-      let monthlyLen = 0;
+        let dailyTotal = 0;
+        let dailyLen = 0;
+        let weeklyTotal = 0;
+        let weeklyLen = 0;
+        let monthlyTotal = 0;
+        let monthlyLen = 0;
 
-      let dailyTotal24 = 0;
-      let dailyLen24 = 0;
-      let nameWorker2 = '';
+        let dailyTotal24 = 0;
+        let dailyLen24 = 0;
+        let nameWorker2 = '';
 
-      for (let i = 0; i < hashRateChartInfo.length; i++) {
-        if (dailyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
-          dailyTotal += parseInt(hashRateChartInfo[i][1][3], 10);
-          dailyLen++;
-        }
-        if (weeklyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
-          weeklyTotal += parseInt(hashRateChartInfo[i][1][3], 10);
-          weeklyLen++;
-        }
-        if (monthlyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
-          monthlyTotal += parseInt(hashRateChartInfo[i][1][3], 10);
-          monthlyLen++;
-        }
+        for (let i = 0; i < hashRateChartInfo.length; i++) {
+          const itemDate = (Math.round(hashRateChartInfo[i][0] / 1000));
+          const itemTotalHashrate = parseInt(hashRateChartInfo[i][1][3], 10);
 
-        for (let y = 0; y < hashRateChartInfo[1][1].length - 2; y++) {
-          if (y % 2 === 0) {
-            nameWorker2 = hashRateChartInfo[0][1][y].split(':')[1];
-          } else {
-            if (dailyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
-              dailyTotal24 += parseInt(hashRateChartInfo[i][1][1], 10);
-              dailyLen24++;
+          if (itemDate >= monthlyPeriod) {
+            monthlyTotal += itemTotalHashrate;
+            monthlyLen++;
+          }
+          if (itemDate >= weeklyPeriod) {
+            weeklyTotal += itemTotalHashrate;
+            weeklyLen++;
+          }
+          if ((itemDate >= dailyPeriod) && (itemDate <= nowDate)) {
+            dailyTotal += itemTotalHashrate;
+            dailyLen++;
+          }
+
+
+          for (let y = 0; y < hashRateChartInfo[1][1].length - 2; y++) {
+            if (y % 2 === 0) {
+              nameWorker2 = hashRateChartInfo[0][1][y].split(':')[1];
+            } else {
+              if (dailyPeriod <= (hashRateChartInfo[i][0] / 1000)) {
+                dailyTotal24 += parseInt(hashRateChartInfo[i][1][1], 10);
+                dailyLen24++;
+              }
             }
           }
         }
-      }
-      this.dailyAverage = dailyTotal / dailyLen;
-      this.dailyAverage24 = dailyTotal24 / dailyLen24;
-      this.weeklyAverage = weeklyTotal / weeklyLen;
-      this.monthlyAverage = monthlyTotal / monthlyLen;
+        this.dailyAverage24 = dailyTotal24 / dailyLen24;
+        this.dailyAverage24 = parseInt(this.dailyAverage24, 10) || 0;
+        this.dailyAverage = dailyTotal / dailyLen;
+        this.dailyAverage = parseInt(this.dailyAverage, 10) || 0;
+        this.weeklyAverage = weeklyTotal / weeklyLen;
+        this.weeklyAverage = parseInt(this.weeklyAverage, 10) || 0;
+        this.monthlyAverage = monthlyTotal / monthlyLen;
+        this.monthlyAverage = parseInt(this.monthlyAverage, 10) || 0;
+        // charts
+        hashRateChartInfo.forEach(item => {
+          const itemDate = new Date(item[0]).getTime();
+          if (!this.charts['total']) {
+            this.charts['total'] = [];
+          }
+          this.charts['total'].unshift([itemDate, parseFloat(item[1][item[1].length - 1])]);
+          let name = '';
+          let hashrate = '';
+          for (let i = 0; i < item[1].length - 2; i++) {
+            if (i % 2 === 0) {
+              name = item[1][i].split(':')[1];
+            } else {
+              hashrate = item[1][i];
+              if (!this.charts[name]) {
+                this.charts[name] = [];
+              }
+              this.charts[name].unshift([itemDate, parseFloat(hashrate)]);
+            }
+          }
+        });
 
+        this.setChart('total');
 
-      // charts
-      hashRateChartInfo.forEach(item => {
-        const itemDate = new Date(item[0]).getTime();
-        if (!this.charts['total']) {
-          this.charts['total'] = [];
-        }
-        this.charts['total'].unshift([itemDate, parseFloat(item[1][item[1].length - 1])]);
-        let name = '';
-        let hashrate = '';
-        for (let i = 0; i < item[1].length - 2; i++) {
+        let nameWorker = '';
+        let hashRateWorker = '';
+        let totalWorker, staleWorker, invalidWorker, blocksWorker, staleInterestWorker, invalidInteresWorker;
+
+        for (let i = 0; i < hashRateChartInfo[0][1].length - 2; i++) {
           if (i % 2 === 0) {
-            name = item[1][i].split(':')[1];
+            nameWorker = hashRateChartInfo[0][1][i].split(':')[1];
           } else {
-            hashrate = item[1][i];
-            if (!this.charts[name]) {
-              this.charts[name] = [];
-            }
-            this.charts[name].unshift([itemDate, parseFloat(hashrate)]);
+            hashRateWorker = hashRateChartInfo[0][1][i];
+            totalWorker = workerStatsInfo['total_' + nameWorker];
+            staleWorker = workerStatsInfo['stale_' + nameWorker];
+            staleInterestWorker = (parseInt(staleWorker, 10) / parseInt(totalWorker, 10)) * 100;
+            invalidWorker = workerStatsInfo['invalid_' + nameWorker];
+            invalidInteresWorker = (parseInt(invalidWorker, 10) / parseInt(totalWorker, 10)) * 100;
+            blocksWorker = workerStatsInfo['blocks_' + nameWorker];
+            this.workersList.push(
+              {
+                name: nameWorker,
+                hashrate: hashRateWorker,
+                hashrate24: parseInt(this.dailyAverage24, 10) || 0,
+                total: parseInt(totalWorker, 10) || 0,
+                stale: parseInt(staleWorker, 10) || 0,
+                staleInterest: parseInt(staleInterestWorker.toFixed(1), 10) || 0,
+                invalidInterest: parseInt(invalidInteresWorker.toFixed(1), 10) || 0,
+                invalid: parseInt(invalidWorker, 10) || 0,
+                blocks: parseInt(blocksWorker, 10) || 0
+              }
+            );
           }
         }
+      }, (error) => console.log(error),
+      () => {
+        this.show = true;
+        this.loader = false;
       });
-
-      this.setChart('total');
-
-      let nameWorker = '';
-      let hashRateWorker = '';
-      let totalWorker, staleWorker, invalidWorker, blocksWorker, staleInterestWorker, invalidInteresWorker;
-
-      for (let i = 0; i < hashRateChartInfo[0][1].length - 2; i++) {
-        if (i % 2 === 0) {
-          nameWorker = hashRateChartInfo[0][1][i].split(':')[1];
-        } else {
-          hashRateWorker = hashRateChartInfo[0][1][i];
-          totalWorker = workerStatsInfo['total_' + nameWorker];
-          staleWorker = workerStatsInfo['stale_' + nameWorker];
-          staleInterestWorker = (parseInt(staleWorker, 10) / parseInt(totalWorker, 10)) * 100;
-          invalidWorker = workerStatsInfo['invalid_' + nameWorker];
-          invalidInteresWorker = (parseInt(invalidWorker, 10) / parseInt(totalWorker, 10)) * 100;
-          blocksWorker = workerStatsInfo['blocks_' + nameWorker];
-          this.workersList.push(
-            {
-              name: nameWorker,
-              hashrate: hashRateWorker,
-              hashrate24: this.dailyAverage24,
-              total: totalWorker,
-              stale: staleWorker,
-              staleInterest: staleInterestWorker.toFixed(1),
-              invalidInterest: invalidInteresWorker.toFixed(1),
-              invalid: invalidWorker,
-              blocks: blocksWorker
-            }
-          );
-        }
-      }
-    }, (error) => console.log(error),
-      () => { this.show = true; this.loader = false; });
   }
 
   setAddress() {
     // if walletAddress === valid
-    if ( this.walletAddress &&  this.walletAddress.length > 0) {
+    if (this.walletAddress && this.walletAddress.length > 0) {
       localStorage.setItem('walletAddress', this.walletAddress);
       this.getInfoWallet();
     } else {
@@ -433,6 +498,7 @@ export class AccountComponent implements OnInit {
       localStorage.removeItem('walletAddress');
     }
   }
+
   setChart(name) {
     this.miningTabSelected = name;
     this.chart = AccountComponent.drawChart(this.charts[this.miningTabSelected], '100, 221, 226', 'worker-hashrate');

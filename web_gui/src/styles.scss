@@ -160,9 +160,6 @@ a, div {
         tr {
           &:hover, &:focus {
             background-color: rgba(#64DDE2, .5);
-            td {
-              //font-weight: 700;
-            }
           }
         }
       }
@@ -178,8 +175,6 @@ a, div {
       }
     }
   }
-
-
 }
 
 .tabs {
@@ -199,21 +194,16 @@ a, div {
     margin: 0 0.5rem;
     height: 100%;
 
-
     button {
       background-color: transparent;
       border: none;
       color: #fff;
       cursor: pointer;
       font-size: 1.8rem;
-      font-weight: 300;
+      font-weight: 500;
     }
 
     &.active {
-      button {
-        font-weight: 500;
-      }
-
       &:after {
         content: '';
         position: absolute;
@@ -268,22 +258,25 @@ a, div {
 
           .title {
             font-weight: 700;
+            flex: 1 0 auto;
           }
 
           .value {
             font-weight: 400;
+            flex: 0 1 100%;
+            max-width: 9rem;
           }
         }
 
         &.left-box {
-          padding-right: 2rem;
+          padding-right: 1rem;
           @media (max-width: 1199.98px) {
             padding: 0;
           }
         }
 
         &.right-box {
-          padding-left: 2rem;
+          padding-left: 1rem;
           @media (max-width: 1199.98px) {
             padding: 0;
           }
@@ -293,7 +286,10 @@ a, div {
   }
 }
 
-// tables
+
+
+/* TABLE STYLES
+-------------------------------*/
 table {
   width: 100%;
 
@@ -349,6 +345,30 @@ table {
   }
 }
 
+button {
+  &.btn {
+    border-radius: 0.5rem;
+    cursor: pointer;
+    width: 16rem;
+    height: 4rem;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 0.2rem 0.6rem rgba(#000, 0.16);
+    &:disabled {
+      cursor: default;
+    }
+    &.primary {
+      border: 0;
+      background-color: #319bfb;
+    }
+    &.secondary {
+      border: 2px solid #64DDE2;
+      background-color: #09284A;
+    }
+  }
+}
+
 .load-more {
   margin: 1.5rem auto 1rem;
   display: flex;
@@ -367,6 +387,9 @@ table {
 }
 
 
+
+/* SCTOLLED STYLES
+-------------------------------*/
 .scrolled-content {
 
   &::-webkit-scrollbar {
@@ -392,12 +415,20 @@ table {
   }
 }
 
-// highCharts styles
+
+
+/* HIGHCHARTS STYLES
+-------------------------------*/
 .highcharts-navigator-mask-outside {
   fill: rgba(#143F5C, 1);
 }
 .highcharts-navigator-xaxis text {
   font-size: 0 !important;
+}
+.highcharts-range-selector-buttons {
+  .highcharts-button {
+
+  }
 }
 
 .wrap-loader {
@@ -431,5 +462,123 @@ table {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+}
 
+.no-data {
+  text-align: center;
+  padding: 15px;
+  font-size: 1.6rem;
+}
+
+
+
+/* MODAL STYLES
+-------------------------------*/
+modal {
+  display: none;
+
+  .modal {
+    margin: auto;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    overflow: auto;
+    display: flex;
+    .modal-content {
+      margin: auto;
+      background: #09284A;
+      border-radius: 0.5rem;
+      .modal-head {
+        height: 8rem;
+        border-bottom: 0.1rem solid #0C68CC;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+      }
+      .modal-body {
+        padding: 3rem 2rem;
+      }
+    }
+  }
+  .modal-background {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(#001C3B, .86);
+    z-index: 900;
+  }
+  &#get-alias {
+    .modal-content {
+      .modal-head {
+        .ms-Icon {
+          color: #64DDE2;
+          margin-left: 20px;
+          margin-right: 20px;
+        }
+      }
+      .modal-body {
+        input {
+          margin-bottom: 3rem;
+        }
+        .hint {
+          display: flex;
+          font-size: 1.8rem;
+          color: #64DDE2;
+          margin-bottom: 3rem;
+        }
+        .wrap_btn {
+          display: flex;
+          justify-content: space-between;
+        }
+      }
+    }
+  }
+}
+body.modal-open {
+  overflow: hidden;
+}
+
+
+
+/* INPUT STYLES
+-------------------------------*/
+input {
+  background-color: rgba(#64dde2, 0.1);
+  border: none;
+  border-bottom: 0.1rem solid rgba(#64dde2, 0.5);
+  box-sizing: border-box;
+  color: #64dde2;
+  font-size: 1.8rem;
+  font-style: normal;
+  font-weight: 300;
+  padding: 1.5rem;
+  outline-style: none;
+  width: 100%;
+
+  &::-webkit-input-placeholder {
+    color: rgba(#64dde2, 0.5);
+    font-style: italic;
+    font-weight: 100;
+  }
+
+  &::-moz-placeholder {
+    color: rgba(#64dde2, 0.5);
+    font-style: italic;
+    font-weight: 100;
+  }
+
+  &::-ms-input-placeholder {
+    color: rgba(#64dde2, 0.5);
+    font-style: italic;
+    font-weight: 100;
+  }
+  &.error {
+    border-bottom: 0.1rem solid rgba(#ff0000, 0.5);
+    color: #ff0000;
+  }
 }

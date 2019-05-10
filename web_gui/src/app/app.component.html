@@ -1,29 +1,29 @@
 <header>
   <div class="container">
     <div class="content-row">
-      <div class="content-col logo" [routerLink]="['/']" >
+      <div class="content-col logo" [routerLink]="['/']">
         Mining Pool
       </div>
 
       <nav class="desktop-nav">
         <ul class="content-col tabs">
-          <li class="tab" >
+          <li class="tab">
             <a [routerLink]="['/']" routerLinkActive='active' [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
           </li>
-          <li class="tab" >
+          <li class="tab">
             <a [routerLink]="['/account']" routerLinkActive='active'>Account</a>
           </li>
-<!--          <li class="tab" >-->
-<!--            <a [routerLink]="['/stats']" routerLinkActive='active'>Stats</a>-->
-<!--          </li>-->
-<!--          <li class="tab" >-->
-<!--            <a [routerLink]="['/docs']" routerLinkActive='active'>Docs</a>-->
-<!--          </li>-->
+          <!--          <li class="tab" >-->
+          <!--            <a [routerLink]="['/stats']" routerLinkActive='active'>Stats</a>-->
+          <!--          </li>-->
+          <!--          <li class="tab" >-->
+          <!--            <a [routerLink]="['/docs']" routerLinkActive='active'>Docs</a>-->
+          <!--          </li>-->
         </ul>
       </nav>
 
       <div class="content-col get-alias">
-        <button type="button" disabled="disabled">Get Alias</button>
+<!--        <button type="button" class="btn primary" (click)="openModal('get-alias')">Get Alias</button>-->
       </div>
       <div class="content-col btn-mobile-nav">
         <button type="button" (click)="toggleMobileNav()" [ngClass]="{'show': navIsOpen === true }"></button>
@@ -32,15 +32,40 @@
   </div>
 </header>
 
+
 <nav class="mobile-nav" [ngClass]="{'show': navIsOpen === true }">
   <ul>
     <li><a [routerLink]="['/dashboard']" routerLinkActive="active">Dashboard</a></li>
     <li><a [routerLink]="['/account']" routerLinkActive="active">Account</a></li>
-<!--    <li><a [routerLink]="['/stats']" routerLinkActive="active">Stats</a></li>-->
-<!--    <li><a [routerLink]="['/docs']" routerLinkActive="active">Docs</a></li>-->
-    <li class="wrap-alias-btn"><button type="button">Get Alias</button></li>
+    <!--    <li><a [routerLink]="['/stats']" routerLinkActive="active">Stats</a></li>-->
+    <!--    <li><a [routerLink]="['/docs']" routerLinkActive="active">Docs</a></li>-->
+    <li class="wrap-alias-btn">
+<!--      <button type="button" class="btn primary" (click)="openModal('get-alias')">Get Alias</button>-->
+    </li>
   </ul>
 </nav>
+
+<modal id="get-alias">
+  <div class="modal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <i class="ms-Icon ms-Icon--Contact"></i>Get alias
+      </div>
+      <div class="modal-body">
+        <input type="text" placeholder="Yor alias">
+        <input type="text" placeholder="Yor wallet">
+        <span class="hint">Request new alias or check it status</span>
+        <span class="error" style="display: none">Alias already in use, try another</span>
+        <span class="success" style="display: none">Request added. You are 015 in line!</span>
+        <div class="wrap_btn">
+          <button type="button" class="btn secondary" (click)="closeModal('get-alias');">Close</button>
+          <button type="button" class="btn primary">Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-background"></div>
+</modal>
 
 
 <div class="container">

@@ -11,7 +11,6 @@ export class HashPowerConverterPipe implements PipeTransform {
     const GH = 1000000000; // GigaHash
     const MH = 1000000; // MegaHash
     const KH = 1000; // KiloHash
-
     if (value && !isNaN(value)) {
       if (value >= PT) {
         return (value / PT).toFixed(3) + ' ' + ((args === 'speed') ? 'PT/s' : 'P');
@@ -26,7 +25,8 @@ export class HashPowerConverterPipe implements PipeTransform {
       } else {
         return value + ' ' + ((args === 'speed') ? 'H/s' : 'H');
       }
+    } else if (value === 0) {
+      return value + ' ' + ((args === 'speed') ? 'H/s' : 'H');
     }
   }
-
 }

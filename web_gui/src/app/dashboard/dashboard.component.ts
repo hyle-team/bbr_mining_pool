@@ -66,8 +66,8 @@ export class DashboardComponent implements OnInit {
         handles: {
           backgroundColor: '#64DDE2',
           borderColor: '#64DDE2',
-          width: 7,
-          height: 7,
+          width: 8,
+          height: 8,
           symbols: ['doublearrow', 'doublearrow'],
         }
       },
@@ -79,6 +79,11 @@ export class DashboardComponent implements OnInit {
         zoomType: null,
         style: {
           fontFamily: 'Helvetica'
+        },
+        events: {
+          load() {
+            // console.log(this);
+          },
         }
       },
 
@@ -123,26 +128,43 @@ export class DashboardComponent implements OnInit {
         },
         minPadding: 0,
         maxPadding: 0,
-        minTickInterval: 60000,
+        tickInterval: days,
+
         events: {
           setExtremes(e) {
             const delta = e.max - e.min;
+            // Hours
             if (parseInt(String(delta), 10) <= hours) {
+              this.update({
+                tickInterval: 600000
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['minute', [10]];
                 item.chart.redraw();
               });
+              // Days
             } else if (parseInt(String(delta), 10) <= days) {
+              this.update({
+                tickInterval: hours
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['hour', [1]];
                 item.chart.redraw();
               });
+              // Weeks
             } else if (parseInt(String(delta), 10) <= weeks) {
+              this.update({
+                tickInterval: days
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['day', [1]];
                 item.chart.redraw();
               });
+              // Months
             } else if (parseInt(String(delta), 10) <= months) {
+              this.update({
+                tickInterval: weeks
+              }, false);
               this.series.forEach((item) => {
                 item.chart.series[0].options.dataGrouping.units[0] = ['week', [1]];
                 item.chart.redraw();
@@ -154,7 +176,7 @@ export class DashboardComponent implements OnInit {
               });
             }
           },
-        }
+        },
       },
 
       tooltip: {
@@ -189,18 +211,50 @@ export class DashboardComponent implements OnInit {
           type: 'month',
           count: 1,
           text: 'Months',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['week', [1]]
+          //   ]
+          // },
         }, {
           type: 'week',
           count: 1,
           text: 'Weeks',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['day', [1]]
+          //   ]
+          // },
         }, {
           type: 'day',
           count: 1,
           text: 'Days',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['hour', [1]]
+          //   ]
+          // },
         }, {
           type: 'hour',
           count: 1,
           text: 'Hours',
+          // dataGrouping: {
+          //   enabled: true,
+          //   approximation: 'average',
+          //   forced: true,
+          //   units: [
+          //     ['minute', [10]]
+          //   ]
+          // },
         }],
         buttonSpacing: 0,
         buttonTheme: {
@@ -233,7 +287,7 @@ export class DashboardComponent implements OnInit {
             },
           }
         },
-        selected: 0,
+        selected: 1,
       },
 
       plotOptions: {
@@ -281,7 +335,7 @@ export class DashboardComponent implements OnInit {
             approximation: 'average',
             forced: true,
             units: [
-              ['week', [1]]
+              ['day', [1]]
             ]
           },
           states: {
@@ -334,40 +388,45 @@ export class DashboardComponent implements OnInit {
       }
       this.effortChart = DashboardComponent.drawChart(this.chartsData.effort, '100, 221, 226', 'effort');
 
-
       // Calculation Block Found Every
-      const a = moment(parseInt(this.blocks[0][0].endTime, 10));
-      const b = moment(parseInt(this.blocks[1][0].endTime, 10));
-      const c = moment(parseInt(this.blocks[2][0].endTime, 10));
-      const d = moment(parseInt(this.blocks[3][0].endTime, 10));
-      const e = moment(parseInt(this.blocks[4][0].endTime, 10));
-      const f = moment(parseInt(this.blocks[5][0].endTime, 10));
-      const g = moment(parseInt(this.blocks[6][0].endTime, 10));
-      const h = moment(parseInt(this.blocks[7][0].endTime, 10));
-      const i = moment(parseInt(this.blocks[8][0].endTime, 10));
-      const j = moment(parseInt(this.blocks[9][0].endTime, 10));
+      if (this.blocks.length) {
+        const a = moment(parseInt(this.blocks[0][0].endTime, 10));
+        const b = moment(parseInt(this.blocks[1][0].endTime, 10));
+        const c = moment(parseInt(this.blocks[2][0].endTime, 10));
+        const d = moment(parseInt(this.blocks[3][0].endTime, 10));
+        const e = moment(parseInt(this.blocks[4][0].endTime, 10));
+        const f = moment(parseInt(this.blocks[5][0].endTime, 10));
+        const g = moment(parseInt(this.blocks[6][0].endTime, 10));
+        const h = moment(parseInt(this.blocks[7][0].endTime, 10));
+        const i = moment(parseInt(this.blocks[8][0].endTime, 10));
+        const j = moment(parseInt(this.blocks[9][0].endTime, 10));
 
-      const firstPair = a.diff(b, 'seconds');
-      const secondPair = c.diff(d, 'seconds');
-      const thirdPair = e.diff(f, 'seconds');
-      const fourthPair = g.diff(h, 'seconds');
-      const fifthPair = i.diff(j, 'seconds');
+        const firstPair = a.diff(b, 'seconds');
+        const secondPair = c.diff(d, 'seconds');
+        const thirdPair = e.diff(f, 'seconds');
+        const fourthPair = g.diff(h, 'seconds');
+        const fifthPair = i.diff(j, 'seconds');
 
-      const sum = firstPair + secondPair + thirdPair + fourthPair + fifthPair;
-      const seconds = Math.round(sum / 5);
+        const sum = firstPair + secondPair + thirdPair + fourthPair + fifthPair;
+        const seconds = Math.round(sum / 5);
 
-      const duration = moment.duration(seconds, 'seconds');
-      if (duration._data.minutes === 0) {
-        this.blockFoundEvery = duration._data.seconds + ' sec';
-      } else if (duration._data.hours === 0) {
-        this.blockFoundEvery = duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
-      } else if (duration._data.days === 0) {
-        this.blockFoundEvery = duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
-      } else if (duration._data.months === 0) {
-        this.blockFoundEvery = duration._data.days + 'd ' + duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
-      } else if (duration._data.years === 0) {
-        this.blockFoundEvery = duration._data.months + 'month ' + duration._data.days + 'd ' + duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+        const duration = moment.duration(seconds, 'seconds');
+        if (duration._data.minutes === 0) {
+          this.blockFoundEvery = duration._data.seconds + ' sec';
+        } else if (duration._data.hours === 0) {
+          this.blockFoundEvery = duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+        } else if (duration._data.days === 0) {
+          this.blockFoundEvery = duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+        } else if (duration._data.months === 0) {
+          this.blockFoundEvery = duration._data.days + 'd ' + duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+        } else if (duration._data.years === 0) {
+          this.blockFoundEvery = duration._data.months + 'month ' + duration._data.days + 'd ' + duration._data.hours + 'h ' + duration._data.minutes + 'm ' + duration._data.seconds + 'sec';
+        }
+      } else {
+        this.blockFoundEvery = 0;
       }
+
+
     });
   }
 }

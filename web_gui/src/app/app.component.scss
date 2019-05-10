@@ -30,19 +30,7 @@ header {
       justify-content: flex-end;
 
       button {
-        background-color: #319bfb;
-        border: 0;
-        border-radius: 0.5rem;
-        box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.16);
-        color: #fff;
-        cursor: pointer;
-        width: 16rem;
-        height: 5rem;
-        font-size: 1.8rem;
-        font-weight: 500;
-        &:disabled {
-          cursor: default;
-        }
+
       }
     }
     .btn-mobile-nav {
@@ -53,8 +41,6 @@ header {
         display: flex;
       }
       button {
-        //width: 3.1rem;
-        //height: 2.9rem;
         width: 8rem;
         height: 8rem;
         position: absolute;
@@ -89,7 +75,7 @@ nav {
       > a {
         color: #fff;
         font-size: 1.8rem;
-        font-weight: 300;
+        font-weight: 500;
         display: flex;
         height: 100%;
         align-items: center;
@@ -97,7 +83,6 @@ nav {
         margin: 0 1rem;
         position: relative;
         &.active {
-          font-weight: 500;
           &:after {
             content: '';
             position: absolute;

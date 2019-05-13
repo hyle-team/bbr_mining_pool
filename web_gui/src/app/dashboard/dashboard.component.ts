@@ -256,14 +256,14 @@ export class DashboardComponent implements OnInit {
           //   ]
           // },
         }],
-        buttonSpacing: 0,
+        buttonSpacing: 10,
         buttonTheme: {
           width: 70,
           height: null,
           fill: 'transparent',
           stroke: '#64DDE2',
           'stroke-width': 1,
-          r: 0,
+          r: 5,
           padding: 3,
           style: {
             color: '#64DDE2',

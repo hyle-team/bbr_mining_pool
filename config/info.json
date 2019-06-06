@@ -1,0 +1,27 @@
+{
+    "item1": {
+      "label": "Stratum IP",
+      "text": "Stratum IP"
+    },
+    "item2": {
+      "label": "Stratum Port",
+      "text": "Port"
+    },
+    "item3": {
+      "label": "Miner Diff",
+      "text": "automatic"
+    },
+    "item4": {
+      "label": "Workers",
+      "text": "set in password"
+    },
+    "item5": {
+      "label": "Account",
+      "text": "address or alias"
+    },
+    "item6": {
+      "label": "Scratchpad",
+      "link_name": "link",
+      "link_url": "http://API:PORT/scratchpad"
+    }
+  }

@@ -177,7 +177,7 @@ npm update
 ```
 Opent pool configuration file in the editor:
 ```
-nano ./config/pool.js
+nano ./config/pool.json
 ```
 Find entry `address` and set generated wallet address it's value. Example:
 ```
